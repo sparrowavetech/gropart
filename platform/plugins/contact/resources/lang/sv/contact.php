@@ -142,7 +142,7 @@ return [
         'admin_reply_our_response' => 'Vårt svar:',
         'admin_reply_additional_questions' => 'Om du har ytterligare frågor är du välkommen att svara på detta e-postmeddelande eller kontakta oss igen.',
         'admin_reply_best_regards' => 'Med vänliga hälsningar,',
-        'admin_reply_team' => '{{ site_title }}-teamet',
+        'admin_reply_team' => ':site_title-teamet',
 
         // Notice email template
         'notice_title' => 'Nytt kontaktmeddelande',

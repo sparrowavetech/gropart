@@ -141,7 +141,7 @@ return [
         'admin_reply_our_response' => 'Η απάντησή μας:',
         'admin_reply_additional_questions' => 'Εάν έχετε επιπλέον ερωτήσεις, μη διστάσετε να απαντήσετε σε αυτό το email ή να επικοινωνήσετε μαζί μας ξανά.',
         'admin_reply_best_regards' => 'Με εκτίμηση,',
-        'admin_reply_team' => '{{ site_title }} Ομάδα',
+        'admin_reply_team' => ':site_title Ομάδα',
         'notice_title' => 'Νέο μήνυμα επαφής',
         'notice_greeting' => 'Αγαπητέ διαχειριστή,',
         'notice_message_details' => 'Λεπτομέρειες μηνύματος',

@@ -12,6 +12,7 @@
                     id="search-category-input-{{ $inputSearchId = mt_rand() }}"
                     class="form-control"
                     placeholder="{{ trans('core/base::forms.search_input_placeholder') }}"
+                    aria-label="{{ trans('core/base::forms.search_input_placeholder') }}"
                     onkeyup="filter_categories_{{ $inputSearchId }}({{ $inputSearchId }})"
                     formnovalidate
                 />

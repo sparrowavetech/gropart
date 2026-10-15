@@ -2,7 +2,7 @@
 
 return [
     'payments' => '支払い',
-    'checkout_success' => 'チェックアウトが正常に完了しました。',
+    'checkout_success' => 'お支払いが完了しました。',
     'view_payment' => '支払い番号を表示',
     'charge_id' => 'チャージID',
     'amount' => '額',
@@ -83,7 +83,7 @@ return [
     'payment_method_description' => 'お支払いガイド - (購入成功の通知と支払いページに表示されます)',
     'payment_via_cod' => '代金引換（代金引換）',
     'payment_via_bank_transfer' => '銀行振込',
-    'payment_pending' => 'チェックアウトが正常に完了しました。お支払いは保留中であり、スタッフが確認します。',
+    'payment_pending' => 'お支払いは保留中です。入金が確認され次第、確定いたします。',
     'created_at' => '作成日',
     'payment_channel' => '支払いチャネル',
     'total' => '合計',

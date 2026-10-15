@@ -48,6 +48,7 @@ return [
         ],
         'success' => 'Le impostazioni del tuo file .env sono state salvate.',
         'errors' => 'Impossibile salvare il file .env, crealo manualmente.',
+        'database_connection_failed' => 'Impossibile connettersi al database. Controlla host, porta, nome, nome utente e password del database. Errore: :message',
     ],
     'theme' => [
         'title' => 'Scegli tema',

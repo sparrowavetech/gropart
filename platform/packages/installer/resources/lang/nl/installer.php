@@ -48,6 +48,7 @@ return [
         ],
         'success' => 'Uw .env bestandsinstellingen zijn opgeslagen.',
         'errors' => 'Kan het .env bestand niet opslaan, maak het handmatig aan.',
+        'database_connection_failed' => 'Kan geen verbinding maken met de database. Controleer de host, poort, naam, gebruikersnaam en het wachtwoord van de database. Fout: :message',
     ],
     'theme' => [
         'title' => 'Kies thema',

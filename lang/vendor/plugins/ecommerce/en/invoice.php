@@ -2,7 +2,7 @@
 
 return [
     'name' => 'Invoices',
-    'description' => 'View and update your invoices settings',
+    'description' => 'View generated invoices and download PDFs for customer orders',
     'create' => 'New invoice',
     'edit' => 'Edit invoice',
     'print' => 'Print Invoice',
@@ -13,11 +13,9 @@ return [
         'amount' => 'Amount',
     ],
     'detail' => [
-        'sku'         => 'SKU',
-        'seller_signature' => 'Seller Signature',
         'invoice_for' => 'Invoice For',
         'invoice_to' => 'Invoice To',
-        'tax_id' => 'GSTIN',
+        'tax_id' => 'Tax ID',
         'code' => 'Invoice Code',
         'issue_at' => 'Issue At',
         'description' => 'Description',
@@ -43,4 +41,11 @@ return [
     'generate_invoice' => 'Generate invoice',
     'order' => 'Order',
     'all_invoices_have_already_generated' => 'All invoices have already generated.',
+    'statuses' => [
+        'pending' => 'Pending',
+        'processing' => 'Processing',
+        'completed' => 'Completed',
+        'canceled' => 'Canceled',
+    ],
+    'back_to_invoices' => 'Back to Invoices',
 ];

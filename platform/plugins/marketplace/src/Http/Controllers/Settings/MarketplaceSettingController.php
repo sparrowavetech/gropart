@@ -11,6 +11,7 @@ use Botble\Marketplace\Forms\Settings\MarketplaceSettingForm;
 use Botble\Marketplace\Http\Requests\MarketPlaceSettingFormRequest;
 use Botble\Marketplace\Models\Store;
 use Botble\Marketplace\Services\SubscriptionProductVisibilityService;
+use Botble\Marketplace\Services\VendorSubscriptionService;
 use Botble\Setting\Facades\Setting;
 use Illuminate\Support\Arr;
 
@@ -58,6 +59,8 @@ class MarketplaceSettingController extends SettingController
             Helper::clearCache();
         }
 
+        $missingDefaultPlan = false;
+
         // Switching mode changes which admin and vendor menu items are registered,
         // and both menus are cached per user.
         if ($preMode !== MarketplaceHelper::getMode()) {
@@ -70,9 +73,22 @@ class MarketplaceSettingController extends SettingController
             if (MarketplaceHelper::getMode() === MarketplaceModeEnum::COMMISSION) {
                 app(SubscriptionProductVisibilityService::class)->restoreAll();
             }
+
+            // Entering a subscription-bearing mode with no published default plan leaves every
+            // vendor without one unable to publish, which locks them out of the vendor area.
+            // The save still goes through: the admin may be on their way to create the plan.
+            $missingDefaultPlan = MarketplaceHelper::hasVendorSubscriptions()
+                && ! app(VendorSubscriptionService::class)->defaultPlan();
         }
 
         DashboardMenu::clearCachesForCurrentUser();
+
+        if ($missingDefaultPlan) {
+            return $this
+                ->httpResponse()
+                ->setNextUrl(route('marketplace.settings'))
+                ->setMessage(trans('plugins/marketplace::subscription.settings.no_default_plan_warning'));
+        }
 
         return $this
             ->httpResponse()

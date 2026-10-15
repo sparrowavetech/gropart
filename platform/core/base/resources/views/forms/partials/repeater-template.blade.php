@@ -13,6 +13,7 @@
                 data-id="{{ $repeaterId }}___key__"
                 icon="ti ti-x"
                 :icon-only="true"
+                :aria-label="trans('core/base::tables.delete')"
                 size="sm"
             />
         </fieldset>

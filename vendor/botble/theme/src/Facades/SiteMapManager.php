@@ -6,7 +6,7 @@ use Botble\Theme\Supports\SiteMapManager as SiteMapManagerSupport;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static \Botble\Theme\Supports\SiteMapManager init(string|null $prefix = null, string $extension = 'xml')
+ * @method static \Botble\Theme\Supports\SiteMapManager init(string|null $prefix = null, string $extension = 'xml', string $cacheKeySuffix = '')
  * @method static \Botble\Theme\Supports\SiteMapManager addSitemap(string $loc, string|null $lastModified = null)
  * @method static string route(string|null $key = null)
  * @method static \Botble\Theme\Supports\SiteMapManager add(string $url, string|null $date = null, string $priority = '1.0', string $sequence = 'daily')

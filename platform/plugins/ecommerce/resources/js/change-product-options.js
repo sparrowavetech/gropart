@@ -5,8 +5,12 @@ class FrontendProductOption {
         // Product options render on the product detail page and inside the
         // quick-shop modal. Scope every lookup to whichever context the options
         // live in so we never read/write a price from a related-product card.
-        const $modal = $('.product-option').first().closest('[data-bb-toggle="quick-shop-modal"], .modal')
+        const $firstOption = $('.product-option').first()
+        const $modal = $firstOption.closest('[data-bb-toggle="quick-shop-modal"], .modal')
         this.$scope = $modal.length ? $modal : $(document)
+
+        // The add-to-cart form holding these options also holds the product's own swatches.
+        this.$form = $firstOption.closest('form')
 
         // The price near the product title carries data-bb-value="product-price".
         this.priceElement = this.$scope.find('[data-bb-value="product-price"]').first()
@@ -23,6 +27,20 @@ class FrontendProductOption {
 
     isInModal($element) {
         return $element.closest('[data-bb-toggle="quick-shop-modal"], .modal').length > 0
+    }
+
+    // Whether swatches belong to the product these options are for. The page can
+    // also hold swatches of other products (e.g. upsell bundle items).
+    isOwnSwatches($element) {
+        if (!$element || !$element.length) {
+            return false
+        }
+
+        if (this.$form.length) {
+            return $.contains(this.$form[0], $element[0])
+        }
+
+        return this.$scope[0] === document ? !this.isInModal($element) : $.contains(this.$scope[0], $element[0])
     }
 
     // Detect currency formatting (symbol position, grouping, decimals) from the
@@ -125,6 +143,27 @@ class FrontendProductOption {
 
         $(window).on('popstate', () => {
             this.restoreOptionsFromUrl()
+        })
+
+        // Selecting another variation rewrites the price with that variation's
+        // own price (without option extras). Use it as the new base, otherwise
+        // the total keeps being calculated from the variation shown at load.
+        $(document).on('product-variation-changed', (e, response, $attributes) => {
+            const data = response && !response.error ? response.data : null
+
+            if (!data || !data.display_sale_price || !this.isOwnSwatches($attributes)) {
+                return
+            }
+
+            const format = this.parsePriceFormat(data.display_sale_price)
+
+            if (!format) {
+                return
+            }
+
+            this.priceFormat = format
+            this.basePrice = format.value
+            this.changeDisplayedPrice()
         })
     }
 

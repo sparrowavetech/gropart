@@ -44,6 +44,11 @@ class SubscriptionPlan extends BaseModel
     /**
      * Every quota and feature flag a plan can carry. Adding a key here back-fills
      * every existing plan without a migration. -1 means unlimited.
+     *
+     * The two commission_* keys are hybrid-mode only and use -1 to mean "inherit the global
+     * fee_per_order / fee_per_order_fixed setting". 0 is therefore a real value: a plan that
+     * pays no commission at all. Only the Phase 03 resolver may interpret them; never pass
+     * them to allows() or isUnlimited(), whose > 0 / < 0 semantics are meaningless here.
      */
     public static function defaultOptions(): array
     {
@@ -54,7 +59,32 @@ class SubscriptionPlan extends BaseModel
             'allow_coupons' => 0,
             'allow_product_import' => 0,
             'listing_priority' => 0,
+            'commission_percentage' => -1,
+            'commission_fixed' => -1,
         ];
+    }
+
+    /**
+     * Options whose value is not an integer. Absent key means int, which keeps every
+     * pre-existing quota and flag on exactly the semantics it had before.
+     *
+     * @return array<string, string>
+     */
+    public static function optionCasts(): array
+    {
+        return [
+            'commission_percentage' => 'float',
+            'commission_fixed' => 'float',
+        ];
+    }
+
+    /**
+     * Cast one option value according to optionCasts(), defaulting to int.
+     * Public because VendorSubscription::option() resolves snapshots with the same map.
+     */
+    public static function castOptionValue(string $key, mixed $value): int|float
+    {
+        return (static::optionCasts()[$key] ?? 'int') === 'float' ? (float) $value : (int) $value;
     }
 
     protected static function booted(): void
@@ -97,7 +127,7 @@ class SubscriptionPlan extends BaseModel
         return $this->resolvedOptions;
     }
 
-    public function getOption(string $key): int
+    public function getOption(string $key): int|float
     {
         $options = $this->getOptions();
 
@@ -105,14 +135,19 @@ class SubscriptionPlan extends BaseModel
             throw new \InvalidArgumentException(sprintf('Unknown subscription plan option [%s].', $key));
         }
 
-        return (int) $options[$key];
+        return static::castOptionValue($key, $options[$key]);
     }
 
     public function fillOptions(array $options): static
     {
-        $this->options = array_intersect_key(
-            array_map(fn ($value) => (int) $value, $options),
-            static::defaultOptions()
+        $known = array_intersect_key($options, static::defaultOptions());
+
+        $this->options = array_combine(
+            array_keys($known),
+            array_map(
+                fn (string $key) => static::castOptionValue($key, $known[$key]),
+                array_keys($known)
+            )
         );
 
         $this->resolvedOptions = null;

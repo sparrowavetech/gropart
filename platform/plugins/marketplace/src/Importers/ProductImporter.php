@@ -68,7 +68,7 @@ class ProductImporter extends BaseProductImporter
     public function handle(array $data): int
     {
         // Nothing to guard against outside subscription mode; keep the fast path intact.
-        if (! MarketplaceHelper::isSubscriptionMode()) {
+        if (! MarketplaceHelper::hasVendorSubscriptions()) {
             return parent::handle($data);
         }
 

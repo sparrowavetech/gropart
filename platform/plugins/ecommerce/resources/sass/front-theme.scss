@@ -780,6 +780,44 @@ body,
     }
 }
 
+.ec-checkout-item-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+
+    .ec-checkout-quantity {
+        margin: 0;
+    }
+}
+
+.ec-checkout-remove-item {
+    all: unset;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    cursor: pointer;
+    font-size: 13px;
+    color: #bd362f;
+
+    svg {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    &:hover,
+    &:focus-visible {
+        text-decoration: underline;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+}
+
 .ec-checkout-quantity {
     position: relative;
     width: 75px;

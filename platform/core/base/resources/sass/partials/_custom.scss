@@ -491,6 +491,10 @@ small {
     color: #333;
 }
 
+// CKEditor injects its own `:root { --ck-color-* }` defaults at runtime, after this
+// stylesheet. With the theme attribute on <html> (the same element as :root) the
+// higher-specificity :root[...] selector keeps these overrides in effect.
+:root[data-bs-theme='dark'],
 [data-bs-theme='dark'] {
     // CKEditor 5 dark mode overrides
     --ck-color-base-background: var(--bb-bg-surface);
@@ -927,8 +931,8 @@ small {
 
 .tagify--focus {
     outline: 0 !important;
-    border-color: $input-focus-border-color !important;
-    box-shadow: 0 0 $focus-ring-blur $focus-ring-width rgba(var(--bb-primary-rgb), 0.25);
+    border-color: color-mix(in oklab, var(--bb-primary) 50%, var(--bb-white)) !important;
+    box-shadow: 0 0 0 0.25rem color-mix(in oklab, var(--bb-primary) 25%, transparent);
 }
 
 .ck-editor__editable {
@@ -1085,4 +1089,10 @@ a.form-hint, .form-hint a {
     .accordion-button {
         font-size: 14px;
     }
+}
+
+// The skip link (styled by Tabler's .skip-link) moves focus to <main>; it only
+// needs to be focusable, not outlined.
+#main-content:focus {
+    outline: 0;
 }

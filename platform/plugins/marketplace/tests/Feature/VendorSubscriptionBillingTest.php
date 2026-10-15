@@ -31,6 +31,12 @@ class VendorSubscriptionBillingTest extends BaseTestCase
         parent::setUp();
 
         Setting::set('marketplace_mode', MarketplaceModeEnum::SUBSCRIPTION)->save();
+
+        // The seeded database ships a non-zero grace period (5 days), which would keep a
+        // subscription that ended 2 days ago ACTIVE and silently break the expiry tests.
+        // tearDown already forgets this key; setUp has to pin it, or the assertions depend
+        // on whatever the database happened to be seeded with.
+        Setting::set('marketplace_subscription_grace_period_days', 0)->save();
     }
 
     protected function tearDown(): void

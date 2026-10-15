@@ -88,31 +88,91 @@ class SpecificationAttribute extends BaseModel
     {
         $options = $this->options;
 
-        if (empty($options)) {
+        if (! is_array($options) || empty($options)) {
             return false;
         }
 
-        $first = $options[0] ?? null;
+        // Rows written before options carried ids hold plain strings, and a partially migrated row
+        // holds a mix of both, so every element is inspected rather than only the first one.
+        foreach ($options as $option) {
+            if (is_array($option) && isset($option['id'])) {
+                return true;
+            }
+        }
 
-        return is_array($first) && isset($first['id']);
+        return false;
     }
 
     public function getIdBasedOptions(): array
     {
-        $options = $this->options ?? [];
+        $options = $this->options;
 
-        if (empty($options)) {
+        if (! is_array($options) || empty($options)) {
             return [];
         }
 
-        if ($this->hasIdBasedOptions()) {
-            return $options;
+        $normalized = [];
+
+        foreach ($options as $option) {
+            // Options come from user input, imports and older schema versions, so an element may be a
+            // plain string, an id/value pair, or an array carrying neither. Everything is coerced to a
+            // pair of strings here so callers - the Blade views above all - never echo an array and
+            // trigger the PHP 8 "htmlspecialchars(): Argument #1 must be of type string" fatal.
+            $value = self::castOptionValue(is_array($option) ? ($option['value'] ?? null) : $option);
+            $id = is_array($option) ? ($option['id'] ?? null) : null;
+            $id = is_scalar($id) ? (string) $id : '';
+
+            $normalized[] = [
+                // Missing ids are DERIVED from the value, never generated randomly: this is a read
+                // path, and the importer and the edit form persist the id it returns. A random id
+                // would differ on the next call, leaving the stored id unresolvable and printing raw
+                // hex where the label should be.
+                'id' => $id !== '' ? $id : self::deriveOptionId($value),
+                'value' => $value,
+            ];
         }
 
-        return array_map(fn (string $value) => [
-            'id' => self::generateOptionId(),
-            'value' => $value,
-        ], $options);
+        return $normalized;
+    }
+
+    /**
+     * A stable id for an option that has none, derived from its own value.
+     *
+     * Same shape as generateOptionId() so both are interchangeable to callers, but repeatable - two
+     * calls on the same unmigrated row agree, which is what keeps a stored id resolvable.
+     */
+    protected static function deriveOptionId(string $value): string
+    {
+        return substr(md5($value), 0, 8);
+    }
+
+    /**
+     * Flatten one option value down to a printable string.
+     *
+     * Translation payloads occasionally arrive as a nested array keyed by language, so the first
+     * scalar found is used instead of discarding the option outright.
+     */
+    public static function castOptionValue(mixed $value): string
+    {
+        if (is_array($value)) {
+            foreach ($value as $item) {
+                if (is_scalar($item)) {
+                    return (string) $item;
+                }
+            }
+
+            return '';
+        }
+
+        return is_scalar($value) ? (string) $value : '';
+    }
+
+    /**
+     * The option labels only, already cast to strings, for views that render values rather than ids.
+     */
+    public function getPlainOptions(): array
+    {
+        return array_column($this->getIdBasedOptions(), 'value');
     }
 
     public function getOptionValueById(string $id): ?string

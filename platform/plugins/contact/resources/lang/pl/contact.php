@@ -142,7 +142,7 @@ return [
         'admin_reply_our_response' => 'Nasza odpowiedź:',
         'admin_reply_additional_questions' => 'Jeśli masz dodatkowe pytania, odpowiedz na ten e-mail lub skontaktuj się z nami ponownie.',
         'admin_reply_best_regards' => 'Z poważaniem,',
-        'admin_reply_team' => 'Zespół {{ site_title }}',
+        'admin_reply_team' => 'Zespół :site_title',
 
         // Notice email template
         'notice_title' => 'Nowa wiadomość kontaktowa',

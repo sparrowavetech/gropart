@@ -35,6 +35,17 @@ class PaystackController extends BaseController
                 ->setMessage($result['message']);
         }
 
+        // "Verification successful" only means the reference exists: Paystack returns it
+        // for abandoned and failed transactions too. The outcome is data.status, and only
+        // `success` means money was taken. Without this, replaying the callback URL with
+        // the reference of an abandoned checkout marked the order paid.
+        if (Arr::get($result, 'data.status') !== 'success') {
+            return $response
+                ->setError()
+                ->setNextUrl(PaymentHelper::getCancelURL())
+                ->setMessage(trans('plugins/paystack::paystack.payment_failed'));
+        }
+
         do_action(PAYMENT_ACTION_PAYMENT_PROCESSED, [
             'amount' => $result['data']['amount'] / 100,
             'currency' => $result['data']['currency'],

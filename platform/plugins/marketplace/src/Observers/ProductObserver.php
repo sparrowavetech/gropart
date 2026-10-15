@@ -27,7 +27,7 @@ class ProductObserver
      */
     public function creating(Product $product): void
     {
-        if (! MarketplaceHelper::isSubscriptionMode()) {
+        if (! MarketplaceHelper::hasVendorSubscriptions()) {
             return;
         }
 

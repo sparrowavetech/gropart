@@ -19,7 +19,7 @@
         </tr>
         <tr>
             <td class="bb-content">
-                <div>{{ 'plugins/ecommerce::email-templates.order_return_request_message' | trans({'customer_name': customer_name}) }}</div>
+                <div>{{ 'plugins/ecommerce::email-templates.order_return_request_message' | trans({'customer_name': customer_name, 'order_id': order_id}) }}</div>
             </td>
         </tr>
         <tr>

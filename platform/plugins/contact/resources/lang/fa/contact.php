@@ -141,7 +141,7 @@ return [
         'admin_reply_our_response' => 'پاسخ ما:',
         'admin_reply_additional_questions' => 'اگر سؤال دیگری دارید، می‌توانید به این ایمیل پاسخ دهید یا دوباره با ما تماس بگیرید.',
         'admin_reply_best_regards' => 'با احترام،',
-        'admin_reply_team' => 'تیم {{ site_title }}',
+        'admin_reply_team' => 'تیم :site_title',
         'notice_title' => 'پیام تماس جدید',
         'notice_greeting' => 'با سلام مدیر گرامی،',
         'notice_message_details' => 'جزئیات پیام',

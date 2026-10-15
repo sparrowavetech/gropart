@@ -32,7 +32,7 @@ class CancelVendorSubscriptionService
 
     public function isEnabled(): bool
     {
-        return MarketplaceHelper::isSubscriptionMode()
+        return MarketplaceHelper::hasVendorSubscriptions()
             && (bool) MarketplaceHelper::getSetting('subscription_allow_vendor_cancel', true);
     }
 

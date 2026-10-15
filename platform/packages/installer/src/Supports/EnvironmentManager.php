@@ -29,7 +29,7 @@ class EnvironmentManager
         $replacements = [
             'APP_NAME' => [
                 'default' => '"Your App"',
-                'value' => '"' . str_replace('"', '', $request->input('app_name')) . '"',
+                'value' => $this->quoteValue($request->input('app_name')),
             ],
             'APP_URL' => [
                 'default' => 'http:\/\/localhost',
@@ -49,15 +49,15 @@ class EnvironmentManager
             ],
             'DB_DATABASE' => [
                 'default' => '"laravel"',
-                'value' => '"' . str_replace('"', '', $request->input('database_name')) . '"',
+                'value' => $this->quoteValue($request->input('database_name')),
             ],
             'DB_USERNAME' => [
                 'default' => '"root"',
-                'value' => '"' . str_replace('"', '', $request->input('database_username')) . '"',
+                'value' => $this->quoteValue($request->input('database_username')),
             ],
             'DB_PASSWORD' => [
                 'default' => '"your_db_password"',
-                'value' => '"' . str_replace('"', '', $request->input('database_password')) . '"',
+                'value' => $this->quoteValue($request->input('database_password')),
             ],
         ];
 
@@ -79,14 +79,28 @@ class EnvironmentManager
             // defaults (e.g. #FORCE_ROOT_URL=...) are uncommented and written. Without this,
             // FORCE_ROOT_URL is never set, and sub-folder installs fall back to the wrong root
             // URL (e.g. http://localhost). [ \t]* avoids matching across line breaks.
-            $content = preg_replace(
+            // A callback keeps the value literal: as a plain replacement string, "$1" or "\\"
+            // in a password would be read as backreferences/escapes and silently altered.
+            $content = preg_replace_callback(
                 '/^#?[ \t]*' . $key . '=' . $replacement['default'] . '/m',
-                $key . '=' . $replacement['value'],
+                fn () => $key . '=' . $replacement['value'],
                 $content
             );
         }
 
         return $content;
+    }
+
+    /**
+     * Wrap a value in double quotes so phpdotenv reads it back exactly as entered.
+     * Inside double quotes phpdotenv treats "\" as an escape (an unknown one such as "\a" is a
+     * parse error that stops the whole .env from loading) and "${NAME}" as a variable, so a
+     * password containing these used to fail with "Access denied". strtr() does a single pass,
+     * so the backslashes it adds are never escaped a second time.
+     */
+    protected function quoteValue(?string $value): string
+    {
+        return '"' . strtr((string) $value, ['\\' => '\\\\', '"' => '\\"', '$' => '\\$']) . '"';
     }
 
     protected function isSubFolderInstallation(string $appUrl): bool

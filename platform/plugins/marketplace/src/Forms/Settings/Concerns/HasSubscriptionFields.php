@@ -17,9 +17,10 @@ use Botble\Payment\Enums\PaymentMethodEnum;
 /**
  * The marketplace mode selector and the vendor subscription settings.
  *
- * Both modes' fields are always rendered and wrapped in a collapsible keyed on the mode
+ * All three modes' fields are always rendered and wrapped in a collapsible keyed on the mode
  * select, so switching mode shows the right section immediately without a save. Because
- * every field is posted either way, both sets of values survive a switch.
+ * every field is posted whatever the mode, all sets of values survive a switch. Hybrid shows
+ * the commission block and this one at the same time.
  */
 trait HasSubscriptionFields
 {
@@ -38,7 +39,7 @@ trait HasSubscriptionFields
     protected function addSubscriptionFields(): static
     {
         return $this
-            ->addOpenCollapsible('mode', MarketplaceModeEnum::SUBSCRIPTION, MarketplaceHelper::getMode())
+            ->addOpenModeCollapsible([MarketplaceModeEnum::SUBSCRIPTION, MarketplaceModeEnum::HYBRID])
             ->add('subscription_settings_title', 'html', [
                 'html' => sprintf(
                     '<hr><h4>%s</h4><p class="text-muted">%s</p>'
@@ -49,6 +50,14 @@ trait HasSubscriptionFields
                     e(trans('plugins/marketplace::subscription.settings.manage_plans'))
                 ),
             ])
+            ->add(
+                'enable_public_subscription_plans',
+                OnOffCheckboxField::class,
+                OnOffFieldOption::make()
+                    ->label(trans('plugins/marketplace::subscription.settings.enable_public_plans'))
+                    ->helperText(trans('plugins/marketplace::subscription.settings.enable_public_plans_helper'))
+                    ->value(MarketplaceHelper::getSetting('enable_public_subscription_plans', false))
+            )
             ->add(
                 'subscription_unpublish_products_on_expired',
                 OnOffCheckboxField::class,
@@ -122,6 +131,6 @@ trait HasSubscriptionFields
                     ->choices(PaymentMethodEnum::labels())
                     ->selected(MarketplaceHelper::subscriptionPaymentMethods())
             )
-            ->addCloseCollapsible('mode', MarketplaceModeEnum::SUBSCRIPTION);
+            ->addCloseModeCollapsible([MarketplaceModeEnum::SUBSCRIPTION, MarketplaceModeEnum::HYBRID]);
     }
 }

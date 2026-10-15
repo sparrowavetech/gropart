@@ -2,6 +2,7 @@
 
 return [
     'name' => 'Product categories',
+    'product_categories' => 'Product categories',
     'create' => 'Create new product category',
     'edit' => 'Edit product category',
     'list' => 'List product categories',
@@ -14,4 +15,18 @@ return [
     ],
     'total_products' => 'Total products: :total',
     'edit_this_category' => 'Edit this category',
+    'export' => [
+        'description' => 'Export product categories to Excel/CSV file.',
+        'total' => 'Total',
+    ],
+    'import' => [
+        'description' => 'Import product categories from Excel/CSV file.',
+    ],
+    'table_view_info' => 'For easier bulk management of categories, you can also',
+    'manage_as_table' => 'manage categories as a table',
+    'parent' => 'Parent Category',
+    'image' => 'Image',
+    'product_category_translations' => 'Product Category Translations',
+    'parent_self_reference' => 'A category cannot be its own parent.',
+    'parent_circular_reference' => 'A category cannot be assigned to one of its own descendants as a parent.',
 ];

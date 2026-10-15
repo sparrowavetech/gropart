@@ -48,6 +48,7 @@ return [
         ],
         'success' => 'Na-save ang iyong mga setting ng .env file.',
         'errors' => 'Hindi ma-save ang .env file, Pakigawa ito nang manu-mano.',
+        'database_connection_failed' => 'Hindi makakonekta sa database. Pakisuri ang host, port, pangalan, username at password ng database. Error: :message',
     ],
     'theme' => [
         'title' => 'Pumili ng tema',

@@ -26,7 +26,7 @@
                                         @endif
                                         <div class="bb-order-info-item">
                                             <span class="label">{{ trans('plugins/ecommerce::invoice.payment_status') }}:</span>
-                                            <span class="value">{!! BaseHelper::clean($invoice->status->toHtml()) !!}</span>
+                                            <span class="value">{!! BaseHelper::clean($invoice->payment_status_html) !!}</span>
                                         </div>
                                         @if (is_plugin_active('payment') && $invoice->payment->id && $invoice->payment->payment_channel->displayName())
                                             <div class="bb-order-info-item">

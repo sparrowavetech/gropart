@@ -141,7 +141,7 @@ return [
         'admin_reply_our_response' => 'Phản hồi của chúng tôi:',
         'admin_reply_additional_questions' => 'Nếu bạn có bất kỳ câu hỏi nào khác, vui lòng trả lời email này hoặc liên hệ lại với chúng tôi.',
         'admin_reply_best_regards' => 'Trân trọng,',
-        'admin_reply_team' => 'Đội ngũ {{ site_title }}',
+        'admin_reply_team' => 'Đội ngũ :site_title',
         'notice_title' => 'Tin nhắn liên hệ mới',
         'notice_greeting' => 'Kính gửi Quản trị viên,',
         'notice_message_details' => 'Chi tiết tin nhắn',

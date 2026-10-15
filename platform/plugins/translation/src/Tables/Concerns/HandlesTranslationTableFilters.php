@@ -70,7 +70,15 @@ trait HandlesTranslationTableFilters
             $needle = $this->normalizeSearchTerm($keyword);
 
             $translations = $translations->filter(function (array $item) use ($needle, $service) {
+                $translated = trans(
+                    Str::of($item['group'])->replaceLast(DIRECTORY_SEPARATOR, '::')->append('.' . $item['key'])->toString(),
+                    [],
+                    $this->locale
+                );
+
+                // Match the translated text of the current locale too, not only the English source
                 $haystacks = [
+                    is_string($translated) ? $translated : '',
                     (string) $item['value'],
                     (string) $item['key'],
                     (string) $item['group'],

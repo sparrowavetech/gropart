@@ -141,7 +141,7 @@ return [
         'admin_reply_our_response' => 'Наш ответ:',
         'admin_reply_additional_questions' => 'Если у вас есть дополнительные вопросы, не стесняйтесь ответить на это письмо или свяжитесь с нами снова.',
         'admin_reply_best_regards' => 'С уважением,',
-        'admin_reply_team' => 'Команда {{ site_title }}',
+        'admin_reply_team' => 'Команда :site_title',
         'notice_title' => 'Новое контактное сообщение',
         'notice_greeting' => 'Уважаемый администратор,',
         'notice_message_details' => 'Детали сообщения',

@@ -4,6 +4,7 @@ use Botble\Base\Http\Middleware\RequiresJsonRequestMiddleware;
 use Botble\Marketplace\Http\Controllers\Fronts\BecomeVendorController;
 use Botble\Marketplace\Http\Controllers\Fronts\ContactStoreController;
 use Botble\Marketplace\Http\Controllers\Fronts\PublicStoreController;
+use Botble\Marketplace\Http\Controllers\Fronts\PublicSubscriptionPlanController;
 use Botble\Marketplace\Models\Store;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Theme\Facades\Theme;
@@ -22,6 +23,9 @@ Route::group([
 
         Route::get($slugPrefix, [PublicStoreController::class, 'getStores'])->name('public.stores');
         Route::get("$slugPrefix/{slug}", [PublicStoreController::class, 'getStore'])->name('public.store');
+
+        Route::get('vendor-plans', [PublicSubscriptionPlanController::class, 'index'])
+            ->name('public.marketplace.subscription-plans');
 
         Route::prefix('ajax/stores')
             ->name('public.ajax.')

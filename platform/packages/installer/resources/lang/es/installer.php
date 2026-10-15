@@ -49,6 +49,7 @@ return [
         ],
         'success' => 'La configuración de su archivo .env se ha guardado.',
         'errors' => 'No se pudo guardar el archivo .env. Por favor, créelo manualmente.',
+        'database_connection_failed' => 'No se pudo conectar a la base de datos. Compruebe el host, el puerto, el nombre, el usuario y la contraseña de la base de datos. Error: :message',
     ],
     'theme' => [
         'title' => 'Escoge un tema',

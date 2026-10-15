@@ -24,6 +24,7 @@ return [
     'greater_than' => 'Greater than',
     'less_than' => 'Less than',
     'value' => 'Value',
+    'operator' => 'Operator',
     'select_field' => 'Select field',
     'reset' => 'Reset',
     'add_additional_filter' => 'Add additional filter',

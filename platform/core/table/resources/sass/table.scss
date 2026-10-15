@@ -376,6 +376,12 @@ div.dt-buttons {
     }
 }
 
+// The responsive caret shares the narrow (w-1) checkbox cell; keep them on one line.
+table.dataTable > tbody > tr > td.dtr-control,
+table.dataTable > tbody > tr > th.dtr-control {
+    white-space: nowrap;
+}
+
 [data-bs-theme='dark'] {
     div.dataTables_wrapper .dataTables_processing {
         background-color: rgba(0, 0, 0, 0.5);

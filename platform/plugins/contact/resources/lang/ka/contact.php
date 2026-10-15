@@ -141,7 +141,7 @@ return [
         'admin_reply_our_response' => 'ჩვენი პასუხი:',
         'admin_reply_additional_questions' => 'თუ გაქვთ დამატებითი კითხვები, გთხოვთ უპასუხოთ ამ ელფოსტას ან დაგვიკავშირდით ხელახლა.',
         'admin_reply_best_regards' => 'პატივისცემით,',
-        'admin_reply_team' => '{{ site_title }} გუნდი',
+        'admin_reply_team' => ':site_title გუნდი',
         'notice_title' => 'ახალი საკონტაქტო შეტყობინება',
         'notice_greeting' => 'ძვირფასო ადმინისტრატორო,',
         'notice_message_details' => 'შეტყობინების დეტალები',

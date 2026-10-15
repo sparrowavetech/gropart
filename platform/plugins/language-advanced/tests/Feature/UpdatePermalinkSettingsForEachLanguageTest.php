@@ -68,13 +68,16 @@ class UpdatePermalinkSettingsForEachLanguageTest extends TestCase
         $event = new UpdatedPermalinkSettings(Page::class, 'trang', $request);
         (new UpdatePermalinkSettingsForEachLanguage())->handle($event);
 
-        $this->assertSame(3, DB::table('slugs_translations')->where('lang_code', 'vi')->count());
+        $countAfterFirstRun = DB::table('slugs_translations')->where('lang_code', 'vi')->count();
 
         // Run again with different prefix — should NOT create duplicates
         $event2 = new UpdatedPermalinkSettings(Page::class, 'cac-trang', $request);
         (new UpdatePermalinkSettingsForEachLanguage())->handle($event2);
 
-        $this->assertSame(3, DB::table('slugs_translations')->where('lang_code', 'vi')->count());
+        $countAfterSecondRun = DB::table('slugs_translations')->where('lang_code', 'vi')->count();
+
+        $this->assertSame(3, $countAfterFirstRun);
+        $this->assertSame(3, $countAfterSecondRun);
 
         DB::table('slugs_translations')->where('lang_code', 'vi')->get()->each(function ($row) {
             $this->assertSame('cac-trang', $row->prefix);

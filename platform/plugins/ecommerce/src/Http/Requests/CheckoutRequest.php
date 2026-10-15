@@ -21,6 +21,10 @@ class CheckoutRequest extends Request
 
     protected function prepareForValidation(): void
     {
+        foreach (['address', 'billing_address', 'tax_information'] as $group) {
+            $this->dropArrayValues($group);
+        }
+
         $this->mergeSavedAddressData();
 
         $this->preparePhoneFieldForCheckout('address');
@@ -28,6 +32,25 @@ class CheckoutRequest extends Request
         if ($this->has('billing_address')) {
             $this->preparePhoneFieldForCheckout('billing_address');
         }
+    }
+
+    /**
+     * A bot can post a field as an array (address[name][0]=x). The array fails validation, is flashed
+     * back with the redirect, and every old('address.*') / old('tax_information.*') echo in the checkout view then crashes with
+     * "htmlspecialchars(): Argument #1 must be of type string, array given". Dropping nested arrays
+     * before validation keeps the flashed input scalar, so the form re-renders cleanly.
+     */
+    protected function dropArrayValues(string $prefix): void
+    {
+        $data = $this->input($prefix);
+
+        if (! is_array($data)) {
+            return;
+        }
+
+        $this->merge([
+            $prefix => array_filter($data, fn ($value) => ! is_array($value)),
+        ]);
     }
 
     protected function mergeSavedAddressData(): void
@@ -242,6 +265,9 @@ class CheckoutRequest extends Request
             'address.country' => __('Country'),
             'address.address' => __('Address'),
             'address.zip_code' => __('Zipcode'),
+            'shipping_method' => __('Shipping method'),
+            'shipping_option' => __('Shipping option'),
+            'payment_method' => __('Payment method'),
         ];
     }
 

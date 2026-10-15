@@ -401,7 +401,15 @@
                         </div>
                         <div class="ps-product__shopping">
                             {!! Theme::partial('ecommerce.product-price', compact('product')) !!}
-                            @if (EcommerceHelper::isCartEnabled())
+                            @if ($product->isExternalProduct())
+                                <a
+                                    class="btn btn-primary ms-2"
+                                    href="{{ $product->original_product->external_url ?? $product->external_url }}"
+                                    target="_blank"
+                                    rel="nofollow noopener noreferrer"
+                                    title="{{ __('Buy on External Store') }}"
+                                >{{ __('Buy on External Store') }}</a>
+                            @elseif (EcommerceHelper::isCartEnabled())
                                 <button
                                     class="btn btn-primary ms-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif"
                                     name="add_to_cart"
@@ -444,7 +452,15 @@
         <div class="container">
             <div class="row">
                 <div class="sticky-atc-btn product-button">
-                    @if (EcommerceHelper::isCartEnabled())
+                    @if ($product->isExternalProduct())
+                        <a
+                            class="btn btn-primary mb-2"
+                            href="{{ $product->original_product->external_url ?? $product->external_url }}"
+                            target="_blank"
+                            rel="nofollow noopener noreferrer"
+                            title="{{ __('Buy on External Store') }}"
+                        >{{ __('Buy on External Store') }}</a>
+                    @elseif (EcommerceHelper::isCartEnabled())
                         <button
                             class="btn btn-primary mb-2 add-to-cart-button @if ($product->isOutOfStock()) disabled @endif"
                             name="add_to_cart"

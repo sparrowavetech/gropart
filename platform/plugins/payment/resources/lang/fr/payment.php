@@ -83,7 +83,7 @@ return [
     'payment_method_description' => 'Guide de paiement (affiché sur la page de confirmation de commande).',
     'payment_via_cod' => 'Paiement à la livraison (COD)',
     'payment_via_bank_transfer' => 'Paiement par virement bancaire',
-    'payment_pending' => 'Commande passée. Votre paiement est en attente et sera vérifié par notre équipe.',
+    'payment_pending' => 'Votre paiement est en attente et sera confirmé dès sa réception.',
     'created_at' => 'Créé le',
     'payment_channel' => 'Canal de paiement',
     'total' => 'Montant total',
@@ -131,6 +131,8 @@ return [
     'payment_description' => 'Payer votre commande n°:order_id sur :site_url',
     'processing_fee' => 'Frais de traitement (optionnel)',
     'fee_helper' => 'Des frais supplémentaires seront appliqués si le client choisit ce mode de paiement. Entrez 0 pour aucun frais.',
+    'fee_fixed' => 'Frais fixes supplémentaires (facultatif)',
+    'fee_fixed_helper' => 'Un montant fixe ajouté aux frais en pourcentage ci-dessus, par ex. à la manière de Stripe « 2.9% + frais fixes ». Basé sur la devise par défaut (:currency). Entrez 0 pour aucun frais fixe supplémentaire.',
     'payment_fee' => 'Frais de paiement',
     'payment_log' => [
         'name' => 'Journaux de paiement',

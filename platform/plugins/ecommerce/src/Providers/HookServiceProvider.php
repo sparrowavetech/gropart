@@ -28,6 +28,7 @@ use Botble\DataSynchronize\Importer\Importer;
 use Botble\Ecommerce\AdsTracking\FacebookPixel;
 use Botble\Ecommerce\AdsTracking\GoogleTagManager;
 use Botble\Ecommerce\Cart\CartItem;
+use Botble\Ecommerce\Enums\OrderHistoryActionEnum;
 use Botble\Ecommerce\Enums\OrderReturnStatusEnum;
 use Botble\Ecommerce\Facades\Cart;
 use Botble\Ecommerce\Facades\Discount;
@@ -42,6 +43,7 @@ use Botble\Ecommerce\Models\Customer;
 use Botble\Ecommerce\Models\FlashSale;
 use Botble\Ecommerce\Models\Invoice;
 use Botble\Ecommerce\Models\Order;
+use Botble\Ecommerce\Models\OrderHistory;
 use Botble\Ecommerce\Models\OrderReturn;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductCategory;
@@ -65,6 +67,7 @@ use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Forms\BankTransferPaymentMethodForm;
 use Botble\Payment\Forms\CODPaymentMethodForm;
 use Botble\Payment\Http\Requests\PaymentMethodRequest;
+use Botble\Payment\Models\Payment as PaymentModel;
 use Botble\Payment\Services\Gateways\BankTransferPaymentService;
 use Botble\Payment\Services\Gateways\CodPaymentService;
 use Botble\Payment\Supports\PaymentHelper;
@@ -459,6 +462,40 @@ class HookServiceProvider extends ServiceProvider
                 $orders = Order::query()->whereIn('id', $orderIds)->get();
 
                 $currency = cms_currency()->getDefaultCurrency()->title;
+
+                // Redirect gateways (Mollie, PayPal, Stripe, Razorpay, ...) create the payment
+                // for the order total at checkout time, but the order can still be modified
+                // before the customer pays (e.g. reopen /cart in another tab and raise the
+                // quantity, then pay on the already-open gateway page). The gateway then
+                // reports a paid amount lower than the current order total. Completing the
+                // order here would ship products the customer never paid for, so flag the
+                // payment as fraud and leave the order unfinished for manual review.
+                $underpayment = $this->detectUnderpaidPayment($orders, $data);
+
+                if ($underpayment !== null) {
+                    $data['status'] = PaymentStatusEnum::FRAUD;
+
+                    PaymentHelper::log(
+                        (string) Arr::get($data, 'payment_channel', ''),
+                        [],
+                        [
+                            'payment_amount_mismatch' => $underpayment,
+                            'charge_id' => Arr::get($data, 'charge_id'),
+                            'order_ids' => $orderIds,
+                        ]
+                    );
+
+                    foreach ($orders as $order) {
+                        $data['order_id'] = $order->id;
+                        $data['payment_fee'] = (float) $order->payment_fee;
+
+                        PaymentHelper::storeLocalPayment($data);
+                    }
+
+                    return;
+                }
+
+                $this->flagOverpaidPayment($orders, $data);
 
                 foreach ($orders as $order) {
                     $data['amount'] = $order->amount;
@@ -1375,6 +1412,148 @@ class HookServiceProvider extends ServiceProvider
         }
 
         return $messages;
+    }
+
+    /**
+     * Detect a gateway payment that completed for less than the current total of the
+     * orders it pays for (the cart was modified after the gateway payment was created).
+     *
+     * @return array|null Mismatch details for logging, or null when the amounts are
+     *                    consistent or cannot be compared reliably.
+     */
+    protected function detectUnderpaidPayment(Collection $orders, array $data): ?array
+    {
+        // Some callers (e.g. Stripe's "already completed" webhook path) fire the action
+        // with only charge_id + order_id, so never assume the keys exist.
+        if (
+            Arr::get($data, 'status') != PaymentStatusEnum::COMPLETED
+            || ! empty($data['is_refund_update'])
+            || $orders->isEmpty()
+        ) {
+            return null;
+        }
+
+        // Escape hatch for plugins that legitimately charge less than the order total
+        // through the gateway (e.g. partial payment with wallet credit).
+        if (! apply_filters('ecommerce_verify_completed_payment_amount', true, $orders, $data)) {
+            return null;
+        }
+
+        $paidAmount = (float) Arr::get($data, 'amount');
+        $paidCurrency = (string) Arr::get($data, 'currency');
+        $expectedAmount = (float) $orders->sum('amount');
+
+        if ($paidAmount <= 0 || ! $paidCurrency || $expectedAmount <= 0) {
+            return null;
+        }
+
+        $defaultCurrency = cms_currency()->getDefaultCurrency();
+
+        if ($paidCurrency == $defaultCurrency->title) {
+            $paidInDefaultCurrency = $paidAmount;
+            $tolerance = 0.01;
+        } else {
+            $paymentCurrency = cms_currency()->currencies()->firstWhere('title', $paidCurrency);
+
+            if (! $paymentCurrency || (float) $paymentCurrency->exchange_rate <= 0) {
+                return null;
+            }
+
+            $paidInDefaultCurrency = $paidAmount / (float) $paymentCurrency->exchange_rate;
+            // Converted amounts are rounded to the payment currency's decimals, so allow
+            // a small relative drift; real cart manipulation produces a far larger gap.
+            $tolerance = max($expectedAmount * 0.01, 0.05);
+        }
+
+        if ($paidInDefaultCurrency + $tolerance >= $expectedAmount) {
+            return null;
+        }
+
+        // A charge already recorded as completed was verified when it first arrived.
+        // A webhook re-delivery or callback revisit (possibly after an admin raised the
+        // order total) must not downgrade that payment to fraud.
+        $chargeId = Arr::get($data, 'charge_id');
+
+        if (
+            $chargeId
+            && PaymentModel::query()
+                ->where('charge_id', $chargeId)
+                ->where('status', PaymentStatusEnum::COMPLETED)
+                ->exists()
+        ) {
+            return null;
+        }
+
+        return [
+            'paid_amount' => $paidAmount,
+            'paid_currency' => $paidCurrency,
+            'paid_amount_in_default_currency' => round($paidInDefaultCurrency, 2),
+            'expected_amount' => $expectedAmount,
+            'expected_currency' => $defaultCurrency->title,
+        ];
+    }
+
+    /**
+     * Leave a note on the order when the gateway captured MORE than the order total.
+     *
+     * The payment row below is stored at the order total, so without this the extra money
+     * is invisible in the admin. It happens when the gateway amount was fixed before the
+     * order was (e.g. an embedded payment form opened with shipping included, while the
+     * order was finalized from a draft that still had shipping 0), and the admin needs to
+     * see it before fulfilling or filing the invoice.
+     */
+    protected function flagOverpaidPayment(Collection $orders, array $data): void
+    {
+        $chargeId = Arr::get($data, 'charge_id');
+
+        if (
+            ! $chargeId
+            || Arr::get($data, 'status') != PaymentStatusEnum::COMPLETED
+            || ! empty($data['is_refund_update'])
+            || $orders->isEmpty()
+            || Arr::get($data, 'currency') != cms_currency()->getDefaultCurrency()->title
+        ) {
+            return;
+        }
+
+        $paidAmount = (float) Arr::get($data, 'amount');
+        $expectedAmount = (float) $orders->sum('amount');
+
+        if ($paidAmount <= $expectedAmount + 0.01) {
+            return;
+        }
+
+        // Webhook re-deliveries and the browser callback replay the same charge.
+        if (
+            PaymentModel::query()
+                ->where('charge_id', $chargeId)
+                ->where('status', PaymentStatusEnum::COMPLETED)
+                ->exists()
+        ) {
+            return;
+        }
+
+        foreach ($orders as $order) {
+            OrderHistory::query()->create([
+                'action' => OrderHistoryActionEnum::UPDATE_STATUS,
+                'description' => trans('plugins/ecommerce::order.payment_higher_than_order_total', [
+                    'charge_id' => $chargeId,
+                    'paid' => format_price($paidAmount),
+                    'total' => format_price($expectedAmount),
+                ]),
+                'order_id' => $order->getKey(),
+            ]);
+        }
+
+        PaymentHelper::log(
+            (string) Arr::get($data, 'payment_channel', ''),
+            [],
+            [
+                'payment_amount_higher_than_order' => ['paid' => $paidAmount, 'expected' => $expectedAmount],
+                'charge_id' => $chargeId,
+                'order_ids' => $orders->pluck('id')->all(),
+            ]
+        );
     }
 
     protected function convertOrderAmount(float $amount): float

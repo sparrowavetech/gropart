@@ -49,7 +49,7 @@ if (! function_exists('format_price')) {
         }
 
         if ($useSymbol && $currency->is_prefix_symbol) {
-            $space = $currency->space_between_price_and_currency ? ' ' : null;
+            $space = has_space_between_price_and_currency($currency) ? ' ' : null;
 
             return $currency->symbol . $space . human_price_text($price, $currency);
         }
@@ -104,9 +104,28 @@ if (! function_exists('human_price_text')) {
             );
         }
 
-        $space = ($currency instanceof Currency && $currency->space_between_price_and_currency) || $convertNumberToText ? ' ' : null;
+        if (! $priceUnit) {
+            return $price;
+        }
 
-        return $price . $space . ($priceUnit ?: '');
+        $space = has_space_between_price_and_currency($currency) || $convertNumberToText ? ' ' : null;
+
+        return $price . $space . $priceUnit;
+    }
+}
+
+if (! function_exists('has_space_between_price_and_currency')) {
+    /**
+     * A space is added when either the currency's own option or the global
+     * "Add a space between price and currency" setting is enabled.
+     */
+    function has_space_between_price_and_currency(Currency|null|string $currency): bool
+    {
+        if ($currency instanceof Currency && $currency->space_between_price_and_currency) {
+            return true;
+        }
+
+        return (bool) get_ecommerce_setting('add_space_between_price_and_currency', false);
     }
 }
 

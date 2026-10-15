@@ -25,6 +25,7 @@
                     :icon-only="true"
                     class="btn-show-table-options rounded-pill"
                     size="sm"
+                    :aria-label="trans('core/table::table.close')"
                 />
 
                 {!! $table->renderFilter() !!}

@@ -180,8 +180,8 @@ class DashboardMenu
             $items = $this->getItemsByGroup();
 
             return tap(
-                apply_filters('dashboard_menu', $items, $this),
-                function ($menu): void {
+                $this->ensureCollection(apply_filters('dashboard_menu', $items, $this), $items),
+                function (Collection $menu): void {
                     $this->dispatchAfterRetrieved($menu);
                 }
             );
@@ -195,6 +195,12 @@ class DashboardMenu
                     return $this->sanitizeItemsForCache(value($value));
                 }
             );
+
+            // The cache may return null when the entry expires or is flushed between
+            // the existence check and the read, so rebuild the menu instead of failing.
+            if (! $items instanceof Collection) {
+                $items = value($value);
+            }
         } else {
             $items = value($value);
         }
@@ -332,6 +338,28 @@ class DashboardMenu
         $groupedItems = $this->getGroupedItemsByGroup();
 
         return $this->getMappedItems($groupedItems[''] ?? collect(), $groupedItems);
+    }
+
+    /**
+     * Guard against a `dashboard_menu` filter listener that forgets to return the
+     * menu (or returns something else). Without this, a single third-party plugin
+     * breaks the whole admin layout with a TypeError.
+     */
+    protected function ensureCollection(mixed $items, Collection $fallback): Collection
+    {
+        if ($items instanceof Collection) {
+            return $items;
+        }
+
+        if (is_array($items)) {
+            return collect($items);
+        }
+
+        if ($items instanceof Arrayable) {
+            return collect($items->toArray());
+        }
+
+        return $fallback;
     }
 
     /**

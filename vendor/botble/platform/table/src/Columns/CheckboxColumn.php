@@ -16,6 +16,7 @@ class CheckboxColumn extends FormattedColumn implements FormattedColumnContract
                 Form::input('checkbox', '', null, [
                     'class' => 'form-check-input m-0 align-middle table-check-all',
                     'data-set' => '.dataTable .checkboxes',
+                    'aria-label' => trans('core/base::tables.select_all_rows'),
                 ])->toHtml()
             )
             ->className('w-1')

@@ -10,16 +10,20 @@ use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
 use Botble\Base\Forms\FieldOptions\HtmlFieldOption;
+use Botble\Base\Forms\FieldOptions\NumberFieldOption;
 use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
 use Botble\Base\Forms\FieldOptions\PhoneNumberFieldOption;
 use Botble\Base\Forms\FieldOptions\RadioFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
+use Botble\Base\Forms\FieldOptions\TextareaFieldOption;
 use Botble\Base\Forms\FieldOptions\TextFieldOption;
 use Botble\Base\Forms\Fields\HtmlField;
+use Botble\Base\Forms\Fields\NumberField;
 use Botble\Base\Forms\Fields\OnOffField;
 use Botble\Base\Forms\Fields\PhoneNumberField;
 use Botble\Base\Forms\Fields\RadioField;
 use Botble\Base\Forms\Fields\SelectField;
+use Botble\Base\Forms\Fields\TextareaField;
 use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
 use Botble\Base\Http\Responses\BaseHttpResponse;
@@ -52,7 +56,10 @@ use Botble\Marketplace\Models\Withdrawal;
 use Botble\Marketplace\Services\CartValidateSameStore;
 use Botble\Marketplace\Services\GeneratePayoutInvoiceService;
 use Botble\Marketplace\Services\GenerateSubscriptionInvoiceService;
+use Botble\Marketplace\Shortcodes\SubscriptionPlansShortcode;
 use Botble\Media\Facades\RvMedia;
+use Botble\Shortcode\Compilers\Shortcode;
+use Botble\Shortcode\Forms\ShortcodeForm;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\CollectionDataTable;
@@ -82,6 +89,40 @@ class HookServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        if (function_exists('add_shortcode')) {
+            add_shortcode(
+                'marketplace-subscription-plans',
+                trans('plugins/marketplace::subscription.public.shortcode_name'),
+                trans('plugins/marketplace::subscription.public.shortcode_description'),
+                fn (Shortcode $shortcode) => app(SubscriptionPlansShortcode::class)->render($shortcode)
+            );
+
+            shortcode()->setPreviewImage(
+                'marketplace-subscription-plans',
+                asset('vendor/core/plugins/marketplace/images/ui-blocks/subscription-plans.png')
+            );
+
+            shortcode()->setAdminConfig('marketplace-subscription-plans', function (array $attributes) {
+                return ShortcodeForm::createFromArray($attributes)
+                    ->add('title', TextField::class, TextFieldOption::make()->label(trans('core/base::forms.title')))
+                    ->add(
+                        'description',
+                        TextareaField::class,
+                        TextareaFieldOption::make()->label(trans('core/base::forms.description'))->rows(3)
+                    )
+                    ->add(
+                        'limit',
+                        NumberField::class,
+                        NumberFieldOption::make()
+                            ->label(trans('plugins/marketplace::subscription.public.shortcode_limit'))
+                            ->addAttribute('min', 0)
+                    );
+            });
+
+            shortcode()->ignoreCaches(['marketplace-subscription-plans']);
+            shortcode()->ignoreLazyLoading(['marketplace-subscription-plans']);
+        }
+
         $this->app->booted(function (): void {
             FormFrontManager::register(ContactStoreForm::class, ContactStoreRequest::class);
 

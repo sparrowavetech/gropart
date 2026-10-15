@@ -48,6 +48,7 @@ return [
         ],
         'success' => '.env 파일 설정이 저장되었습니다.',
         'errors' => '.env 파일을 저장할 수 없습니다. 수동으로 생성하십시오.',
+        'database_connection_failed' => '데이터베이스에 연결할 수 없습니다. 데이터베이스 호스트, 포트, 이름, 사용자 이름 및 비밀번호를 확인하세요. 오류: :message',
     ],
     'theme' => [
         'title' => '테마 선택',

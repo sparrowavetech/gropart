@@ -40,12 +40,14 @@ use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Supports\PaymentFeeHelper;
 use Botble\Payment\Supports\PaymentHelper;
 use Botble\Theme\Facades\Theme;
-use Exception;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Contracts\Cache\LockProvider;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -60,6 +62,23 @@ class PublicCheckoutController extends BaseController
         if (class_exists(OptimizerHelper::class)) {
             OptimizerHelper::disable();
         }
+    }
+
+    /**
+     * The unfinished order a checkout token may still be resumed on, if any.
+     *
+     * Cancelling an order leaves is_finished = false, so without the status filter a cancelled
+     * order's checkout link stays payable forever. A buyer reopening an old link (bookmark,
+     * abandoned-cart email, browser history) would pay into an order that is already void: the
+     * money is captured but the cancelled order is never revived and the success page has
+     * nothing to show. Treating it as gone sends them back to start a fresh checkout.
+     */
+    protected function findResumableOrderByToken(string $token): ?Order
+    {
+        return Order::query()
+            ->where(['token' => $token, 'is_finished' => false])
+            ->where('status', '!=', OrderStatusEnum::CANCELED)
+            ->first();
     }
 
     public function getCheckout(
@@ -77,13 +96,19 @@ class PublicCheckoutController extends BaseController
         }
 
         if ($token !== session('tracked_start_checkout')) {
-            $order = Order::query()->where(['token' => $token, 'is_finished' => false])->first();
+            $order = $this->findResumableOrderByToken($token);
 
             if (! $order) {
                 return $this
                     ->httpResponse()
                     ->setNextUrl(BaseHelper::getHomepageUrl());
             }
+        } elseif (OrderHelper::discardSpentCheckoutSession()) {
+            // The session still points at an order a gateway webhook already completed.
+            // Rendering this page would open a new payment on that old order's token.
+            return $this
+                ->httpResponse()
+                ->setNextUrl(route('public.cart'));
         }
 
         if (
@@ -595,7 +620,7 @@ class PublicCheckoutController extends BaseController
         abort_unless(EcommerceHelper::isCartEnabled(), 404);
 
         if ($token !== session('tracked_start_checkout')) {
-            $order = Order::query()->where(['token' => $token, 'is_finished' => false])->first();
+            $order = $this->findResumableOrderByToken($token);
 
             if (! $order) {
                 return $this
@@ -697,6 +722,81 @@ class PublicCheckoutController extends BaseController
     ) {
         abort_unless(EcommerceHelper::isCartEnabled(), 404);
 
+        $arguments = [$token, $request, $shippingFeeService, $applyCouponService, $removeCouponService, $handleApplyPromotionsService];
+
+        // Serialize submissions of the same checkout. Overlapping submits (double-click, two
+        // tabs, a retried request) would otherwise all reach the payment gateway: COD and bank
+        // transfer mint a fresh charge_id per call, so every overlapping submit stored another
+        // set of payment rows for the same orders. A later submit waits here, then sees the
+        // finished order and is sent to the success page.
+        if (! Cache::getStore() instanceof LockProvider) {
+            return $this->handlePostCheckout(...$arguments);
+        }
+
+        $lock = Cache::lock('ecommerce_checkout_submit_' . $token, 60);
+
+        try {
+            $lock->block(20);
+        } catch (LockTimeoutException) {
+            return $this
+                ->httpResponse()
+                ->setError()
+                ->setMessage(__('Your order is still being processed. Please wait a moment before trying again.'));
+        }
+
+        try {
+            return $this->handlePostCheckout(...$arguments);
+        } finally {
+            $lock->release();
+        }
+    }
+
+    protected function handlePostCheckout(
+        string $token,
+        CheckoutRequest $request,
+        HandleShippingFeeService $shippingFeeService,
+        HandleApplyCouponService $applyCouponService,
+        HandleRemoveCouponService $removeCouponService,
+        HandleApplyPromotionsService $handleApplyPromotionsService
+    ) {
+        // An overlapping submit of this checkout may have placed the order while this request
+        // waited for the lock. This request's session was loaded before that, so its cart still
+        // looks full: trust the database instead, drop the stale cart (so this request's session
+        // write does not restore it) and send the buyer to the success page.
+        if (Order::query()->where('token', $token)->where('is_finished', true)->exists()) {
+            Cart::instance('cart')->destroy();
+
+            return $this
+                ->httpResponse()
+                ->setNextUrl(route('public.checkout.success', $token));
+        }
+
+        // Same reason as findResumableOrderByToken(): never take payment for a cancelled order.
+        // Scoped to "nothing left to pay for" rather than "any sibling is cancelled", because a
+        // marketplace checkout splits one token across several vendor orders and cancelling one
+        // of them must not block payment for the rest.
+        if (
+            Order::query()->where('token', $token)->exists()
+            && ! $this->findResumableOrderByToken($token)
+        ) {
+            // Drop the dead token so the next request mints a fresh one, otherwise the buyer
+            // is sent back to this same cancelled checkout and can never get past it. The cart
+            // is deliberately left intact - they still want to buy, just on a new order.
+            // Only clear the session token when it is this checkout: submitting an old
+            // bookmarked link must not throw away a different checkout already in progress.
+            session()->forget(md5('checkout_address_information_' . $token));
+
+            if (session('tracked_start_checkout') === $token) {
+                session()->forget('tracked_start_checkout');
+            }
+
+            return $this
+                ->httpResponse()
+                ->setError()
+                ->setNextUrl(route('public.checkout.information', OrderHelper::getOrderSessionToken()))
+                ->setMessage(__('This order has been cancelled. Please place your order again.'));
+        }
+
         if (! EcommerceHelper::isEnabledGuestCheckout() && ! auth('customer')->check()) {
             return $this
                 ->httpResponse()
@@ -778,7 +878,7 @@ class PublicCheckoutController extends BaseController
             ];
         }
 
-        $stockValidation = OrderHelper::validateAndReserveStock($cartItems);
+        $stockValidation = OrderHelper::validateStock($cartItems);
 
         if (! $stockValidation['success']) {
             return $this
@@ -787,27 +887,19 @@ class PublicCheckoutController extends BaseController
                 ->setMessage($stockValidation['message']);
         }
 
-        $reservedItems = $stockValidation['reserved_items'] ?? [];
-
-        try {
-            return $this->processCheckoutAfterStockReserved(
-                $request,
-                $token,
-                $sessionData,
-                $products,
-                $handleApplyPromotionsService,
-                $shippingFeeService,
-                $applyCouponService,
-                $removeCouponService,
-            );
-        } catch (Exception $e) {
-            OrderHelper::restoreReservedStock($reservedItems);
-
-            throw $e;
-        }
+        return $this->processCheckoutAfterStockValidated(
+            $request,
+            $token,
+            $sessionData,
+            $products,
+            $handleApplyPromotionsService,
+            $shippingFeeService,
+            $applyCouponService,
+            $removeCouponService,
+        );
     }
 
-    protected function processCheckoutAfterStockReserved(
+    protected function processCheckoutAfterStockValidated(
         CheckoutRequest $request,
         string $token,
         array $sessionData,
@@ -1061,7 +1153,7 @@ class PublicCheckoutController extends BaseController
         return $this
             ->httpResponse()
             ->setNextUrl(PaymentHelper::getRedirectURL($token))
-            ->setMessage(trans('plugins/ecommerce::order.checkout_successfully'));
+            ->setMessage(OrderHelper::getCheckoutSuccessMessage($paymentData));
     }
 
     public function getCheckoutSuccess(string $token)
@@ -1171,11 +1263,14 @@ class PublicCheckoutController extends BaseController
             return apply_filters(PROCESS_GET_CHECKOUT_RECOVER_ECOMMERCE, $token, $request);
         }
 
+        // Recovery links live in abandoned-cart emails and stay valid for a long time, so this
+        // is the most likely way a buyer lands on an order that was cancelled in the meantime.
         $order = Order::query()
             ->where([
                 'token' => $token,
                 'is_finished' => false,
             ])
+            ->where('status', '!=', OrderStatusEnum::CANCELED)
             ->with(['products', 'address'])
             ->firstOrFail();
 

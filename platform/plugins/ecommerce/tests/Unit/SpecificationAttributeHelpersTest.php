@@ -259,6 +259,136 @@ class SpecificationAttributeHelpersTest extends BaseTestCase
         $this->assertEquals('Same', $attribute->getOptionValueById('id2'));
     }
 
+    // --- Malformed / legacy option payloads (PHP 8 array-to-string crash) ---
+
+    public function test_has_id_based_options_detects_ids_beyond_the_first_element(): void
+    {
+        $attribute = $this->makeAttribute(SpecificationAttributeFieldType::SELECT, [
+            'Matte',
+            ['id' => 'abc12345', 'value' => 'Glossy'],
+        ]);
+
+        $this->assertTrue($attribute->hasIdBasedOptions());
+    }
+
+    public function test_has_id_based_options_detects_ids_on_a_non_zero_indexed_array(): void
+    {
+        $attribute = $this->makeAttribute(SpecificationAttributeFieldType::SELECT, [
+            3 => ['id' => 'abc12345', 'value' => 'Matte'],
+        ]);
+
+        $this->assertTrue($attribute->hasIdBasedOptions());
+    }
+
+    public function test_get_id_based_options_normalizes_a_mix_of_strings_and_pairs(): void
+    {
+        $attribute = $this->makeAttribute(SpecificationAttributeFieldType::SELECT, [
+            'Matte',
+            ['id' => 'abc12345', 'value' => 'Glossy'],
+        ]);
+
+        $result = $attribute->getIdBasedOptions();
+
+        $this->assertCount(2, $result);
+        $this->assertEquals('Matte', $result[0]['value']);
+        $this->assertMatchesRegularExpression('/^[0-9a-f]{8}$/', $result[0]['id']);
+        $this->assertEquals(['id' => 'abc12345', 'value' => 'Glossy'], $result[1]);
+    }
+
+    public function test_get_id_based_options_reindexes_a_non_zero_indexed_array(): void
+    {
+        $attribute = $this->makeAttribute(SpecificationAttributeFieldType::SELECT, [
+            2 => ['id' => 'abc12345', 'value' => 'Matte'],
+            5 => ['id' => 'def67890', 'value' => 'Glossy'],
+        ]);
+
+        $this->assertEquals([
+            ['id' => 'abc12345', 'value' => 'Matte'],
+            ['id' => 'def67890', 'value' => 'Glossy'],
+        ], $attribute->getIdBasedOptions());
+    }
+
+    public function test_get_id_based_options_flattens_an_array_value_to_a_string(): void
+    {
+        $attribute = $this->makeAttribute(SpecificationAttributeFieldType::SELECT, [
+            ['id' => 'abc12345', 'value' => ['en' => 'Matte', 'fr' => 'Mat']],
+        ]);
+
+        $result = $attribute->getIdBasedOptions();
+
+        $this->assertSame('Matte', $result[0]['value']);
+    }
+
+    public function test_get_id_based_options_handles_an_option_with_no_value_key(): void
+    {
+        $attribute = $this->makeAttribute(SpecificationAttributeFieldType::SELECT, [
+            ['id' => 'abc12345'],
+            ['label' => 'Glossy'],
+        ]);
+
+        $result = $attribute->getIdBasedOptions();
+
+        // Only the "value" key is treated as the label - an unknown shape renders blank rather than
+        // leaking an id or crashing the view.
+        $this->assertSame('', $result[0]['value']);
+        $this->assertSame('', $result[1]['value']);
+        $this->assertMatchesRegularExpression('/^[0-9a-f]{8}$/', $result[1]['id']);
+    }
+
+    public function test_get_id_based_options_derives_stable_ids_for_options_without_one(): void
+    {
+        $attribute = $this->makeAttribute(SpecificationAttributeFieldType::SELECT, [
+            'Matte',
+            'Glossy',
+        ]);
+
+        $first = $attribute->getIdBasedOptions();
+        $second = $attribute->getIdBasedOptions();
+
+        // The importer and the edit form persist these ids, so two calls must agree.
+        $this->assertSame($first, $second);
+        $this->assertNotSame($first[0]['id'], $first[1]['id']);
+    }
+
+    public function test_option_id_round_trips_for_options_without_an_id(): void
+    {
+        $attribute = $this->makeAttribute(SpecificationAttributeFieldType::SELECT, [
+            'Matte',
+            ['id' => 'abc12345', 'value' => 'Glossy'],
+        ]);
+
+        $optionId = $attribute->getOptionIdByValue('Matte');
+
+        $this->assertNotNull($optionId);
+        $this->assertSame('Matte', $attribute->getOptionValueById($optionId));
+    }
+
+    // --- getPlainOptions ---
+
+    public function test_get_plain_options_returns_string_labels_only(): void
+    {
+        $attribute = $this->makeAttribute(SpecificationAttributeFieldType::SELECT, [
+            'Matte',
+            ['id' => 'abc12345', 'value' => 'Glossy'],
+            ['id' => 'def67890', 'value' => ['en' => 'Satin']],
+        ]);
+
+        $options = $attribute->getPlainOptions();
+
+        $this->assertSame(['Matte', 'Glossy', 'Satin'], $options);
+
+        foreach ($options as $option) {
+            $this->assertIsString($option);
+        }
+    }
+
+    public function test_get_plain_options_returns_empty_for_null_options(): void
+    {
+        $attribute = $this->makeAttribute(SpecificationAttributeFieldType::SELECT, null);
+
+        $this->assertSame([], $attribute->getPlainOptions());
+    }
+
     // --- Helper ---
 
     private function makeAttribute(

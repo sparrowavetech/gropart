@@ -38,7 +38,8 @@ class ThemeTranslationTable extends TableAbstract
             ])
             ->onAjax(function () {
                 $translations = collect(app(Manager::class)->getThemeTranslations($this->locale))
-                    ->transform(fn ($value, $key) => compact('key', 'value'));
+                    // Expose the value under the locale column name so the table search can match translated text
+                    ->transform(fn ($value, $key) => ['key' => $key, 'value' => $value, $this->locale => $value]);
 
                 $table = $this->table
                     ->of($translations)

@@ -3,6 +3,7 @@
 namespace Botble\Installer\Tests\Unit;
 
 use Botble\Installer\Supports\EnvironmentManager;
+use Dotenv\Dotenv;
 use Illuminate\Http\Request;
 use Tests\TestCase;
 
@@ -64,5 +65,33 @@ class EnvironmentManagerTest extends TestCase
         $this->assertStringContainsString('DB_DATABASE="test_db"', $content);
         $this->assertStringContainsString('DB_USERNAME="test_user"', $content);
         $this->assertStringContainsString('DB_PASSWORD="test_password"', $content);
+    }
+
+    public function test_it_writes_special_characters_so_phpdotenv_reads_them_back_unchanged(): void
+    {
+        // Each value hits one way the old writer corrupted it: '"' was stripped, "\a" made the
+        // whole .env unparseable, "${APP_NAME}" was interpolated, "$1" / "\\" were eaten by
+        // preg_replace as backreferences, and "#" must not start a comment.
+        $values = [
+            'app_name' => 'My "Quoted" Site',
+            'database_name' => 'db$1name',
+            'database_username' => 'user\\name',
+            'database_password' => 'p"a\\ss$1${APP_NAME}\\a#x\'y\\',
+        ];
+
+        $content = (new EnvironmentManager())->buildEnvironmentContent(Request::create('/', 'POST', [
+            ...$values,
+            'app_url' => 'https://example.com',
+            'database_connection' => 'mysql',
+            'database_hostname' => '127.0.0.1',
+            'database_port' => '3306',
+        ]));
+
+        $env = Dotenv::parse($content);
+
+        $this->assertSame($values['app_name'], $env['APP_NAME']);
+        $this->assertSame($values['database_name'], $env['DB_DATABASE']);
+        $this->assertSame($values['database_username'], $env['DB_USERNAME']);
+        $this->assertSame($values['database_password'], $env['DB_PASSWORD']);
     }
 }

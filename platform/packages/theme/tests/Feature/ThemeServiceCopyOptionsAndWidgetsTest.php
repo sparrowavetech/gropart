@@ -2,15 +2,15 @@
 
 namespace Botble\Theme\Tests\Feature;
 
+use Botble\Base\Models\BaseModel;
 use Botble\Setting\Facades\Setting;
 use Botble\Setting\Models\Setting as SettingModel;
 use Botble\Setting\Supports\SettingStore;
 use Botble\Theme\Facades\Theme;
-use Botble\Theme\Facades\ThemeOption;
 use Botble\Theme\Services\ThemeService;
 use Botble\Widget\Models\Widget;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ThemeServiceCopyOptionsAndWidgetsTest extends TestCase
@@ -33,20 +33,40 @@ class ThemeServiceCopyOptionsAndWidgetsTest extends TestCase
         SettingModel::query()->delete();
 
         // Ensure a theme is always set
-        SettingModel::query()->insert([
+        SettingModel::query()->insert($this->withKeys([
             [
                 'key' => 'theme',
                 'value' => 'homzen',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-        ]);
+        ]));
 
         // Re-instantiate to clear cache
         $this->settingStore = app(SettingStore::class);
         $this->settingStore->forgetAll();
 
         $this->themeService = app(ThemeService::class);
+    }
+
+    /**
+     * Rows for a raw insert(), carrying a primary key when the application uses string ids.
+     *
+     * insert() bypasses the model on purpose here - these are fixtures, and they want no casts,
+     * no events and explicit timestamps. But it also bypasses key generation, and a UUID `id`
+     * column has no database default, so the insert fails outright on such an install.
+     * DatabaseSettingStore::prepareInsertData() solves it the same way in production.
+     */
+    protected function withKeys(array $rows): array
+    {
+        if (! BaseModel::isUsingStringId()) {
+            return $rows;
+        }
+
+        return array_map(
+            fn (array $row): array => $row + ['id' => (new BaseModel())->newUniqueId()],
+            $rows
+        );
     }
 
     protected function refreshSettings(): void
@@ -179,7 +199,7 @@ class ThemeServiceCopyOptionsAndWidgetsTest extends TestCase
         $this->refreshSettings();
 
         // Create parent theme widgets
-        Widget::query()->insert([
+        Widget::query()->insert($this->withKeys([
             [
                 'widget_id' => 'recent-posts',
                 'sidebar_id' => 'home-sidebar',
@@ -198,7 +218,7 @@ class ThemeServiceCopyOptionsAndWidgetsTest extends TestCase
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-        ]);
+        ]));
 
         // Copy widgets from parent to child theme
         $this->themeService->copyThemeWidgets('homzen-custom');
@@ -238,7 +258,7 @@ class ThemeServiceCopyOptionsAndWidgetsTest extends TestCase
         $this->refreshSettings();
 
         // Create parent and child theme widgets
-        Widget::query()->insert([
+        Widget::query()->insert($this->withKeys([
             [
                 'widget_id' => 'recent-posts',
                 'sidebar_id' => 'home-sidebar',
@@ -268,7 +288,7 @@ class ThemeServiceCopyOptionsAndWidgetsTest extends TestCase
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-        ]);
+        ]));
 
         // Copy widgets to child theme
         $this->themeService->copyThemeWidgets('homzen-custom');
@@ -391,7 +411,7 @@ class ThemeServiceCopyOptionsAndWidgetsTest extends TestCase
         $this->refreshSettings();
 
         // Create locale-specific widgets
-        Widget::query()->insert([
+        Widget::query()->insert($this->withKeys([
             [
                 'widget_id' => 'about-widget',
                 'sidebar_id' => 'footer',
@@ -419,7 +439,7 @@ class ThemeServiceCopyOptionsAndWidgetsTest extends TestCase
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-        ]);
+        ]));
 
         // Copy widgets to child theme
         $this->themeService->copyThemeWidgets('homzen-custom');
@@ -476,7 +496,7 @@ class ThemeServiceCopyOptionsAndWidgetsTest extends TestCase
         Setting::save();
         $this->refreshSettings();
 
-        Widget::query()->insert([
+        Widget::query()->insert($this->withKeys([
             [
                 'widget_id' => 'recent-posts',
                 'sidebar_id' => 'home-sidebar',
@@ -486,7 +506,7 @@ class ThemeServiceCopyOptionsAndWidgetsTest extends TestCase
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-        ]);
+        ]));
 
         $widgetsCountBefore = Widget::query()->count();
 

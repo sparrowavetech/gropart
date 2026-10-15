@@ -11,6 +11,7 @@ use Botble\Setting\Http\Requests\LicenseSettingRequest;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -21,6 +22,23 @@ class LicenseController extends BaseController
     public function index(): View|RedirectResponse
     {
         return view('packages/installer::license');
+    }
+
+    /**
+     * Where the wizard goes after the licence screen. Stock: the closing screen.
+     *
+     * The steps before this are a chain of hardcoded redirects with no extension
+     * point, so a product that adds install steps of its own (Ecommerce SaaS
+     * inserts five: control-plane domain, operator account, automated setup,
+     * queue & cron, first store) hooks `cms_installer_step_after_license` and
+     * returns its first step's route name. A route that does not exist falls back
+     * to the closing screen instead of 404ing the wizard.
+     */
+    protected function nextStepAfterLicense(): string
+    {
+        $route = (string) apply_filters('cms_installer_step_after_license', 'installers.final');
+
+        return Route::has($route) ? $route : 'installers.final';
     }
 
     public function store(LicenseSettingRequest $request, Core $core): RedirectResponse
@@ -42,9 +60,9 @@ class LicenseController extends BaseController
 
             Setting::forceSet('licensed_to', $buyer)->save();
 
-            $finalUrl = URL::temporarySignedRoute('installers.final', Carbon::now()->addMinutes(30));
+            $nextUrl = URL::temporarySignedRoute($this->nextStepAfterLicense(), Carbon::now()->addMinutes(30));
 
-            return redirect()->to($finalUrl);
+            return redirect()->to($nextUrl);
         } catch (LicenseInvalidException|LicenseIsAlreadyActivatedException $exception) {
             throw ValidationException::withMessages([
                 'purchase_code' => [$exception->getMessage()],
@@ -62,6 +80,6 @@ class LicenseController extends BaseController
     {
         Core::make()->skipLicenseReminder();
 
-        return redirect()->to(URL::temporarySignedRoute('installers.final', Carbon::now()->addMinutes(30)));
+        return redirect()->to(URL::temporarySignedRoute($this->nextStepAfterLicense(), Carbon::now()->addMinutes(30)));
     }
 }

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static \Illuminate\Support\Collection|\Illuminate\Database\Eloquent\Model|array|bool processOrder(array|string|null $orderIds, string|null $chargeId = null)
+ * @method static array validateStock(array $cartItems)
  * @method static array validateAndReserveStock(array $cartItems)
  * @method static void restoreReservedStock(array $reservedItems)
  * @method static bool decreaseProductQuantity(\Botble\Ecommerce\Models\Order $order)
@@ -19,7 +20,10 @@ use Illuminate\Support\Facades\Facade;
  * @method static array|string|null getShippingMethod(string $method, array|string|null $option = null)
  * @method static string|null processHistoryVariables(\Botble\Ecommerce\Models\OrderHistory|\Botble\Ecommerce\Models\ShipmentHistory $history)
  * @method static array setOrderSessionData(string|null $token, array|string $data)
+ * @method static string getCheckoutSuccessMessage(array $paymentData)
  * @method static string getOrderSessionToken()
+ * @method static bool isCheckoutTokenSpent(string|null $token)
+ * @method static bool discardSpentCheckoutSession()
  * @method static array getOrderSessionData(string|null $token = null)
  * @method static array cleanData(array $data)
  * @method static array mergeOrderSessionData(string|null $token, array|string $data)

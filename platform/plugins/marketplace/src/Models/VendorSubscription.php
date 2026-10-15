@@ -155,7 +155,7 @@ class VendorSubscription extends BaseModel
      * Read a quota or feature flag from the snapshot taken at purchase time,
      * falling back to the plan defaults when the snapshot predates the option.
      */
-    public function option(string $key): int
+    public function option(string $key): int|float
     {
         $options = array_merge(
             SubscriptionPlan::defaultOptions(),
@@ -166,9 +166,15 @@ class VendorSubscription extends BaseModel
             throw new \InvalidArgumentException(sprintf('Unknown subscription plan option [%s].', $key));
         }
 
-        return (int) $options[$key];
+        // Snapshots written before an option existed fall back to the plan default above,
+        // so a pre-upgrade subscription reads commission_* as -1 (inherit the global rate).
+        return SubscriptionPlan::castOptionValue($key, $options[$key]);
     }
 
+    /**
+     * Quota/flag helpers only. Never call these with a commission_* key: -1 there means
+     * "inherit the global rate", not "unlimited", and 0 is a real rate, not "not allowed".
+     */
     public function allows(string $key): bool
     {
         return $this->option($key) > 0;

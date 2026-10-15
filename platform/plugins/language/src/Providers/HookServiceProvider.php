@@ -71,6 +71,7 @@ class HookServiceProvider extends ServiceProvider
         add_filter('setting_email_template_meta_boxes', [$this, 'settingEmailTemplateMetaBoxes'], 55, 2);
         add_filter('payment_method_after_settings', [$this, 'settingEmailTemplateMetaBoxes'], 55, 2);
         add_filter('setting_email_template_path', [$this, 'settingEmailTemplatePath'], 55, 3);
+        add_filter('email_template_preview_locale', [$this, 'emailTemplatePreviewLocale'], 55);
         add_filter('setting_email_subject_key', [$this, 'settingEmailSubjectKey'], 55);
         add_filter('payment_setting_key', [$this, 'paymentSettingKey'], 55);
         add_filter('cms_email_settings_validation_rules', function (array $rules): array {
@@ -208,6 +209,17 @@ class HookServiceProvider extends ServiceProvider
         }
 
         return $path;
+    }
+
+    /**
+     * Render the email template preview in the language being edited (?ref_lang=...).
+     * Only known languages are accepted - unknown values keep the given locale.
+     */
+    public function emailTemplatePreviewLocale(?string $locale): ?string
+    {
+        $refLang = Language::getRefLang();
+
+        return ($refLang ? Language::getLocaleByLocaleCode($refLang) : null) ?: $locale;
     }
 
     public function paymentSettingKey(string $key): string

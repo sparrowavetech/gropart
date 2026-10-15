@@ -25,7 +25,7 @@ class RequireActiveVendorSubscription
 
     public function handle(Request $request, Closure $next, ?string $option = null)
     {
-        if (! MarketplaceHelper::isSubscriptionMode()) {
+        if (! MarketplaceHelper::hasVendorSubscriptions()) {
             return $next($request);
         }
 

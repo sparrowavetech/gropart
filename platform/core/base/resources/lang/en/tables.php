@@ -64,6 +64,8 @@ return [
     'submit' => 'Submit',
     'please_select_record' => 'Please select at least one record to perform this action!',
     'checkbox' => 'Checkbox',
+    'select_all_rows' => 'Select all rows',
+    'select_row' => 'Select row #:id',
     'toggle_columns' => 'Toggle Columns',
     'created_by' => 'Created By',
 ];

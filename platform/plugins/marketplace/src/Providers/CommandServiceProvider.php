@@ -23,7 +23,7 @@ class CommandServiceProvider extends ServiceProvider
             $schedule
                 ->command(ExpireVendorSubscriptionsCommand::class)
                 ->dailyAt('01:00')
-                ->when(fn () => MarketplaceHelper::isSubscriptionMode());
+                ->when(fn () => MarketplaceHelper::hasVendorSubscriptions());
         });
     }
 }

@@ -121,6 +121,22 @@ class Invoice extends BaseModel
             ->all();
     }
 
+    /**
+     * The invoice status only moves to completed/canceled when the order does, so it never
+     * reflects a failed, refunded or fraudulent payment. Fall back to the payment status
+     * whenever a payment record exists so customers see the real payment state.
+     */
+    protected function paymentStatusHtml(): Attribute
+    {
+        return Attribute::get(function () {
+            if (is_plugin_active('payment') && $this->payment->id) {
+                return $this->payment->status->toHtml();
+            }
+
+            return $this->status->toHtml();
+        });
+    }
+
     protected function taxClassesName(): Attribute
     {
         return Attribute::get(function () {

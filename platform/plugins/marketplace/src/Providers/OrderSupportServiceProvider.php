@@ -17,7 +17,6 @@ use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\OrderHistory;
-use Botble\Ecommerce\Models\OrderReturn;
 use Botble\Ecommerce\Models\Shipment;
 use Botble\Ecommerce\Services\HandleApplyCouponService;
 use Botble\Ecommerce\Services\HandleApplyPromotionsService;
@@ -29,6 +28,8 @@ use Botble\Marketplace\Models\CategoryCommission;
 use Botble\Marketplace\Models\Revenue;
 use Botble\Marketplace\Models\Store;
 use Botble\Marketplace\Models\VendorInfo;
+use Botble\Marketplace\Services\CommissionFeeResolver;
+use Botble\Payment\Enums\PaymentFeeTypeEnum;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Models\Payment;
 use Botble\Payment\Supports\PaymentFeeHelper;
@@ -67,7 +68,6 @@ class OrderSupportServiceProvider extends ServiceProvider
             add_filter(PROCESS_CHECKOUT_RULES_REQUEST_ECOMMERCE, [$this, 'processCheckoutRulesRequest'], 100);
             add_filter(PROCESS_CHECKOUT_MESSAGES_REQUEST_ECOMMERCE, [$this, 'processCheckoutMessagesRequest'], 100);
             add_action(ACTION_AFTER_ORDER_STATUS_COMPLETED_ECOMMERCE, [$this, 'afterOrderStatusCompleted'], 12);
-            add_filter(ACTION_AFTER_ORDER_RETURN_STATUS_COMPLETED, [$this, 'afterReturnOrderCompleted'], 12);
             add_filter('ecommerce_order_email_variables', [$this, 'addMoreOrderEmailVariables'], 12, 2);
             add_filter('ecommerce_checkout_discounts_query', [$this, 'modifyCheckoutDiscountsQuery'], 1, 2);
         });
@@ -280,7 +280,7 @@ class OrderSupportServiceProvider extends ServiceProvider
 
             return $response
                 ->setNextUrl(route('public.checkout.success', $token))
-                ->setMessage(trans('plugins/ecommerce::order.checkout_successfully'));
+                ->setMessage(trans('plugins/ecommerce::order.order_placed_successfully'));
         }
 
         $totalAmount = format_price($orders->pluck('amount')->sum(), null, true);
@@ -308,7 +308,7 @@ class OrderSupportServiceProvider extends ServiceProvider
 
         return $response
             ->setNextUrl(PaymentHelper::getRedirectURL($token))
-            ->setMessage(trans('plugins/ecommerce::order.checkout_successfully'));
+            ->setMessage(OrderHelper::getCheckoutSuccessMessage($paymentData));
     }
 
     public function processApplyCouponCode(array $result, Request $request): array
@@ -710,26 +710,7 @@ class OrderSupportServiceProvider extends ServiceProvider
 
         $paymentFee = 0;
         if ($paymentMethod && is_plugin_active('payment')) {
-            $paymentFee = PaymentFeeHelper::calculateFee($paymentMethod, $orderAmount);
-
-            // calculateFee() returns (percentage-of-amount) + fee_fixed. This method runs once
-            // per vendor sub-order in a multi-vendor cart, but the buyer only makes a single
-            // gateway transaction, so the flat fee_fixed component must be charged once per
-            // order — not once per vendor. The percentage component is safe to repeat here
-            // (sum of per-vendor percentages of the true total = percentage fee of the sum).
-            // Apply-once: only the first store's sub-order carries fee_fixed; subtract it back
-            // out of every subsequent store so per-vendor totals still sum to the true order
-            // total.
-            //
-            // The clamp below must mirror calculateFee()'s own max(0, ...) on fee_fixed. Reading
-            // the raw setting instead would let a negative fee_fixed - which calculateFee has
-            // already discarded - be subtracted as a negative, inflating every vendor after the
-            // first. The outer max(0, ...) is belt-and-braces: once fee_fixed is clamped,
-            // $paymentFee - $feeFixed is the base fee and cannot go negative.
-            if (! $isFirstStore) {
-                $feeFixed = max(0, (float) get_payment_setting('fee_fixed', $paymentMethod, 0));
-                $paymentFee = max(0, $paymentFee - $feeFixed);
-            }
+            $paymentFee = $this->calculateStorePaymentFee($paymentMethod, $orderAmount, $isFirstStore);
 
             $orderAmount += $paymentFee;
         }
@@ -770,8 +751,15 @@ class OrderSupportServiceProvider extends ServiceProvider
         ]);
 
         if ($order) {
-            $order->fill($data);
-            $order->save();
+            // Mirrors OrderHelper::createOrUpdateIncompleteOrder(): a locked order must never
+            // be rebuilt from the live cart. $data carries status = PENDING, so without this a
+            // cancelled vendor sub-order would be quietly revived and its restocked products
+            // sold again, and a paid one would have its total rewritten away from the amount
+            // the gateway captured.
+            if (! OrderHelper::isOrderLocked($order)) {
+                $order->fill($data);
+                $order->save();
+            }
         } else {
             $order = Order::query()->create($data);
         }
@@ -865,7 +853,15 @@ class OrderSupportServiceProvider extends ServiceProvider
                 $origin['country'] = EcommerceHelper::getFirstCountryId();
             }
 
-            return EcommerceHelper::getShippingData($products['products'], $session, $origin, $orderTotal, $paymentMethod);
+            $data = EcommerceHelper::getShippingData($products['products'], $session, $origin, $orderTotal, $paymentMethod);
+
+            // Expose the vendor store id so shipping drivers can resolve provider-specific
+            // location IDs per store. It belongs in `extra` (alongside order_token), not in
+            // `origin`: origin is validated and cached as the carrier's from-address, so an
+            // extra key there would distort address validation and its cache key.
+            Arr::set($data, 'extra.store_id', $products['store']->getKey());
+
+            return $data;
         }
 
         $origin = EcommerceHelper::getOriginAddress();
@@ -1107,8 +1103,17 @@ class OrderSupportServiceProvider extends ServiceProvider
                 $couponDiscountAmount = Arr::get($vendorSessionData, 'coupon_discount_amount', 0);
             }
 
-            $orderTotal = $rawTotal - $promotionDiscountAmount - $couponDiscountAmount;
-            $orderTotal = max($orderTotal, 0);
+            $orderTotal = max($rawTotal - $promotionDiscountAmount - $couponDiscountAmount, 0);
+
+            // Per-vendor slice. `store_id` tells listeners this is one vendor's share of the
+            // cart, not the whole cart, so whole-order adjustments are not applied N times.
+            $orderTotal = max((float) apply_filters('ecommerce_checkout_order_total', $orderTotal, [
+                'raw_total' => $rawTotal,
+                'promotion_discount_amount' => $promotionDiscountAmount,
+                'coupon_discount_amount' => $couponDiscountAmount,
+                'token' => $token,
+                'store_id' => $storeId,
+            ]), 0);
             $isAvailableShipping = EcommerceHelper::isAvailableShipping($productsByStore['products']);
 
             if (MarketplaceHelper::isChargeShippingPerVendor()) {
@@ -1378,11 +1383,14 @@ class OrderSupportServiceProvider extends ServiceProvider
 
     public function processGetCheckoutRecover(string $token, Request $request)
     {
+        // Same as the core handler: a recovery link from an abandoned-cart email must not
+        // resume an order that was cancelled and restocked in the meantime.
         $orders = Order::query()
             ->where([
                 'token' => $token,
                 'is_finished' => 0,
             ])
+            ->where('status', '!=', OrderStatusEnum::CANCELED)
             ->with(['address', 'products'])
             ->get();
 
@@ -1676,24 +1684,27 @@ class OrderSupportServiceProvider extends ServiceProvider
 
             if ($vendorInfo->id) {
                 $orderAmountWithoutShippingFee = $order->amount - $order->shipping_amount - ($order->shipping_tax_amount ?? 0) - $order->tax_amount - $order->payment_fee;
-                if (MarketplaceHelper::isSubscriptionMode()) {
-                    // Subscription mode is mutually exclusive with commission: the admin earns
-                    // from subscription plans instead, so the vendor keeps 100% of every order.
+                if (! MarketplaceHelper::shouldChargeCommission()) {
+                    // Subscription mode: the admin earns from subscription plans instead,
+                    // so the vendor keeps 100% of every order.
                     $fee = 0;
                 } else {
+                    // In hybrid the vendor's plan may override either half of the global rate.
+                    $rate = app(CommissionFeeResolver::class)->forVendor($customer);
+
                     if (! MarketplaceHelper::isCommissionCategoryFeeBasedEnabled()) {
-                        $feePercentage = MarketplaceHelper::getSetting('fee_per_order', 0);
-                        $fee = $orderAmountWithoutShippingFee * ($feePercentage / 100);
+                        $fee = $orderAmountWithoutShippingFee * ($rate->percentage / 100);
                     } else {
-                        $fee = $this->calculatorCommissionFeeByProduct($order->products);
+                        // Per-category rates still win where the admin configured one; the plan
+                        // override only replaces the default applied to everything else.
+                        $fee = $this->calculatorCommissionFeeByProduct($order->products, $rate->percentage);
                     }
 
                     // Add the fixed commission fee, charged once per vendor sub-order.
                     // Each order in the marketplace already belongs to a single store, so this
                     // applies per vendor. Covers the flat part of payment gateway fees (e.g. Stripe/PayPal €0.25).
-                    $fixedFee = (float) MarketplaceHelper::getSetting('fee_per_order_fixed', 0);
-                    if ($fixedFee > 0) {
-                        $fee += $fixedFee;
+                    if ($rate->fixed > 0) {
+                        $fee += $rate->fixed;
                     }
                 }
 
@@ -1756,9 +1767,16 @@ class OrderSupportServiceProvider extends ServiceProvider
         return $order;
     }
 
-    protected function calculatorCommissionFeeByProduct(Collection $orderProducts): float|int
-    {
-        if (MarketplaceHelper::isSubscriptionMode()) {
+    /**
+     * @param  float|null  $defaultPercentage  Rate applied to products whose categories have no
+     *                                         configured commission. Null keeps the global
+     *                                         setting, which is what commission mode passes.
+     */
+    protected function calculatorCommissionFeeByProduct(
+        Collection $orderProducts,
+        ?float $defaultPercentage = null
+    ): float|int {
+        if (! MarketplaceHelper::shouldChargeCommission()) {
             return 0;
         }
 
@@ -1783,7 +1801,8 @@ class OrderSupportServiceProvider extends ServiceProvider
             ->groupBy('product_category_id')
             ->map(fn ($group) => $group->sortByDesc('commission_percentage')->first());
 
-        $defaultCommissionFeePercentage = MarketplaceHelper::getSetting('fee_per_order', 0);
+        $defaultCommissionFeePercentage = $defaultPercentage
+            ?? MarketplaceHelper::getSetting('fee_per_order', 0);
 
         $totalFee = 0;
         foreach ($orderProducts as $orderProduct) {
@@ -1817,61 +1836,37 @@ class OrderSupportServiceProvider extends ServiceProvider
         return $totalFee;
     }
 
-    public function afterReturnOrderCompleted(OrderReturn $orderReturn): void
+    /**
+     * Payment fee for one vendor sub-order of a (possibly multi-vendor) checkout.
+     *
+     * calculateFee() returns (percentage-of-amount) + fee_fixed. This runs once per vendor
+     * sub-order, but the buyer only makes a single gateway transaction, so any flat component
+     * must be charged once per checkout, not once per vendor. The percentage component is safe
+     * to repeat (sum of per-vendor percentages of the true total = percentage fee of the sum).
+     * Apply-once: only the first store's sub-order carries the flat part; every subsequent
+     * store gets it subtracted back out so per-vendor totals still sum to the true total.
+     *
+     * - Percentage type: the flat part is fee_fixed ("2.9% + $0.30"). The clamp mirrors
+     *   calculateFee()'s own max(0, ...) so a negative fee_fixed it already discarded is not
+     *   subtracted as a negative (which would inflate every vendor after the first).
+     * - Fixed type (e.g. a flat COD fee): the whole fee ignores the order amount, so it is all
+     *   flat component. The buyer sees it once at checkout and pays it once, on the first store.
+     */
+    public function calculateStorePaymentFee(string $paymentMethod, float $orderAmount, bool $isFirstStore): float
     {
-        $order = $orderReturn->order;
-        if ($order && $order->store?->id && $order->store->customer->id) {
-            $customer = $order->store->customer;
-            $vendorInfo = $customer->vendorInfo;
-            if (! $vendorInfo->id) {
-                $vendorInfo = VendorInfo::query()
-                    ->create([
-                        'customer_id' => $customer->id,
-                    ]);
-            }
+        $paymentFee = PaymentFeeHelper::calculateFee($paymentMethod, $orderAmount);
 
-            if ($vendorInfo->id) {
-                $refundAmount = $orderReturn->items->sum('refund_amount');
-                if ($order->payment_fee > 0) {
-                    $refundAmount = $refundAmount - $order->payment_fee;
-                }
-                if (MarketplaceHelper::isSubscriptionMode()) {
-                    // No commission was taken on the original order, so none is refunded here.
-                    $fee = 0;
-                } elseif (! MarketplaceHelper::isCommissionCategoryFeeBasedEnabled()) {
-                    $feePercentage = MarketplaceHelper::getSetting('fee_per_order', 0);
-                    $fee = $refundAmount * ($feePercentage / 100);
-                } else {
-                    $products = $orderReturn->items->map(fn ($item) => $item->product);
-                    $fee = $this->calculatorCommissionFeeByProduct($products);
-                }
-                $fee = $fee * -1;
-                $refundAmount = $refundAmount * -1;
-                $amount = $refundAmount - $fee;
-                $currentBalance = $customer->balance;
-
-                $data = [
-                    'sub_amount' => $refundAmount,
-                    'fee' => $fee,
-                    'amount' => $amount,
-                    'currency' => get_application_currency()->title,
-                    'current_balance' => $currentBalance,
-                    'customer_id' => $customer->getKey(),
-                    'order_id' => $order->id,
-                    'type' => RevenueTypeEnum::ORDER_RETURN,
-                    'description' => trans('plugins/marketplace::order.return.description', [
-                        'order' => $order->code,
-                    ]),
-                ];
-
-                Revenue::query()->create($data);
-
-                $vendorInfo->total_revenue += $amount;
-                $vendorInfo->balance += $amount;
-                $vendorInfo->total_fee += $fee;
-                $vendorInfo->save();
-            }
+        if ($isFirstStore) {
+            return $paymentFee;
         }
+
+        if (get_payment_setting('fee_type', $paymentMethod, PaymentFeeTypeEnum::FIXED) !== PaymentFeeTypeEnum::PERCENTAGE) {
+            return 0;
+        }
+
+        $feeFixed = max(0, (float) get_payment_setting('fee_fixed', $paymentMethod, 0));
+
+        return max(0, $paymentFee - $feeFixed);
     }
 
     public function addMoreOrderEmailVariables(array $variables, Order $order): array

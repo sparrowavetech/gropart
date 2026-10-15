@@ -142,7 +142,7 @@ return [
         'admin_reply_our_response' => 'Mūsų atsakymas:',
         'admin_reply_additional_questions' => 'Jei turite papildomų klausimų, nedvejodami atsakykite į šį el. laišką arba susisiekite su mumis dar kartą.',
         'admin_reply_best_regards' => 'Pagarbiai,',
-        'admin_reply_team' => '{{ site_title }} komanda',
+        'admin_reply_team' => ':site_title komanda',
 
         // Notice email template
         'notice_title' => 'Nauja kontaktinė žinutė',

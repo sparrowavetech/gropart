@@ -104,7 +104,8 @@ class SubscriptionPlanController extends BaseController
 
         foreach (SubscriptionPlan::defaultOptions() as $key => $default) {
             $fallback = in_array($key, $booleans, true) ? 0 : $default;
-            $options[$key] = (int) ($submitted[$key] ?? $fallback);
+            // Per-key cast: commission_* are floats, everything else stays integer.
+            $options[$key] = SubscriptionPlan::castOptionValue($key, $submitted[$key] ?? $fallback);
         }
 
         return $options;

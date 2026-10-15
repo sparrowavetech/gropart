@@ -13,7 +13,8 @@
 ])
 
 @php
-    $id ??= $name ?? Str::random(8);
+    // Array-style names (e.g. "items[]") repeat on a page, so they can't double as a unique id.
+    $id ??= $name && ! str_ends_with($name, '[]') ? $name : Str::random(8);
 
     $classes = Arr::toCssClasses([
         'form-select',

@@ -31,8 +31,10 @@ class ImageDimensionsInjector
      */
     public static function inject(string $tag, string $attrs): string
     {
+        $attributes = static::attributes($attrs);
+
         // Skip if width/height already present.
-        if (preg_match('/\s(width|height)\s*=/i', $attrs)) {
+        if (array_key_exists('width', $attributes) || array_key_exists('height', $attributes)) {
             return $tag;
         }
 
@@ -41,11 +43,9 @@ class ImageDimensionsInjector
         // 600x400 placeholder.png) and moves the real URL to `data-src`; reading
         // `src` would reserve the placeholder's aspect ratio and shift the layout
         // when the real image is swapped in.
-        if (preg_match('/\sdata-src\s*=\s*"([^"]+)"/i', $attrs, $lazyMatch)) {
-            $imageUrl = $lazyMatch[1];
-        } elseif (preg_match('/\ssrc\s*=\s*"([^"]+)"/i', $attrs, $srcMatch)) {
-            $imageUrl = $srcMatch[1];
-        } else {
+        $imageUrl = static::firstNonEmpty($attributes, ['data-src', 'src']);
+
+        if ($imageUrl === null) {
             return $tag;
         }
 
@@ -59,6 +59,77 @@ class ImageDimensionsInjector
         //   <img src="icon.png" width="24" height="24">  (on a 256x256 source file)
         // is never touched by the reset and renders at its intentional 24x24 size.
         return sprintf('<img width="%d" height="%d" data-dims-auto%s>', $dims[0], $dims[1], $attrs);
+    }
+
+    /**
+     * Parse the raw attribute string of an <img> tag into a lowercased name => value map.
+     *
+     * Values are read quote-insensitively. The optimize package's RemoveQuotes middleware
+     * (Settings -> Optimize page speed) rewrites `src="/storage/a.png"` to
+     * `src=/storage/a.png`, and it runs inside the middleware pipeline - so by the time
+     * the catch-all injector post-processes the response on RequestHandled, those values
+     * are already bare. It unquotes a fixed list rather than the whole tag, but that list
+     * is `src`, `width`, `height`, `name`, `charset`, `align`, `border`, `crossorigin`
+     * and `type` - which covers every attribute this class reads. Matching only the
+     * quoted form made this whole layer silently do nothing on such sites: raw <img> tags
+     * in blade templates kept shipping without width/height and kept costing CLS, while
+     * images rendered through RvMedia::image() (injected earlier, during view compilation)
+     * still had theirs - which made the failure look like a template bug.
+     *
+     * The scan is sequential rather than a per-attribute search precisely BECAUSE values
+     * are unquoted here: a bare `/\ssrc\s*=/` search also fires on the ` src=` sitting
+     * inside `alt="a src=b"` and returns "b". Matching name/value as one unit consumes a
+     * quoted value whole, so text inside it can never be mistaken for an attribute.
+     */
+    protected static function attributes(string $attrs): array
+    {
+        preg_match_all(
+            '/([^\s=\/>]+)(?:\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s"\'=<>`]*)))?/',
+            $attrs,
+            $matches,
+            PREG_SET_ORDER
+        );
+
+        $attributes = [];
+
+        foreach ($matches as $match) {
+            $name = strtolower($match[1]);
+
+            // First occurrence wins, which is how browsers resolve a duplicated attribute.
+            if ($name === '' || array_key_exists($name, $attributes)) {
+                continue;
+            }
+
+            $value = '';
+
+            // Exactly one of the three alternatives can be non-empty; unmatched trailing
+            // groups are absent from the set rather than empty, hence the `??`.
+            foreach ([2, 3, 4] as $group) {
+                if (($match[$group] ?? '') !== '') {
+                    $value = $match[$group];
+
+                    break;
+                }
+            }
+
+            $attributes[$name] = $value;
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * First of $names present with a non-empty value, or null.
+     */
+    protected static function firstNonEmpty(array $attributes, array $names): ?string
+    {
+        foreach ($names as $name) {
+            if (($attributes[$name] ?? '') !== '') {
+                return $attributes[$name];
+            }
+        }
+
+        return null;
     }
 
     /**

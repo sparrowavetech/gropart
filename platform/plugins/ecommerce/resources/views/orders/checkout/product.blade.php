@@ -26,25 +26,37 @@
         @endif
 
         @if (get_ecommerce_setting('checkout_product_quantity_editable', true))
-            <div
-                class="ec-checkout-quantity"
-                data-url="{{ route('public.cart.update') }}"
-                data-row-id="{{ $cartItem->rowId }}"
-            >
-                <button type="button" class="ec-checkout-quantity-control ec-checkout-quantity-minus" data-bb-toggle="decrease-qty">
-                    <x-core::icon name="ti ti-minus" />
-                </button>
-                <input
-                    type="number"
-                    name="items[{{ $key }}][values][qty]"
-                    value="{{ $cartItem->qty }}"
-                    min="1"
-                    max="{{ $product->with_storehouse_management ? $product->quantity : 1000 }}"
-                    data-bb-toggle="update-cart"
-                    readonly
-                />
-                <button type="button" class="ec-checkout-quantity-control ec-checkout-quantity-plus" data-bb-toggle="increase-qty">
-                    <x-core::icon name="ti ti-plus" />
+            <div class="ec-checkout-item-actions">
+                <div
+                    class="ec-checkout-quantity"
+                    data-url="{{ route('public.cart.update') }}"
+                    data-row-id="{{ $cartItem->rowId }}"
+                >
+                    <button type="button" class="ec-checkout-quantity-control ec-checkout-quantity-minus" data-bb-toggle="decrease-qty">
+                        <x-core::icon name="ti ti-minus" />
+                    </button>
+                    <input
+                        type="number"
+                        name="items[{{ $key }}][values][qty]"
+                        value="{{ $cartItem->qty }}"
+                        min="1"
+                        max="{{ $product->with_storehouse_management ? $product->quantity : 1000 }}"
+                        data-bb-toggle="update-cart"
+                        readonly
+                    />
+                    <button type="button" class="ec-checkout-quantity-control ec-checkout-quantity-plus" data-bb-toggle="increase-qty">
+                        <x-core::icon name="ti ti-plus" />
+                    </button>
+                </div>
+                <button
+                    type="button"
+                    class="ec-checkout-remove-item"
+                    data-bb-toggle="remove-checkout-item"
+                    data-url="{{ route('public.cart.remove', $cartItem->rowId) }}"
+                    title="{{ __('Remove') }}"
+                >
+                    <x-core::icon name="ti ti-trash" />
+                    <span>{{ __('Remove') }}</span>
                 </button>
             </div>
         @endif

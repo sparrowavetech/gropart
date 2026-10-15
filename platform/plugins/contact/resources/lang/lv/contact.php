@@ -142,7 +142,7 @@ return [
         'admin_reply_our_response' => 'Mūsu atbilde:',
         'admin_reply_additional_questions' => 'Ja jums ir papildu jautājumi, lūdzu, atbildiet uz šo e-pastu vai sazinieties ar mums vēlreiz.',
         'admin_reply_best_regards' => 'Ar cieņu,',
-        'admin_reply_team' => '{{ site_title }} komanda',
+        'admin_reply_team' => ':site_title komanda',
 
         // Notice email template
         'notice_title' => 'Jauns kontakta ziņojums',

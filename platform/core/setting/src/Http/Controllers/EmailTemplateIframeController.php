@@ -14,6 +14,11 @@ class EmailTemplateIframeController extends BaseController
 
     public function __invoke(Request $request, string $type, string $module, string $template)
     {
+        // Render the preview in the language being edited (e.g. ?ref_lang=vi) instead of the admin UI language
+        if ($locale = apply_filters('email_template_preview_locale', null)) {
+            app()->setLocale($locale);
+        }
+
         [$inputData, $variables, $emailHandler] = $this->getData($request, $type, $module, $template);
 
         foreach ($variables as $key => $variable) {

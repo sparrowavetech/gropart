@@ -42,6 +42,7 @@ use Botble\Marketplace\Repositories\Interfaces\RevenueInterface;
 use Botble\Marketplace\Repositories\Interfaces\StoreInterface;
 use Botble\Marketplace\Repositories\Interfaces\VendorInfoInterface;
 use Botble\Marketplace\Repositories\Interfaces\WithdrawalInterface;
+use Botble\Marketplace\Services\CommissionFeeResolver;
 use Botble\Marketplace\Services\VendorSubscriptionService;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Slug\Facades\SlugHelper;
@@ -65,6 +66,7 @@ class MarketplaceServiceProvider extends ServiceProvider
         // the request, and lazily creates the default free plan. Two instances would
         // duplicate that work and make forget() meaningless.
         $this->app->scoped(VendorSubscriptionService::class);
+        $this->app->scoped(CommissionFeeResolver::class);
 
         $this->app->bind(StoreInterface::class, function () {
             return new StoreRepository(new Store());
@@ -184,7 +186,7 @@ class MarketplaceServiceProvider extends ServiceProvider
                     'permissions' => ['marketplace.reports'],
                 ])
                 ->when(
-                    MarketplaceHelper::isSubscriptionMode(),
+                    MarketplaceHelper::hasVendorSubscriptions(),
                     function (DashboardMenuSupport $dashboardMenu): void {
                         $dashboardMenu
                             ->registerItem([
@@ -240,7 +242,7 @@ class MarketplaceServiceProvider extends ServiceProvider
                     'url' => fn () => route('marketplace.vendor.products.index'),
                     'icon' => 'ti ti-package',
                 ])
-                ->when(MarketplaceHelper::isSubscriptionMode(), function (DashboardMenuSupport $dashboardMenu): void {
+                ->when(MarketplaceHelper::hasVendorSubscriptions(), function (DashboardMenuSupport $dashboardMenu): void {
                     $dashboardMenu
                         ->registerItem([
                             'id' => 'marketplace.vendor.subscriptions',

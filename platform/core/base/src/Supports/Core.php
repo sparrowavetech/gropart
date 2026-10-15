@@ -598,6 +598,13 @@ final class Core
 
         $migrator = app('migrator');
 
+        // MUST stay first. platform/core/acl's own migration ALTERs the `users`
+        // table this pass creates (drops/adds columns) rather than creating its
+        // own — it assumes `users` already exists — so swapping this after the
+        // core/package loop below breaks EVERY install, not just a tenant one:
+        // SQLSTATE 42S02 on `users` the moment ACL's migration runs. See
+        // DatabaseSettingStore::write()/delete() for the other half of this
+        // ordering's cost, and why it is fixed there instead of here.
         rescue(fn () => $migrator->run(database_path('migrations')));
 
         $paths = [

@@ -1284,7 +1284,7 @@ class EcommerceHelper
             ];
         }
 
-        return $data;
+        return apply_filters('ecommerce_shipping_data', $data, $products, $session, $origin, $orderTotal, $paymentMethod);
     }
 
     public function onlyAllowCustomersPurchasedToReview(): bool
@@ -1827,6 +1827,7 @@ class EcommerceHelper
             'billion' => __('billion'),
             'million' => __('million'),
             'is_prefix_symbol' => $currency->is_prefix_symbol,
+            'space_between_price_and_currency' => has_space_between_price_and_currency($currency),
             'symbol' => $currency->symbol,
             'title' => $currency->title,
             'decimal_separator' => ($ds = get_ecommerce_setting('decimal_separator', '.')) === 'space' ? ' ' : $ds,

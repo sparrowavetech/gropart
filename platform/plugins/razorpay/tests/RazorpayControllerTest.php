@@ -5,6 +5,7 @@ namespace Botble\Razorpay\Tests;
 use Botble\Ecommerce\Enums\OrderAddressTypeEnum;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\OrderAddress;
+use Botble\Ecommerce\Models\OrderHistory;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Models\Payment;
 use Botble\Razorpay\Http\Controllers\RazorpayController;
@@ -107,6 +108,11 @@ class RazorpayControllerTest extends TestCase
             {
                 return $this->determinePaymentStatus($paymentEntity, $orderData, $api, $chargeId);
             }
+
+            public function testGetCallbackMessage(?string $status): string
+            {
+                return $this->getCallbackMessage($status);
+            }
         };
     }
 
@@ -118,8 +124,17 @@ class RazorpayControllerTest extends TestCase
 
     // ─── Helpers ─────────────────────────────────────────────────────────
 
+    protected function requireEcommerce(): void
+    {
+        if (! class_exists(Order::class)) {
+            $this->markTestSkipped('Requires the ecommerce plugin.');
+        }
+    }
+
     protected function createOrder(array $attributes = []): Order
     {
+        $this->requireEcommerce();
+
         return Order::query()->create(array_merge([
             'amount' => 1000,
             'sub_total' => 1000,
@@ -203,6 +218,8 @@ class RazorpayControllerTest extends TestCase
 
     public function test_resolve_order_id_from_payment_notes_single(): void
     {
+        $this->requireEcommerce();
+
         $paymentData = (object) ['notes' => (object) ['order_id' => '7']];
         $request = Request::create('/', 'POST');
 
@@ -211,6 +228,8 @@ class RazorpayControllerTest extends TestCase
 
     public function test_resolve_order_id_from_payment_notes_csv(): void
     {
+        $this->requireEcommerce();
+
         $paymentData = (object) ['notes' => (object) ['order_id' => '7,8,9']];
         $request = Request::create('/', 'POST');
 
@@ -297,6 +316,8 @@ class RazorpayControllerTest extends TestCase
 
     public function test_webhook_resolve_from_notes_order_id_single(): void
     {
+        $this->requireEcommerce();
+
         $result = $this->controller->testResolveOrderIdFromWebhook(
             ['notes' => ['order_id' => '15']],
             ['receipt' => 'nonexistent']
@@ -307,6 +328,8 @@ class RazorpayControllerTest extends TestCase
 
     public function test_webhook_resolve_from_notes_order_id_csv(): void
     {
+        $this->requireEcommerce();
+
         $result = $this->controller->testResolveOrderIdFromWebhook(
             ['notes' => ['order_id' => '15,16']],
             ['receipt' => 'nonexistent']
@@ -561,6 +584,152 @@ class RazorpayControllerTest extends TestCase
         $this->assertEquals($order->id, $payment->order_id);
         $this->assertEquals(1370, $payment->amount);
         $this->assertEquals(PaymentStatusEnum::COMPLETED, $payment->status);
+    }
+
+    public function test_save_records_a_second_charge_on_a_paid_order_as_its_own_payment(): void
+    {
+        // The buyer paid the order once, then paid again on the same checkout. The dedup
+        // lookup matches the first (completed) row by order_id, but overwriting it would
+        // erase the first capture and leave the order looking underpaid.
+        $order = $this->createOrder(['amount' => 2410]);
+        $this->createPayment([
+            'charge_id' => $this->chargeId('first_capture'),
+            'amount' => 2410,
+            'status' => PaymentStatusEnum::COMPLETED,
+            'order_id' => $order->id,
+        ]);
+
+        $this->controller->testSaveOrUpdatePayment(
+            $this->chargeId('second_capture'), [$order->id], 1100, 'INR', PaymentStatusEnum::COMPLETED
+        );
+
+        $this->assertEquals(2, Payment::query()->where('order_id', $order->id)->count());
+
+        $first = Payment::query()->where('charge_id', $this->chargeId('first_capture'))->first();
+        $this->assertNotNull($first);
+        $this->assertEquals(2410, $first->amount);
+        $this->assertEquals(PaymentStatusEnum::COMPLETED, $first->status);
+
+        $second = Payment::query()->where('charge_id', $this->chargeId('second_capture'))->first();
+        $this->assertNotNull($second);
+        $this->assertEquals(1100, $second->amount);
+        $this->assertEquals($order->id, $second->order_id);
+
+        // Staff must see the extra money on the order page, not only in the payments list.
+        $note = OrderHistory::query()->where('order_id', $order->id)->first();
+        $this->assertNotNull($note);
+        $this->assertStringContainsString($this->chargeId('second_capture'), $note->description);
+    }
+
+    public function test_save_replaying_a_second_charge_does_not_create_duplicate_rows(): void
+    {
+        // Razorpay replays every event (authorized, captured, webhook retries, plus the
+        // browser callback), so the second charge is saved several times per payment.
+        $order = $this->createOrder(['amount' => 2410]);
+        $this->createPayment([
+            'charge_id' => $this->chargeId('first_of_two'),
+            'amount' => 2410,
+            'status' => PaymentStatusEnum::COMPLETED,
+            'order_id' => $order->id,
+        ]);
+
+        foreach (range(1, 3) as $ignored) {
+            $this->controller->testSaveOrUpdatePayment(
+                $this->chargeId('replayed'), [$order->id], 1100, 'INR', PaymentStatusEnum::COMPLETED
+            );
+        }
+
+        $this->assertEquals(1, Payment::query()->where('charge_id', $this->chargeId('replayed'))->count());
+        $this->assertEquals(2, Payment::query()->where('order_id', $order->id)->count());
+        $this->assertEquals(1, OrderHistory::query()->where('order_id', $order->id)->count());
+    }
+
+    public function test_save_ignores_a_stale_failure_from_another_attempt_on_a_paid_order(): void
+    {
+        // Razorpay issues a distinct charge id per attempt and delivers events out of order,
+        // so the failed event of attempt 1 can land after attempt 2 was captured. It must
+        // neither void the paid order nor hang a phantom FAILED row off it.
+        $order = $this->createOrder();
+        $this->createPayment([
+            'charge_id' => $this->chargeId('attempt_2_captured'),
+            'amount' => 1370,
+            'status' => PaymentStatusEnum::COMPLETED,
+            'order_id' => $order->id,
+        ]);
+
+        $this->controller->testSaveOrUpdatePayment(
+            $this->chargeId('attempt_1_failed'), [$order->id], 1370, 'INR', PaymentStatusEnum::FAILED
+        );
+
+        $this->assertEquals(0, Payment::query()->where('charge_id', $this->chargeId('attempt_1_failed'))->count());
+        $this->assertEquals(1, Payment::query()->where('order_id', $order->id)->count());
+
+        $payment = Payment::query()->where('charge_id', $this->chargeId('attempt_2_captured'))->first();
+        $this->assertEquals(PaymentStatusEnum::COMPLETED, $payment->status);
+        $this->assertEquals(1370, $payment->amount);
+    }
+
+    public function test_save_does_not_downgrade_a_captured_payment_to_pending(): void
+    {
+        // PENDING is this controller's "don't know yet" default, not a gateway verdict:
+        // processVerifiedPayment() emits it whenever the Razorpay ORDER is not yet 'paid',
+        // which is still the case right after a capture settles on the charge. The browser
+        // callback lands after the webhook already recorded COMPLETED, so without this guard
+        // a genuinely captured payment reads Pending in admin and hasCompletedPayment()
+        // stops seeing it - which also lets the auto-cancel job void the order.
+        $order = $this->createOrder();
+        $this->createPayment([
+            'charge_id' => $this->chargeId('captured_then_callback'),
+            'amount' => 285,
+            'status' => PaymentStatusEnum::COMPLETED,
+            'order_id' => $order->id,
+        ]);
+
+        $this->controller->testSaveOrUpdatePayment(
+            $this->chargeId('captured_then_callback'), [$order->id], 285, 'INR', PaymentStatusEnum::PENDING
+        );
+
+        $payment = Payment::query()->where('charge_id', $this->chargeId('captured_then_callback'))->first();
+        $this->assertEquals(PaymentStatusEnum::COMPLETED, $payment->status);
+        $this->assertEquals(285, $payment->amount);
+    }
+
+    public function test_save_still_applies_a_genuine_failure_of_the_same_charge(): void
+    {
+        // An authorized-but-never-captured payment is recorded COMPLETED. When Razorpay later
+        // reports that same charge failed, it is authoritative and must be able to undo it.
+        $order = $this->createOrder();
+        $this->createPayment([
+            'charge_id' => $this->chargeId('authorized_then_failed'),
+            'amount' => 900,
+            'status' => PaymentStatusEnum::COMPLETED,
+            'order_id' => $order->id,
+        ]);
+
+        $this->controller->testSaveOrUpdatePayment(
+            $this->chargeId('authorized_then_failed'), [$order->id], 900, 'INR', PaymentStatusEnum::FAILED
+        );
+
+        $payment = Payment::query()->where('charge_id', $this->chargeId('authorized_then_failed'))->first();
+        $this->assertEquals(PaymentStatusEnum::FAILED, $payment->status);
+    }
+
+    public function test_save_still_applies_a_refund_to_a_completed_payment(): void
+    {
+        $order = $this->createOrder();
+        $this->createPayment([
+            'charge_id' => $this->chargeId('to_refund'),
+            'amount' => 500,
+            'status' => PaymentStatusEnum::COMPLETED,
+            'order_id' => $order->id,
+        ]);
+
+        $this->controller->testSaveOrUpdatePayment(
+            $this->chargeId('to_refund'), [$order->id], 500, 'INR', PaymentStatusEnum::REFUNDED
+        );
+
+        $payment = Payment::query()->where('charge_id', $this->chargeId('to_refund'))->first();
+        $this->assertEquals(PaymentStatusEnum::REFUNDED, $payment->status);
     }
 
     public function test_backfill_fills_blank_shipping_address(): void
@@ -1166,5 +1335,23 @@ class RazorpayControllerTest extends TestCase
         ], $body);
 
         $response->assertStatus(200);
+    }
+
+    public function test_callback_message_says_paid_only_when_payment_completed(): void
+    {
+        $this->assertSame(
+            trans('plugins/payment::payment.checkout_success'),
+            $this->controller->testGetCallbackMessage(PaymentStatusEnum::COMPLETED)
+        );
+    }
+
+    public function test_callback_message_is_pending_when_payment_not_completed(): void
+    {
+        foreach ([PaymentStatusEnum::PENDING, null] as $status) {
+            $this->assertSame(
+                trans('plugins/payment::payment.payment_pending'),
+                $this->controller->testGetCallbackMessage($status)
+            );
+        }
     }
 }

@@ -142,7 +142,7 @@ return [
         'admin_reply_our_response' => 'A mi válaszunk:',
         'admin_reply_additional_questions' => 'Ha további kérdései vannak, nyugodtan válaszoljon erre az e-mailre, vagy vegye fel velünk újra a kapcsolatot.',
         'admin_reply_best_regards' => 'Üdvözlettel,',
-        'admin_reply_team' => '{{ site_title }} Csapat',
+        'admin_reply_team' => ':site_title Csapat',
 
         // Notice email template
         'notice_title' => 'Új kapcsolatfelvételi üzenet',

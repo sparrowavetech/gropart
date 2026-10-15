@@ -86,7 +86,7 @@ class HookServiceProvider extends ServiceProvider
         $this->app['events']->listen(RouteMatched::class, function (): void {
             if (defined('THEME_FRONT_HEADER')) {
                 add_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, function ($screen, $page): void {
-                    add_filter(THEME_FRONT_HEADER, function (?string $html) use ($page): string|null {
+                    add_filter(THEME_FRONT_HEADER, function (?string $html) use ($page): ?string {
                         if ($page::class != Page::class) {
                             return $html;
                         }

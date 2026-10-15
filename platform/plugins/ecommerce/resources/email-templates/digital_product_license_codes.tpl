@@ -169,7 +169,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for product in digital_product_list %}
+                            {% for product in digital_products|filter(product => product.license_code) %}
                                 <tr
                                     style="
                                         border-bottom: 1px solid #e2e8f0;
@@ -197,21 +197,26 @@
                                     {% endif %}
                                     </td>
                                     <td style="padding: 14px 12px; vertical-align: top;">
-                                        {% if product.license_code %}
-                                            <div
-                                                style="
-                                                    background-color: #f8fafc;
-                                                    border: 1px dashed #94a3b8;
-                                                    border-radius: 6px;
-                                                    padding: 10px 14px;
-                                                    font-family: 'Courier New', monospace;
-                                                    font-size: 14px;
-                                                    font-weight: 600;
-                                                    color: #1e293b;
-                                                "
-                                            >
-                                                {{ product.license_code }}
-                                            </div>
+                                        {% if product.license_codes is not empty %}
+                                            {% for code in product.license_codes %}
+                                                <div
+                                                    style="
+                                                        background-color: #f8fafc;
+                                                        border: 1px dashed #94a3b8;
+                                                        border-radius: 6px;
+                                                        padding: 10px 14px;
+                                                        font-family: 'Courier New', monospace;
+                                                        font-size: 14px;
+                                                        font-weight: 600;
+                                                        color: #1e293b;
+                                                        white-space: pre-line;
+                                                        word-break: break-word;
+                                                        {{ loop.first ? '' : 'margin-top: 8px;' }}
+                                                    "
+                                                >
+                                                    {{ code }}
+                                                </div>
+                                            {% endfor %}
                                         {% else %}
                                             <span style="color: #94a3b8;">{{ 'plugins/ecommerce::email-templates.digital_product_license_codes_na' | trans }}</span>
                                         {% endif %}

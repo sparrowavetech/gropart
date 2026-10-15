@@ -2,10 +2,10 @@
 
 namespace Botble\Ecommerce\Tables;
 
-use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Base\Facades\Assets;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
+use Botble\Ecommerce\Enums\InvoiceStatusEnum;
 use Botble\Ecommerce\Models\Invoice;
 use Botble\Ecommerce\Tables\Formatters\PriceFormatter;
 use Botble\Table\Abstracts\TableAbstract;
@@ -14,9 +14,9 @@ use Botble\Table\Actions\EditAction;
 use Botble\Table\BulkActions\DeleteBulkAction;
 use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\FormattedColumn;
 use Botble\Table\Columns\IdColumn;
 use Botble\Table\Columns\LinkableColumn;
-use Botble\Table\Columns\StatusColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -66,7 +66,9 @@ class InvoiceTable extends TableAbstract
                 'created_at',
                 'updated_at',
                 'status',
-            ]);
+                'payment_id',
+            ])
+            ->with('payment');
 
         return $this->applyScopes($query);
     }
@@ -89,7 +91,13 @@ class InvoiceTable extends TableAbstract
                 ->title(trans('plugins/ecommerce::invoice.table.amount'))
                 ->alignStart(),
             CreatedAtColumn::make(),
-            StatusColumn::make(),
+            FormattedColumn::make('status')
+                ->title(trans('core/base::tables.status'))
+                ->alignCenter()
+                ->width(100)
+                ->renderUsing(
+                    fn (FormattedColumn $column) => (string) $column->getItem()->payment_status_html
+                ),
         ];
     }
 
@@ -127,8 +135,8 @@ class InvoiceTable extends TableAbstract
             'status' => [
                 'title' => trans('core/base::tables.status'),
                 'type' => 'select',
-                'choices' => BaseStatusEnum::labels(),
-                'validate' => 'required|in:' . implode(',', BaseStatusEnum::values()),
+                'choices' => InvoiceStatusEnum::labels(),
+                'validate' => 'required|in:' . implode(',', InvoiceStatusEnum::values()),
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),

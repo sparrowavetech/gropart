@@ -329,6 +329,8 @@
                 if (itiContainer) {
                     const flagContainer = itiContainer.querySelector('.iti__flag-container');
                     if (flagContainer) {
+                        let suppressCompatibilityClick = false;
+
                         flagContainer.addEventListener('pointerdown', function(e) {
                             if (e.pointerType === 'mouse') {
                                 return;
@@ -341,12 +343,35 @@
                                 e.preventDefault();
                             }
                             e.stopPropagation();
+                            /*
+                             * Only take the gesture over when this tap is going to OPEN the list.
+                             * When it is already open, the browser's own click must be left alone
+                             * so the tap still closes it.
+                             */
+                            suppressCompatibilityClick = selectedFlag.getAttribute('aria-expanded') !== 'true';
                             setTimeout(function() {
                                 if (selectedFlag.getAttribute('aria-expanded') === 'true') {
                                     return;
                                 }
                                 selectedFlag.click();
                             }, 50);
+                        }, { passive: false });
+
+                        /*
+                         * The handler above already opens the list itself, so the click the browser
+                         * synthesises after touchend would arrive as a SECOND toggle and shut it
+                         * again - the list appeared only while the finger stayed down. Suppressing
+                         * that click requires preventDefault on touchend; doing it on pointerdown
+                         * (as above) does not stop it.
+                         */
+                        flagContainer.addEventListener('touchend', function(e) {
+                            if (!suppressCompatibilityClick) {
+                                return;
+                            }
+                            suppressCompatibilityClick = false;
+                            if (e.cancelable) {
+                                e.preventDefault();
+                            }
                         }, { passive: false });
 
                         flagContainer.addEventListener('click', function() {

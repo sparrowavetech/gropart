@@ -65,11 +65,23 @@ class HandleCheckoutOrderData
                         $storeShippingTaxAmount = EcommerceHelper::calculateShippingTax($storeShippingAmount);
                         $newAmount = max($order->sub_total - $order->discount_amount + $order->tax_amount + $storeShippingAmount + $storeShippingTaxAmount + ($order->payment_fee ?? 0), 0);
 
-                        if ($order->shipping_amount != $storeShippingAmount || $order->amount != $newAmount) {
+                        $storeShippingMethod = Arr::get($storeData, 'shipping_method');
+                        $storeShippingOption = Arr::get($storeData, 'shipping_option');
+
+                        // Same rule as the single-vendor branch below: the vendor order has to
+                        // follow the method the buyer picked, and an amount-only guard misses a
+                        // provider switch when both providers quote the same fee.
+                        if (
+                            $order->shipping_amount != $storeShippingAmount
+                            || $order->amount != $newAmount
+                            || ($storeShippingMethod && $order->shipping_method != $storeShippingMethod)
+                            || $order->shipping_option != $storeShippingOption
+                        ) {
                             $order->update([
                                 'shipping_amount' => $storeShippingAmount,
                                 'shipping_tax_amount' => $storeShippingTaxAmount,
-                                'shipping_option' => Arr::get($storeData, 'shipping_option'),
+                                'shipping_method' => $storeShippingMethod ?: $order->shipping_method,
+                                'shipping_option' => $storeShippingOption,
                                 'amount' => $newAmount,
                             ]);
                         }
@@ -110,8 +122,17 @@ class HandleCheckoutOrderData
                 $sessionCheckoutData['coupon_discount_amount'] = $couponDiscountAmount;
             }
 
-            $orderTotal = Cart::instance('cart')->rawTotal() - $promotionDiscountAmount - $couponDiscountAmount;
-            $orderTotal = max($orderTotal, 0);
+            $rawCartTotal = Cart::instance('cart')->rawTotal();
+            $orderTotal = max($rawCartTotal - $promotionDiscountAmount - $couponDiscountAmount, 0);
+
+            // Intermediate total, before shipping is calculated from it.
+            $orderTotal = max((float) apply_filters('ecommerce_checkout_order_total', $orderTotal, [
+                'raw_total' => $rawCartTotal,
+                'promotion_discount_amount' => $promotionDiscountAmount,
+                'coupon_discount_amount' => $couponDiscountAmount,
+                'token' => $token,
+                'store_id' => null,
+            ]), 0);
 
             $shipping = [];
 
@@ -219,10 +240,19 @@ class HandleCheckoutOrderData
                         $orderShippingTaxAmount = EcommerceHelper::calculateShippingTax($shippingAmount);
                         $newAmount = max($order->sub_total - $order->discount_amount + $order->tax_amount + $shippingAmount + $orderShippingTaxAmount + ($order->payment_fee ?? 0), 0);
 
-                        if ($order->shipping_amount != $shippingAmount || $order->amount != $newAmount) {
+                        // The pending order must follow the shipping method the buyer picked, not just
+                        // the option/price. Comparing amounts alone also misses a provider switch when
+                        // both providers quote the same fee, leaving the order on the first method.
+                        if (
+                            $order->shipping_amount != $shippingAmount
+                            || $order->amount != $newAmount
+                            || $order->shipping_method != $defaultShippingMethod
+                            || $order->shipping_option != $defaultShippingOption
+                        ) {
                             $order->update([
                                 'shipping_amount' => $shippingAmount,
                                 'shipping_tax_amount' => $orderShippingTaxAmount,
+                                'shipping_method' => $defaultShippingMethod,
                                 'shipping_option' => $defaultShippingOption,
                                 'amount' => $newAmount,
                             ]);
@@ -272,6 +302,19 @@ class HandleCheckoutOrderData
         }
 
         Arr::set($sessionCheckoutData, 'payment_fee', $paymentFee);
+
+        // Final payable amount. Fires once per checkout, including on marketplace, where
+        // per-vendor order records keep their own amounts. Buyer-side instruments such as
+        // store credit or loyalty points belong here so they are not applied per vendor.
+        $orderAmount = max((float) apply_filters('ecommerce_order_amount', $orderAmount, [
+            'raw_total' => $rawTotal,
+            'promotion_discount_amount' => $promotionDiscountAmount,
+            'coupon_discount_amount' => $couponDiscountAmount,
+            'shipping_amount' => $shippingAmount,
+            'shipping_tax_amount' => $shippingTaxAmount,
+            'payment_fee' => $paymentFee,
+            'token' => $token,
+        ]), 0);
 
         return new CheckoutOrderData(
             shipping: $shipping,

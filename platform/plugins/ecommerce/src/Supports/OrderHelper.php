@@ -108,6 +108,13 @@ class OrderHelper
              * @var Order $order
              */
 
+            // Gateways can report the same payment more than once (return-URL callback plus
+            // webhook, or a webhook re-delivery). Finalize each order only once so events
+            // fire once and stock is decremented exactly once.
+            if ($order->is_finished) {
+                continue;
+            }
+
             // Adopt a completed payment that was linked to the order but never written back
             // onto Order.payment_id. Gateway callback/webhook paths (e.g. Razorpay) can create
             // and link a Payment (Payment.order_id + status = completed, so it shows in
@@ -337,11 +344,16 @@ class OrderHelper
         return $orders;
     }
 
-    public function validateAndReserveStock(array $cartItems): array
+    /**
+     * Validate cart quantities against live stock under a row lock so concurrent checkouts
+     * read consistent numbers. Stock is NOT deducted here: it is decremented exactly once
+     * when the order is finalized (see decreaseProductQuantity()). Deducting at checkout as
+     * well double-counted every order and leaked stock whenever a gateway payment was
+     * cancelled, failed, or the checkout form was re-submitted.
+     */
+    public function validateStock(array $cartItems): array
     {
         return DB::transaction(function () use ($cartItems) {
-            $reservedItems = [];
-
             foreach ($cartItems as $item) {
                 $product = Product::query()
                     ->where('id', $item['product_id'])
@@ -353,8 +365,6 @@ class OrderHelper
                 }
 
                 if ($product->isOutOfStock()) {
-                    $this->restoreReservedStock($reservedItems);
-
                     return [
                         'success' => false,
                         'message' => __('Product :product is out of stock!', ['product' => $product->original_product->name]),
@@ -362,35 +372,23 @@ class OrderHelper
                     ];
                 }
 
-                if ($product->with_storehouse_management && ! $product->allow_checkout_when_out_of_stock) {
-                    if ($product->quantity < $item['qty']) {
-                        $this->restoreReservedStock($reservedItems);
-
-                        return [
-                            'success' => false,
-                            'message' => __('Product :product only has :quantity item(s) left in stock, but you are trying to order :requested!', [
-                                'product' => $product->original_product->name,
-                                'quantity' => $product->quantity,
-                                'requested' => $item['qty'],
-                            ]),
-                            'product' => $product,
-                        ];
-                    }
-
-                    $product->quantity -= $item['qty'];
-                    $product->save();
-
-                    $reservedItems[] = [
-                        'product_id' => $product->id,
-                        'qty' => $item['qty'],
+                if (
+                    $product->with_storehouse_management
+                    && ! $product->allow_checkout_when_out_of_stock
+                    && $product->quantity < $item['qty']
+                ) {
+                    return [
+                        'success' => false,
+                        'message' => __('Product :product only has :quantity item(s) left in stock, but you are trying to order :requested!', [
+                            'product' => $product->original_product->name,
+                            'quantity' => $product->quantity,
+                            'requested' => $item['qty'],
+                        ]),
+                        'product' => $product,
                     ];
-
-                    event(new ProductQuantityUpdatedEvent($product));
                 }
 
                 if ($product->minimum_order_quantity > 0 && $item['qty'] < $product->minimum_order_quantity) {
-                    $this->restoreReservedStock($reservedItems);
-
                     return [
                         'success' => false,
                         'message' => __('Minimum order quantity of product :product is :quantity, you need to buy more :more to place an order! ', [
@@ -403,8 +401,6 @@ class OrderHelper
                 }
 
                 if ($product->maximum_order_quantity > 0 && $item['qty'] > $product->maximum_order_quantity) {
-                    $this->restoreReservedStock($reservedItems);
-
                     return [
                         'success' => false,
                         'message' => __('Maximum order quantity of product :product is :quantity! ', [
@@ -416,10 +412,22 @@ class OrderHelper
                 }
             }
 
-            return ['success' => true, 'message' => null, 'product' => null, 'reserved_items' => $reservedItems];
+            return ['success' => true, 'message' => null, 'product' => null];
         });
     }
 
+    /**
+     * @deprecated Use validateStock(). Kept for third-party plugins calling the old name.
+     *             No stock is reserved any more, so reserved_items is always empty.
+     */
+    public function validateAndReserveStock(array $cartItems): array
+    {
+        return $this->validateStock($cartItems) + ['reserved_items' => []];
+    }
+
+    /**
+     * @deprecated Checkout no longer reserves stock, so there is nothing to restore.
+     */
     public function restoreReservedStock(array $reservedItems): void
     {
         if (empty($reservedItems)) {
@@ -512,6 +520,7 @@ class OrderHelper
                     'product_options_text' => $digitalProduct->product_options_implode,
                     'product_options_array' => $digitalProduct->product_options_array,
                     'license_code' => $digitalProduct->license_code,
+                    'license_codes' => $digitalProduct->license_codes_array,
                 ];
             }
         }
@@ -521,7 +530,8 @@ class OrderHelper
             'store_phone' => get_ecommerce_setting('store_phone'),
             'order_id' => $order->code,
             'order_token' => $order->token,
-            'order_note' => $order->description,
+            // Customer-entered plain text: escape it, email templates render with autoescape off
+            'order_note' => e($order->description),
             'customer_name' => BaseHelper::clean($order->user->name ?: $order->address->name),
             'customer_email' => $order->user->email ?: $order->address->email,
             'customer_phone' => $order->user->phone ?: $order->address->phone,
@@ -829,6 +839,30 @@ class OrderHelper
         return $data;
     }
 
+    public function getCheckoutSuccessMessage(array $paymentData): string
+    {
+        $paymentStatus = null;
+
+        if (is_plugin_active('payment') && ($chargeId = Arr::get($paymentData, 'charge_id'))) {
+            $paymentStatus = Payment::query()
+                ->where('charge_id', $chargeId)
+                ->value('status');
+        }
+
+        if ($paymentStatus instanceof PaymentStatusEnum) {
+            $paymentStatus = $paymentStatus->getValue();
+        }
+
+        $paymentMethod = Arr::get($paymentData, 'type');
+
+        return match (true) {
+            $paymentStatus === PaymentStatusEnum::COMPLETED => trans('plugins/ecommerce::order.order_placed_and_paid_successfully'),
+            $paymentMethod === PaymentMethodEnum::COD => trans('plugins/ecommerce::order.order_placed_successfully_cod'),
+            $paymentMethod === PaymentMethodEnum::BANK_TRANSFER => trans('plugins/ecommerce::order.order_placed_successfully_bank_transfer'),
+            default => trans('plugins/ecommerce::order.order_placed_successfully_payment_pending'),
+        };
+    }
+
     public function getOrderSessionToken(): string
     {
         if (session()->has('tracked_start_checkout')) {
@@ -839,6 +873,45 @@ class OrderHelper
         }
 
         return $token;
+    }
+
+    /**
+     * Whether every order placed under this checkout token is already finished, cancelled
+     * or paid, i.e. the token has nothing left to pay for.
+     */
+    public function isCheckoutTokenSpent(?string $token): bool
+    {
+        if (! $token) {
+            return false;
+        }
+
+        $orders = Order::query()->where('token', $token)->get();
+
+        return $orders->isNotEmpty() && $orders->every(fn (Order $order) => $this->isOrderLocked($order));
+    }
+
+    /**
+     * Drop a checkout session whose order was completed outside this browser session.
+     *
+     * Only the success page clears the checkout token and cart. When a gateway webhook
+     * finalizes the order instead (the buyer paid, then closed the tab or never came back
+     * from their UPI/bank app), the buyer's session keeps the spent token and the old cart.
+     * Their next purchase then runs on that token: the gateway charge is matched to the old,
+     * already-paid order and the new items are never saved anywhere, or the old items get
+     * re-added on top of the new ones. Clearing it here is exactly what the success page
+     * would have done, so the next checkout starts on a fresh token and an empty cart.
+     */
+    public function discardSpentCheckoutSession(): bool
+    {
+        $token = session('tracked_start_checkout');
+
+        if (! $this->isCheckoutTokenSpent($token)) {
+            return false;
+        }
+
+        $this->clearSessions($token);
+
+        return true;
     }
 
     public function getOrderSessionData(?string $token = null): array
@@ -1834,7 +1907,7 @@ class OrderHelper
         // is_finished = false on an order that a gateway webhook/callback already
         // finalized - stranding a paid order in Incomplete Orders (and, on the recover
         // path, overwriting its items/total from the live cart). If the order is already
-        // finished, or a completed payment is linked to it, leave it untouched.
+        // finished, cancelled, or has a completed payment linked to it, leave it untouched.
         if ($order && $this->isOrderLocked($order)) {
             return $order;
         }
@@ -1863,16 +1936,23 @@ class OrderHelper
     }
 
     /**
-     * An order is "locked" once it is finished or a completed payment is linked to it.
-     * Nothing in the checkout flow may rewrite such an order from the live cart: the
-     * buyer can come back to checkout in the same session after paying (back button, a
-     * second tab left open, or they keep shopping and reopen checkout), and rebuilding
-     * the order from the newer cart would inflate the stored total while the gateway
-     * keeps the amount that was actually captured.
+     * An order is "locked" once it is finished, cancelled, or a completed payment is linked
+     * to it. Nothing in the checkout flow may rewrite such an order from the live cart.
+     *
+     * Paid: the buyer can come back to checkout in the same session after paying (back
+     * button, a second tab left open, or they keep shopping and reopen checkout), and
+     * rebuilding the order from the newer cart would inflate the stored total while the
+     * gateway keeps the amount that was actually captured.
+     *
+     * Cancelled: cancelling restocks the products and emails the buyer, but leaves
+     * is_finished = false. Rebuilding would quietly put the order back to pending and
+     * resell stock that was already returned.
      */
     public function isOrderLocked(Order $order): bool
     {
-        return $order->is_finished || $this->hasCompletedPayment($order);
+        return $order->is_finished
+            || $order->status == OrderStatusEnum::CANCELED
+            || $this->hasCompletedPayment($order);
     }
 
     protected function hasCompletedPayment(Order $order): bool

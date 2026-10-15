@@ -35,6 +35,12 @@ class ChangeProductSwatches {
             .on('change', '.product-attributes input, .product-attributes select', (event) => {
                 const $parent = $(event.currentTarget).closest('.product-attributes')
 
+                // Upsell bundle items load their own variations (front-upsale-crosssale.js).
+                // Handling them here too would apply their variation to the main product.
+                if ($parent.is('.ec-upsell-attributes')) {
+                    return
+                }
+
                 _self.getProductVariation($parent)
             })
 
@@ -53,11 +59,13 @@ class ChangeProductSwatches {
                             window.onChangeSwatchesSuccess(e.state.data, $el)
                         }
 
+                        $(document).trigger('product-variation-changed', [e.state.data, $el])
+
                         if (e.state.slugAttributes) {
                             _self.updateSelectingAttributes(e.state.slugAttributes, $el)
                         }
                     } else {
-                        $('.product-attribute-swatches').each(function (i, el) {
+                        $('.product-attribute-swatches').not('.ec-upsell-attributes').each(function (i, el) {
                             let params = _self.parseParamsSearch()
                             let attributes = []
                             let slugAttributes = {}
@@ -245,6 +253,10 @@ class ChangeProductSwatches {
             window.onChangeSwatchesSuccess(res, $productAttributes)
         }
 
+        // Lets other scripts (e.g. product options) react after the variation
+        // price has been written to the page.
+        $(document).trigger('product-variation-changed', [res, $productAttributes])
+
         const { data, message } = res
 
         if (data && !data.error_message) {
@@ -322,8 +334,8 @@ class ChangeProductSwatches {
 $(() => {
     const swatchInstance = new ChangeProductSwatches()
     
-    // Check initial selection on page load
-    $('.product-attribute-swatches').each(function() {
+    // Check initial selection on page load (upsell bundle items select their own)
+    $('.product-attribute-swatches').not('.ec-upsell-attributes').each(function() {
         const $container = $(this)
         const hasCheckedRadio = $container.find('input[type=radio]:checked:not(:disabled)').length > 0
         const hasSelectedDropdown = $container.find('select.product-filter-item').filter(function() {

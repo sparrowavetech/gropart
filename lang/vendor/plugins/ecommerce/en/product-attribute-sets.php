@@ -52,6 +52,7 @@ return [
     'is_default' => 'Is default?',
     'title' => 'Title',
     'slug' => 'Slug',
+    'slug_help_block' => 'Used in product filter URLs, e.g. ?attributes[<slug>]=value. Leave empty to auto-generate from title.',
     'color' => 'Color',
     'image' => 'Image',
     'remove' => 'Remove',

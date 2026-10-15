@@ -122,15 +122,18 @@
             }
 
             function rejectAllCookies() {
-                if (cookieExists(COOKIE_NAME)) {
-                    const secure = window.location.protocol === 'https:' ? '; Secure' : '';
-                    document.cookie = COOKIE_NAME +
-                        '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=' +
-                        COOKIE_DOMAIN +
-                        '; path=/; SameSite=Lax' +
-                        secure +
-                        SESSION_SECURE;
-                }
+                // Store the rejection instead of deleting the cookie. Removing it left the visitor
+                // with no recorded answer, so the notice popped up again on every page load.
+                const categories = {};
+                document.querySelectorAll('.js-cookie-category').forEach(function(checkbox) {
+                    checkbox.checked = checkbox.disabled;
+
+                    if (checkbox.disabled) {
+                        categories[checkbox.value] = true;
+                    }
+                });
+
+                setCookie(COOKIE_NAME, JSON.stringify(categories), COOKIE_LIFETIME);
 
                 window.dataLayer = window.dataLayer || [];
                 if (typeof gtag === 'function') {

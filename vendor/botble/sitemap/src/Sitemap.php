@@ -173,6 +173,11 @@ class Sitemap
         ]);
     }
 
+    public function getSitemaps(): array
+    {
+        return $this->model->getSitemaps();
+    }
+
     public function resetSitemaps(array $sitemaps = []): void
     {
         $this->model->resetSitemaps($sitemaps);

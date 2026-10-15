@@ -48,6 +48,7 @@ return [
         ],
         'success' => 'Dine .env filindstillinger er blevet gemt.',
         'errors' => 'Kan ikke gemme .env filen, Opret den venligst manuelt.',
+        'database_connection_failed' => 'Kunne ikke oprette forbindelse til databasen. Kontroller venligst databasens vært, port, navn, brugernavn og adgangskode. Fejl: :message',
     ],
     'theme' => [
         'title' => 'Vælg tema',

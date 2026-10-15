@@ -1,3 +1,17 @@
+@if ($product->isExternalProduct())
+    <div class="product-button">
+        <a
+            class="btn btn-primary mb-2 w-100"
+            href="{{ $product->original_product->external_url ?? $product->external_url }}"
+            target="_blank"
+            rel="nofollow noopener noreferrer"
+            title="{{ __('Buy on External Store') }}"
+        >{{ __('Buy on External Store') }}</a>
+        @if (!empty($withButtons))
+            {!! Theme::partial('ecommerce.product-loop-buttons', compact('product', 'wishlistIds')) !!}
+        @endif
+    </div>
+@else
 <form
     class="cart-form"
     action="{{ route('public.cart.add-to-cart') }}"
@@ -88,3 +102,4 @@
         </div>
     @endif
 </form>
+@endif

@@ -187,12 +187,15 @@ class ImageMemoryGuardTest extends TestCase
     {
         $guard = ImageMemoryGuard::make($this->imagePath);
 
-        $this->assertSame([600, 400], $guard->getDimensions());
+        $before = $guard->getDimensions();
 
         File::delete($this->imagePath);
 
         // Already resolved, deleting the file must not change the answer.
-        $this->assertSame([600, 400], $guard->getDimensions());
+        $after = $guard->getDimensions();
+
+        $this->assertSame([600, 400], $before);
+        $this->assertSame([600, 400], $after);
     }
 
     protected function createImage(int $width, int $height): string

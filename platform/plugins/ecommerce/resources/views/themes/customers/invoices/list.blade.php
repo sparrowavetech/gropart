@@ -17,7 +17,7 @@
                                     </h3>
                                     <div class="d-flex align-items-center gap-2 flex-wrap">
                                         <div class="bb-customer-card-status">
-                                            {!! BaseHelper::clean($invoice->status->toHtml()) !!}
+                                            {!! BaseHelper::clean($invoice->payment_status_html) !!}
                                         </div>
                                         <span class="text-muted" style="font-size: 0.75rem;">•</span>
                                         <span class="text-muted" style="font-size: 0.75rem;">

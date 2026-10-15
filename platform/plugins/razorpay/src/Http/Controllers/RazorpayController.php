@@ -6,9 +6,11 @@ use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Enums\OrderAddressTypeEnum;
+use Botble\Ecommerce\Enums\OrderHistoryActionEnum;
 use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\OrderAddress;
+use Botble\Ecommerce\Models\OrderHistory;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Models\Payment;
 use Botble\Payment\Supports\PaymentHelper;
@@ -150,20 +152,67 @@ class RazorpayController extends BaseController
             'customer_type' => $customerType,
         ];
 
-        $existingPayment = Payment::query()
-            ->where(function ($query) use ($chargeId, $orderId): void {
-                $query->where('charge_id', $chargeId)
-                    ->orWhere(function ($q) use ($orderId): void {
-                        if (! empty($orderId)) {
-                            $orderIdValue = is_array($orderId) ? ($orderId[0] ?? null) : $orderId;
-                            if ($orderIdValue) {
-                                $q->where('order_id', $orderIdValue)
-                                    ->where('payment_channel', RAZORPAY_PAYMENT_METHOD_NAME);
-                            }
-                        }
-                    });
-            })
-            ->first();
+        // Always prefer the row for this exact charge. Razorpay replays each event (authorized,
+        // captured, plus webhook retries and the browser callback), so a lookup that can return
+        // a sibling row instead would insert a duplicate on every replay.
+        $existingPayment = Payment::query()->where('charge_id', $chargeId)->first();
+
+        $orderIdValue = is_array($orderId) ? ($orderId[0] ?? null) : $orderId;
+
+        // No row for this charge yet: fall back to the order, so a retry reuses the row left
+        // behind by an earlier failed or abandoned attempt instead of piling up rows. An order
+        // can legitimately hold several rows once a buyer has paid twice, so order by id to
+        // keep which row a new charge reuses deterministic rather than engine-dependent.
+        if (! $existingPayment && $orderIdValue) {
+            $existingPayment = Payment::query()
+                ->where('order_id', $orderIdValue)
+                ->where('payment_channel', RAZORPAY_PAYMENT_METHOD_NAME)
+                ->oldest('id')
+                ->first();
+        }
+
+        // The fallback matched a row belonging to a different charge. Reusing it is only right
+        // while that charge never succeeded; once it is COMPLETED the two charges are separate
+        // money and must not share a row.
+        if (
+            $existingPayment
+            && $existingPayment->charge_id !== $chargeId
+            && $existingPayment->status == PaymentStatusEnum::COMPLETED
+        ) {
+            // Razorpay reports each attempt separately and out of order, so this is usually the
+            // failed/abandoned event of an earlier attempt arriving after the capture. Writing
+            // it anywhere would either void a paid order or hang a phantom FAILED row off it.
+            if ($status != PaymentStatusEnum::COMPLETED) {
+                PaymentHelper::log(
+                    RAZORPAY_PAYMENT_METHOD_NAME,
+                    ['info' => 'Ignored a stale event from another attempt on an already paid order'],
+                    [
+                        'charge_id' => $chargeId,
+                        'order_id' => $orderId,
+                        'status' => $status,
+                        'paid_charge_id' => $existingPayment->charge_id,
+                    ]
+                );
+
+                return;
+            }
+
+            // A genuine second capture on the same order: the buyer paid twice. Overwriting
+            // would erase the first capture and leave the order looking underpaid.
+            PaymentHelper::log(
+                RAZORPAY_PAYMENT_METHOD_NAME,
+                ['info' => 'Second charge on an already paid order, storing it as a separate payment'],
+                [
+                    'charge_id' => $chargeId,
+                    'order_id' => $orderId,
+                    'existing_charge_id' => $existingPayment->charge_id,
+                ]
+            );
+
+            $this->noteAdditionalPayment($orderIdValue, $chargeId, $amount, $currency);
+
+            $existingPayment = null;
+        }
 
         if (! $existingPayment) {
             $payment = new Payment();
@@ -180,6 +229,27 @@ class RazorpayController extends BaseController
         }
 
         $this->updateExistingPayment($existingPayment, $paymentData, $chargeId, $orderId, $status, $context);
+    }
+
+    /**
+     * Make a second capture visible on the order page. It usually means the buyer made a
+     * new purchase on this order's old checkout session, so the items they paid for exist
+     * only in the Razorpay dashboard and the shop has to follow up.
+     */
+    protected function noteAdditionalPayment(int|string|null $orderId, string $chargeId, float $amount, string $currency): void
+    {
+        if (! $orderId || ! class_exists(OrderHistory::class)) {
+            return;
+        }
+
+        OrderHistory::query()->create([
+            'action' => OrderHistoryActionEnum::UPDATE_STATUS,
+            'description' => trans('plugins/ecommerce::order.additional_payment_on_paid_order', [
+                'charge_id' => $chargeId,
+                'paid' => $amount . ' ' . $currency,
+            ]),
+            'order_id' => $orderId,
+        ]);
     }
 
     protected function updateExistingPayment(
@@ -217,7 +287,18 @@ class RazorpayController extends BaseController
             $updated = true;
         }
 
-        if ($existingPayment->status !== $status) {
+        // A real gateway verdict is applied as given, including a late failure of a payment
+        // that was only authorized, which must still be able to undo COMPLETED. PENDING is
+        // the one status that is never a verdict: processVerifiedPayment() falls back to it
+        // whenever the Razorpay ORDER is not yet 'paid', which is still true right after a
+        // capture settles on the charge. The browser callback therefore arrives with PENDING
+        // after the webhook already recorded COMPLETED, and applying it would make a captured
+        // payment read Pending - hiding it from hasCompletedPayment() and letting the
+        // auto-cancel job void a paid order.
+        $isUnknownOverCaptured = $status == PaymentStatusEnum::PENDING
+            && $existingPayment->status == PaymentStatusEnum::COMPLETED;
+
+        if ($existingPayment->status != $status && ! $isUnknownOverCaptured) {
             $existingPayment->status = $status;
             $updated = true;
         }
@@ -1162,7 +1243,14 @@ class RazorpayController extends BaseController
 
         return $response
             ->setNextUrl(PaymentHelper::getRedirectURL($token) . '?charge_id=' . $chargeId)
-            ->setMessage(trans('plugins/payment::payment.checkout_success'));
+            ->setMessage($this->getCallbackMessage($status));
+    }
+
+    protected function getCallbackMessage(?string $status): string
+    {
+        return $status == PaymentStatusEnum::COMPLETED
+            ? trans('plugins/payment::payment.checkout_success')
+            : trans('plugins/payment::payment.payment_pending');
     }
 
     public function webhook(Request $request)

@@ -48,6 +48,7 @@ return [
         ],
         'success' => 'Postavke vaše .env datoteke su spremljene.',
         'errors' => 'Nije moguće spremiti .env datoteku, molimo stvorite je ručno.',
+        'database_connection_failed' => 'Povezivanje s bazom podataka nije uspjelo. Provjerite host, port, naziv, korisničko ime i lozinku baze podataka. Greška: :message',
     ],
     'theme' => [
         'title' => 'Odaberite temu',

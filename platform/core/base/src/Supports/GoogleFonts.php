@@ -6,6 +6,7 @@ use Botble\Media\Facades\RvMedia;
 use Exception;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -48,6 +49,10 @@ class GoogleFonts
             $fonts = $this->loadLocal($url, $nonce);
 
             if (! $fonts) {
+                if (Cache::has($this->failureCacheKey($url))) {
+                    return null;
+                }
+
                 return $this->fetch($url, $nonce);
             }
 
@@ -71,9 +76,9 @@ class GoogleFonts
 
         $fontCssPath = $this->path($url, 'fonts.css');
 
-        $localizedCss = $this->files->get($fontCssPath);
+        $localizedCss = (string) $this->files->get($fontCssPath);
 
-        if (str_contains($localizedCss, '<!DOCTYPE html>')) {
+        if (! trim($localizedCss) || str_contains($localizedCss, '<!DOCTYPE html>')) {
             $this->files->delete($fontCssPath);
 
             return null;
@@ -107,19 +112,29 @@ class GoogleFonts
     protected function fetch(string $url, ?string $nonce): ?Fonts
     {
         $response = Http::withHeaders(['User-Agent' => $this->userAgent])
-            ->timeout(300)
+            ->timeout(30)
             ->withoutVerifying()
             ->get($url);
 
         if ($response->failed()) {
+            $this->markFetchFailed($url);
+
             return null;
         }
 
         $localizedCss = $response->body();
 
+        if (! trim($localizedCss)) {
+            $this->markFetchFailed($url);
+
+            return null;
+        }
+
         try {
             $extractedFonts = $this->extractFontUrls($response);
         } catch (Exception) {
+            $this->markFetchFailed($url);
+
             return null;
         }
 
@@ -146,6 +161,8 @@ class GoogleFonts
 
         $this->files->put($this->path($url, 'fonts.css'), $localizedCss);
 
+        Cache::forget($this->failureCacheKey($url));
+
         return new Fonts(
             googleFontsUrl: $url,
             localizedUrl: $this->files->url($this->path($url, 'fonts.css')),
@@ -168,6 +185,16 @@ class GoogleFonts
         [$path, $extension] = explode('.', str_replace('https://fonts.gstatic.com/', '', $path));
 
         return implode('.', [Str::slug($path), $extension]);
+    }
+
+    protected function failureCacheKey(string $url): string
+    {
+        return 'google-fonts-fetch-failed-' . substr(md5($url), 0, 10);
+    }
+
+    protected function markFetchFailed(string $url): void
+    {
+        Cache::put($this->failureCacheKey($url), true, now()->addHour());
     }
 
     protected function path(string $url, string $path = ''): string

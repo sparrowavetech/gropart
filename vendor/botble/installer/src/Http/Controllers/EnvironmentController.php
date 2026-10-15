@@ -14,9 +14,11 @@ use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
+use Throwable;
 
 class EnvironmentController extends BaseController
 {
@@ -48,6 +50,22 @@ class EnvironmentController extends BaseController
                 'password' => $request->input('database_password'),
             ]),
         ]);
+
+        // Connect now, before .env is written, so wrong credentials are reported on this form.
+        // Otherwise they only surface later as a failed sample-data import on the next step.
+        try {
+            DB::purge($driverName);
+            DB::connection($driverName)->getPdo();
+        } catch (Throwable $exception) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors([
+                    'database' => trans('packages/installer::installer.environment.database_connection_failed', [
+                        'message' => $exception->getMessage(),
+                    ]),
+                ]);
+        }
 
         $results = $environmentManager->save($request);
 

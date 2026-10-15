@@ -142,7 +142,7 @@ return [
         'admin_reply_our_response' => 'Balasan Kami:',
         'admin_reply_additional_questions' => 'Jika anda mempunyai sebarang soalan tambahan, sila balas e-mel ini atau hubungi kami semula.',
         'admin_reply_best_regards' => 'Salam hormat,',
-        'admin_reply_team' => 'Pasukan {{ site_title }}',
+        'admin_reply_team' => 'Pasukan :site_title',
 
         // Notice email template
         'notice_title' => 'Mesej Hubungan Baru',

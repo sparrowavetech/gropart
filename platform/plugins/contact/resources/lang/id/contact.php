@@ -142,7 +142,7 @@ return [
         'admin_reply_our_response' => 'Tanggapan Kami:',
         'admin_reply_additional_questions' => 'Jika Anda memiliki pertanyaan tambahan, jangan ragu untuk membalas email ini atau menghubungi kami lagi.',
         'admin_reply_best_regards' => 'Salam hormat,',
-        'admin_reply_team' => 'Tim {{ site_title }}',
+        'admin_reply_team' => 'Tim :site_title',
 
         // Notice email template
         'notice_title' => 'Pesan Kontak Baru',

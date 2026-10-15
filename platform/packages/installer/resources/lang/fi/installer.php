@@ -48,6 +48,7 @@ return [
         ],
         'success' => '.env-tiedoston asetukset on tallennettu.',
         'errors' => '.env-tiedostoa ei voitu tallentaa, luo se manuaalisesti.',
+        'database_connection_failed' => 'Tietokantaan ei saatu yhteyttä. Tarkista tietokannan palvelin, portti, nimi, käyttäjätunnus ja salasana. Virhe: :message',
     ],
     'theme' => [
         'title' => 'Valitse teema',

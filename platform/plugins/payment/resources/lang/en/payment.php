@@ -2,7 +2,7 @@
 
 return [
     'payments' => 'Payments',
-    'checkout_success' => 'Checkout successfully!',
+    'checkout_success' => 'Payment completed successfully!',
     'view_payment' => 'View payment #',
     'charge_id' => 'Charge ID',
     'amount' => 'Amount',
@@ -83,7 +83,7 @@ return [
     'payment_method_description' => 'Payment guide - (Displayed on the notice of successful purchase and payment page)',
     'payment_via_cod' => 'Cash on delivery (COD)',
     'payment_via_bank_transfer' => 'Bank transfer',
-    'payment_pending' => 'Checkout successfully. Your payment is pending and will be checked by our staff.',
+    'payment_pending' => 'Your payment is pending and will be confirmed once it has been received.',
     'created_at' => 'Created At',
     'payment_channel' => 'Payment Channel',
     'total' => 'Total',

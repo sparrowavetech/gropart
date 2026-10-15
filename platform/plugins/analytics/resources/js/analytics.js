@@ -30,13 +30,22 @@ class PluginAnalytics {
         })
 
         if ($worldMap.length) {
+            // jVectorMap interpolates its scale between hex colors, so the palette
+            // is picked here rather than read from CSS variables.
+            const isDarkMode = document.documentElement.getAttribute('data-bs-theme') === 'dark'
+            const primaryColor =
+                getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#206bc4'
+            const mapColors = isDarkMode
+                ? { land: '#374151', border: '#1f2937', scaleStart: '#4b5563' }
+                : { land: '#f6f8fb', border: '#dce1e7', scaleStart: '#ffffff' }
+
             $worldMap.vectorMap({
                 map: 'world_mill_en',
                 backgroundColor: 'transparent',
                 regionStyle: {
                     initial: {
-                        fill: '#f6f8fb',
-                        stroke: '#dce1e7',
+                        fill: mapColors.land,
+                        stroke: mapColors.border,
                         'stroke-width': 2,
                     },
                 },
@@ -44,7 +53,7 @@ class PluginAnalytics {
                     regions: [
                         {
                             values: visitorsData,
-                            scale: ['#ffffff', '#206bc4'],
+                            scale: [mapColors.scaleStart, primaryColor],
                             normalizeFunction: 'polynomial',
                         },
                     ],

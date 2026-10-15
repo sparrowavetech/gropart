@@ -2,7 +2,7 @@
 
 return [
     'payments' => 'Pagamentos',
-    'checkout_success' => 'Finalização da compra com sucesso!',
+    'checkout_success' => 'Pagamento concluído com sucesso!',
     'view_payment' => 'Ver número de pagamento',
     'charge_id' => 'ID de cobrança',
     'amount' => 'Quantia',
@@ -82,7 +82,7 @@ return [
     'payment_method_description' => 'Guia de pagamento - (Exibido no aviso de compra bem-sucedida e na página de pagamento)',
     'payment_via_cod' => 'Pagamento na entrega (COD)',
     'payment_via_bank_transfer' => 'Transferência bancária',
-    'payment_pending' => 'Finalização da compra com sucesso. Seu pagamento está pendente e será verificado por nossa equipe.',
+    'payment_pending' => 'O seu pagamento está pendente e será confirmado assim que for recebido.',
     'created_at' => 'Criado em',
     'payment_channel' => 'Canal de pagamento',
     'total' => 'Montante total',
@@ -148,6 +148,8 @@ return [
     'refund_amount_is_invalid' => 'O valor do reembolso é inválido.',
     'processing_fee' => 'Taxa de processamento (opcional)',
     'fee_helper' => 'Será cobrada uma taxa extra quando o cliente selecionar este método de pagamento. Introduza 0 para não aplicar taxa.',
+    'fee_fixed' => 'Taxa fixa adicional (opcional)',
+    'fee_fixed_helper' => 'Um valor fixo adicionado à taxa percentual acima, por ex. ao estilo Stripe "2.9% + taxa fixa". Baseado na moeda predefinida (:currency). Introduza 0 para nenhuma taxa fixa adicional.',
     'payment_fee' => 'Taxa de pagamento',
     'fee_types' => [
         'fixed' => 'Fixa',

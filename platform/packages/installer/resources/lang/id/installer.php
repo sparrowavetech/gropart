@@ -49,6 +49,7 @@ return [
         ],
         'success' => 'Pengaturan file .env Anda telah disimpan.',
         'errors' => 'Tidak dapat menyimpan file .env, Silakan buat secara manual.',
+        'database_connection_failed' => 'Tidak dapat terhubung ke database. Silakan periksa host, port, nama, nama pengguna, dan kata sandi database. Kesalahan: :message',
     ],
     'theme' => [
         'title' => 'Pilih tema',

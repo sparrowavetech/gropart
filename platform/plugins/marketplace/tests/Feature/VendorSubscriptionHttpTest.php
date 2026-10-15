@@ -489,18 +489,21 @@ class VendorSubscriptionHttpTest extends BaseTestCase
     {
         // The collapsible hides the inactive section with an inline style; the active
         // one must not carry it, or the admin lands on a page with nothing visible.
+        // data-bb-value holds a JSON array of the modes a section belongs to, because
+        // hybrid shares the commission section with commission and the subscription
+        // section with subscription - hence the substring match rather than equality.
         $subscriptionMode = $this->actingAs($this->admin, 'web')
             ->get(route('marketplace.settings'))
             ->assertOk()
             ->getContent();
 
         $this->assertMatchesRegularExpression(
-            '/data-bb-value="commission"[^>]*style="display: none"/',
+            '/data-bb-value="[^"]*commission[^"]*"[^>]*style="display: none"/',
             $subscriptionMode,
             'The commission section should start hidden while in subscription mode.'
         );
         $this->assertDoesNotMatchRegularExpression(
-            '/data-bb-value="subscription"[^>]*style="display: none"/',
+            '/data-bb-value="[^"]*subscription[^"]*"[^>]*style="display: none"/',
             $subscriptionMode
         );
 
@@ -512,12 +515,12 @@ class VendorSubscriptionHttpTest extends BaseTestCase
             ->getContent();
 
         $this->assertMatchesRegularExpression(
-            '/data-bb-value="subscription"[^>]*style="display: none"/',
+            '/data-bb-value="[^"]*subscription[^"]*"[^>]*style="display: none"/',
             $commissionMode,
             'The subscription section should start hidden while in commission mode.'
         );
         $this->assertDoesNotMatchRegularExpression(
-            '/data-bb-value="commission"[^>]*style="display: none"/',
+            '/data-bb-value="[^"]*commission[^"]*"[^>]*style="display: none"/',
             $commissionMode
         );
     }

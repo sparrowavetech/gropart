@@ -2,7 +2,7 @@
 
 return [
     'payments' => 'পেমেন্ট',
-    'checkout_success' => 'চেকআউট সফল হয়েছে!',
+    'checkout_success' => 'পেমেন্ট সফলভাবে সম্পন্ন হয়েছে!',
     'view_payment' => 'পেমেন্ট দেখুন #',
     'charge_id' => 'চার্জ আইডি',
     'amount' => 'পরিমাণ',
@@ -50,8 +50,8 @@ return [
     'client_id' => 'Client ID',
     'client_secret' => 'Client Secret',
     'secret' => 'Secret',
-    'stripe_key' => 'Stripe Public Key',
-    'stripe_secret' => 'Stripe Private Key',
+    'stripe_key' => 'Stripe পাবলিক কী',
+    'stripe_secret' => 'Stripe প্রাইভেট কী',
     'stripe_after_service_registration_msg' => ':name এ নিবন্ধনের পরে, আপনি Public, Secret কী পাবেন',
     'stripe_enter_client_id_and_secret' => 'ডান দিকের বক্সে Public, Secret কী লিখুন',
     'pay_online_via' => ':name এর মাধ্যমে অনলাইন পেমেন্ট করুন',
@@ -82,7 +82,7 @@ return [
     'payment_method_description' => 'পেমেন্ট গাইড - (সফল ক্রয়ের নোটিশ এবং পেমেন্ট পৃষ্ঠায় প্রদর্শিত)',
     'payment_via_cod' => 'ক্যাশ অন ডেলিভারি (COD)',
     'payment_via_bank_transfer' => 'ব্যাংক ট্রান্সফার',
-    'payment_pending' => 'চেকআউট সফল হয়েছে। আপনার পেমেন্ট মুলতুবি রয়েছে এবং আমাদের কর্মীদের দ্বারা পরীক্ষা করা হবে।',
+    'payment_pending' => 'আপনার পেমেন্ট অপেক্ষমাণ আছে এবং প্রাপ্তির পর নিশ্চিত করা হবে।',
     'created_at' => 'তৈরির তারিখ',
     'payment_channel' => 'পেমেন্ট চ্যানেল',
     'total' => 'মোট',
@@ -129,6 +129,8 @@ return [
     'payment_description' => ':site_url এ আপনার অর্ডার #:order_id এর জন্য পেমেন্ট করুন',
     'processing_fee' => 'প্রক্রিয়াকরণ ফি (ঐচ্ছিক)',
     'fee_helper' => 'গ্রাহক এই পেমেন্ট পদ্ধতি নির্বাচন করলে অতিরিক্ত ফি চার্জ করা হবে। কোনো ফি না নেওয়ার জন্য 0 লিখুন।',
+    'fee_fixed' => 'অতিরিক্ত নির্দিষ্ট ফি (ঐচ্ছিক)',
+    'fee_fixed_helper' => 'উপরের শতাংশ ফি-এর সাথে যোগ করা একটি নির্দিষ্ট পরিমাণ, যেমন Stripe-এর মতো "2.9% + নির্দিষ্ট ফি"। ডিফল্ট মুদ্রার (:currency) উপর ভিত্তি করে। অতিরিক্ত নির্দিষ্ট ফি না রাখতে 0 লিখুন।',
     'payment_fee' => 'পেমেন্ট ফি',
     'payment_log' => [
         'name' => 'পেমেন্ট লগ',
@@ -153,4 +155,6 @@ return [
     'currency_not_supported' => ':name :currency সমর্থন করে না। :name দ্বারা সমর্থিত মুদ্রার তালিকা: :currencies।',
     'please_switch_currency' => 'অনুগ্রহ করে যেকোনো সমর্থিত মুদ্রায় পরিবর্তন করুন',
     'payment_with' => ':paymentType দিয়ে পেমেন্ট',
+    'could_not_get_stripe_payment_details' => 'Stripe পেমেন্টের বিবরণ পাওয়া যায়নি।',
+    'refund_amount_is_invalid' => 'ফেরতের পরিমাণ অবৈধ।',
 ];

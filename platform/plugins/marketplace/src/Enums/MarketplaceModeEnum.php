@@ -9,6 +9,7 @@ use Illuminate\Support\HtmlString;
 /**
  * @method static MarketplaceModeEnum COMMISSION()
  * @method static MarketplaceModeEnum SUBSCRIPTION()
+ * @method static MarketplaceModeEnum HYBRID()
  */
 class MarketplaceModeEnum extends Enum
 {
@@ -16,12 +17,16 @@ class MarketplaceModeEnum extends Enum
 
     public const SUBSCRIPTION = 'subscription';
 
+    /** Vendors pay a subscription AND the marketplace takes a commission on each order. */
+    public const HYBRID = 'hybrid';
+
     public static $langPath = 'plugins/marketplace::subscription.modes';
 
     public function toHtml(): HtmlString|string
     {
         $color = match ($this->value) {
             self::SUBSCRIPTION => 'info',
+            self::HYBRID => 'azure',
             default => 'primary',
         };
 

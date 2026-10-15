@@ -49,6 +49,7 @@ return [
         ],
         'success' => 'Cài đặt file .env của bạn đã được lưu.',
         'errors' => 'Không thể lưu file .env, Vui lòng tạo nó thủ công.',
+        'database_connection_failed' => 'Không thể kết nối tới cơ sở dữ liệu. Vui lòng kiểm tra máy chủ, cổng, tên, tên người dùng và mật khẩu cơ sở dữ liệu. Lỗi: :message',
     ],
     'theme' => [
         'title' => 'Chọn chủ đề',

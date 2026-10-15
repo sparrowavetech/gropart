@@ -48,6 +48,7 @@ return [
         ],
         'success' => 'Nastavitve vaše datoteke .env so bile shranjene.',
         'errors' => 'Datoteke .env ni mogoče shraniti, ustvarite jo ročno.',
+        'database_connection_failed' => 'Povezave z bazo podatkov ni bilo mogoče vzpostaviti. Preverite gostitelja, vrata, ime, uporabniško ime in geslo baze podatkov. Napaka: :message',
     ],
     'theme' => [
         'title' => 'Izberite temo',

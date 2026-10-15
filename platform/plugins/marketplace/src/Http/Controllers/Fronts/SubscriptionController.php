@@ -255,7 +255,7 @@ class SubscriptionController extends BaseController
      */
     protected function guardCheckout()
     {
-        if (! MarketplaceHelper::isSubscriptionMode()) {
+        if (! MarketplaceHelper::hasVendorSubscriptions()) {
             return redirect()->route('marketplace.vendor.dashboard');
         }
 

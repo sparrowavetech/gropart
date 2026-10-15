@@ -14,7 +14,9 @@ use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TextareaField;
 use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
+use Botble\Marketplace\Enums\MarketplaceModeEnum;
 use Botble\Marketplace\Enums\SubscriptionDurationUnitEnum;
+use Botble\Marketplace\Facades\MarketplaceHelper;
 use Botble\Marketplace\Http\Requests\SubscriptionPlanRequest;
 use Botble\Marketplace\Models\SubscriptionPlan;
 
@@ -125,6 +127,45 @@ class SubscriptionPlanForm extends FormAbstract
                     ->label(trans('plugins/marketplace::subscription.plans.form.' . $key))
                     ->value((bool) ($options[$key] ?? false))
                     ->colspan(6)
+            );
+        }
+
+        $this->addCommissionOverrideFields($options);
+    }
+
+    /**
+     * Per-plan commission rates. Hybrid only: in commission mode the global rate is the only
+     * rate, and in subscription mode no commission is charged at all, so in both the fields
+     * would be dead controls that silently do nothing.
+     *
+     * @param  array<string, mixed>  $options
+     */
+    protected function addCommissionOverrideFields(array $options): void
+    {
+        if (MarketplaceHelper::getMode() !== MarketplaceModeEnum::HYBRID) {
+            return;
+        }
+
+        $this->add('commission_override_title', 'html', [
+            'html' => sprintf(
+                '<hr><h4>%s</h4><p class="text-muted">%s</p>',
+                e(trans('plugins/marketplace::subscription.plans.form.commission_override')),
+                e(trans('plugins/marketplace::subscription.plans.form.commission_override_helper'))
+            ),
+            'colspan' => 12,
+        ]);
+
+        foreach (['commission_percentage', 'commission_fixed'] as $key) {
+            $this->add(
+                sprintf('options[%s]', $key),
+                NumberField::class,
+                NumberFieldOption::make()
+                    ->label(trans('plugins/marketplace::subscription.plans.form.' . $key))
+                    ->helperText(trans('plugins/marketplace::subscription.plans.form.' . $key . '_helper'))
+                    ->value($options[$key] ?? -1)
+                    ->colspan(6)
+                    ->addAttribute('min', -1)
+                    ->addAttribute('step', 'any')
             );
         }
     }

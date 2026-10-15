@@ -11,6 +11,7 @@ use Botble\Ecommerce\Facades\OrderHelper;
 use Botble\Ecommerce\Models\Order as OrderModel;
 use Botble\Ecommerce\Models\ProductCategory;
 use Botble\Marketplace\Enums\MarketplaceModeEnum;
+use Botble\Marketplace\Models\SubscriptionPlan;
 use Botble\Media\Facades\RvMedia;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Theme\Facades\Theme;
@@ -37,8 +38,15 @@ class MarketplaceHelper
         return 'plugins/marketplace::themes.' . $view;
     }
 
-    public function getSetting(string $key, string|int|array|null|bool $default = ''): string|int|array|null|bool
-    {
+    /**
+     * float belongs in both unions: commission rates are decimals, and without it a value
+     * still held in memory as a float (rather than read back from the database as a string)
+     * is implicitly truncated - 4.5% silently becomes 4%.
+     */
+    public function getSetting(
+        string $key,
+        string|int|float|array|null|bool $default = ''
+    ): string|int|float|array|null|bool {
         return setting($this->getSettingKey($key), $default);
     }
 
@@ -54,7 +62,7 @@ class MarketplaceHelper
 
     public function getAssetVersion(): string
     {
-        return '2.2.1';
+        return '2.3.0';
     }
 
     public function isStoresPageEnabled(): bool
@@ -147,9 +155,49 @@ class MarketplaceHelper
         return $this->getMode() === MarketplaceModeEnum::COMMISSION;
     }
 
+    /**
+     * The commission half of hybrid: true whenever the marketplace takes a cut of each order.
+     * Prefer this over isCommissionMode() for anything touching fee math.
+     */
+    public function shouldChargeCommission(): bool
+    {
+        return in_array(
+            $this->getMode(),
+            [MarketplaceModeEnum::COMMISSION, MarketplaceModeEnum::HYBRID],
+            true
+        );
+    }
+
+    /**
+     * The subscription half of hybrid: true whenever vendors hold subscription plans.
+     * Prefer this over isSubscriptionMode() for plans, quotas, menus, cron and middleware.
+     */
+    public function hasVendorSubscriptions(): bool
+    {
+        return in_array(
+            $this->getMode(),
+            [MarketplaceModeEnum::SUBSCRIPTION, MarketplaceModeEnum::HYBRID],
+            true
+        );
+    }
+
     public function isSubscriptionBalancePaymentEnabled(): bool
     {
-        return $this->isSubscriptionMode() && (bool) $this->getSetting('subscription_allow_balance_payment', true);
+        return $this->hasVendorSubscriptions() && (bool) $this->getSetting('subscription_allow_balance_payment', true);
+    }
+
+    public function isPublicSubscriptionPlansEnabled(): bool
+    {
+        return $this->hasVendorSubscriptions()
+            && (bool) $this->getSetting('enable_public_subscription_plans', false);
+    }
+
+    /**
+     * @return array{url: string|null, label: string, disabled: bool}
+     */
+    public function subscriptionPlanCta(SubscriptionPlan $plan): array
+    {
+        return app(SubscriptionPlanCtaResolver::class)->resolve($plan);
     }
 
     public function subscriptionRequiresAdminApproval(): bool

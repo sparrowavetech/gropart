@@ -9,6 +9,7 @@ use Botble\Payment\Supports\PaymentFeeHelper;
 use Botble\Stripe\Forms\StripePaymentMethodForm;
 use Botble\Stripe\Services\Gateways\StripePaymentService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider;
 
 class HookServiceProvider extends ServiceProvider
@@ -108,9 +109,18 @@ class HookServiceProvider extends ServiceProvider
         $paymentData = apply_filters(PAYMENT_FILTER_PAYMENT_DATA, [], $request);
 
         $orderAmount = $paymentData['amount'] ?? 0;
-        $paymentFee = 0;
-        if (is_plugin_active('payment')) {
+
+        // Prefer the fee the checkout quoted. Both the ecommerce and the real estate checkouts
+        // already add their own surcharge to `amount` before handing it over, so recalculating
+        // from that figure compounds a percentage fee - the charge would then exceed the total the
+        // buyer was shown and the amount recorded on the payment. Same precedence rule as
+        // PaymentHelper::storeLocalPayment().
+        if (Arr::has($paymentData, 'payment_fee')) {
+            $paymentFee = (float) $paymentData['payment_fee'];
+        } elseif (is_plugin_active('payment')) {
             $paymentFee = PaymentFeeHelper::calculateFee(STRIPE_PAYMENT_METHOD_NAME, $orderAmount);
+        } else {
+            $paymentFee = 0;
         }
 
         $paymentData['payment_fee'] = $paymentFee;

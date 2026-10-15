@@ -83,7 +83,7 @@ return [
     'payment_method_description' => 'Hướng dẫn thanh toán - (Hiển thị trên thông báo mua hàng thành công và trang thanh toán)',
     'payment_via_cod' => 'Thanh toán khi nhận hàng (COD)',
     'payment_via_bank_transfer' => 'Chuyển khoản ngân hàng',
-    'payment_pending' => 'Thanh toán thành công. Thanh toán của bạn đang chờ xử lý và sẽ được nhân viên của chúng tôi kiểm tra.',
+    'payment_pending' => 'Thanh toán của bạn đang chờ xử lý và sẽ được xác nhận khi chúng tôi nhận được tiền.',
     'created_at' => 'Tạo lúc',
     'payment_channel' => 'Kênh thanh toán',
     'total' => 'Tổng cộng',
@@ -131,6 +131,8 @@ return [
     'payment_description' => 'Thanh toán cho đơn hàng #:order_id tại :site_url',
     'processing_fee' => 'Phí xử lý (Tùy chọn)',
     'fee_helper' => 'Phí bổ sung sẽ được tính khi khách hàng chọn phương thức thanh toán này. Nhập 0 để không tính phí.',
+    'fee_fixed' => 'Phí cố định bổ sung (Tùy chọn)',
+    'fee_fixed_helper' => 'Số tiền cố định được cộng thêm vào phí phần trăm ở trên, ví dụ kiểu Stripe "2.9% + phí cố định". Tính theo tiền tệ mặc định (:currency). Nhập 0 nếu không thu thêm phí cố định.',
     'payment_fee' => 'Phí thanh toán',
     'payment_log' => [
         'name' => 'Nhật ký thanh toán',

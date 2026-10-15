@@ -142,7 +142,7 @@ return [
         'admin_reply_our_response' => 'คำตอบของเรา:',
         'admin_reply_additional_questions' => 'หากคุณมีคำถามเพิ่มเติม สามารถตอบกลับอีเมลนี้หรือติดต่อเราอีกครั้งได้',
         'admin_reply_best_regards' => 'ขอแสดงความนับถือ',
-        'admin_reply_team' => 'ทีม {{ site_title }}',
+        'admin_reply_team' => 'ทีม :site_title',
 
         // Notice email template
         'notice_title' => 'ข้อความติดต่อใหม่',

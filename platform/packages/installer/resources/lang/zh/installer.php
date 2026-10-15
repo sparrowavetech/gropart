@@ -49,6 +49,7 @@ return [
             'title' => '环境设置',
         ],
         'errors' => '无法保存 .env 文件，请手动创建它。',
+        'database_connection_failed' => '无法连接到数据库。请检查数据库主机、端口、名称、用户名和密码。错误：:message',
     ],
     'theme' => [
         'title' => '选择主题',

@@ -31,13 +31,13 @@ class SiteMapManager
         );
     }
 
-    public function init(?string $prefix = null, string $extension = 'xml'): self
+    public function init(?string $prefix = null, string $extension = 'xml', string $cacheKeySuffix = ''): self
     {
         // create new site map object
         $this->siteMap = app('sitemap');
         // set cache (key (string), duration in minutes (Carbon|Datetime|int), turn on/off (boolean))
         // by default cache is disabled
-        $this->siteMap->setCache('cache_site_map_key' . $prefix . $extension, setting('cache_time_site_map', 60), setting('enable_cache_site_map', true));
+        $this->siteMap->setCache('cache_site_map_key' . $prefix . $extension . $cacheKeySuffix, setting('cache_time_site_map', 60), setting('enable_cache_site_map', true));
 
         // Auto-exclude content types disabled in sitemap settings
         $this->applyExcludedContentTypes();

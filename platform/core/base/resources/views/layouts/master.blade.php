@@ -1,4 +1,9 @@
 <x-core::layouts.base>
+    <a
+        href="#main-content"
+        class="visually-hidden-focusable skip-link"
+    >{{ trans('core/base::layouts.skip_to_main_content') }}</a>
+
     @include('core/base::layouts.' . AdminAppearance::getCurrentLayout() . '.partials.before-content')
 
     <div @class([
@@ -7,7 +12,11 @@
     ])>
         @include('core/base::layouts.partials.page-header')
 
-        <main class="page-body page-content">
+        <main
+            id="main-content"
+            class="page-body page-content"
+            tabindex="-1"
+        >
             <div class="{{ AdminAppearance::getContainerWidth() }}">
                 {!! apply_filters('core_layout_before_content', null) !!}
 

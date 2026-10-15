@@ -80,6 +80,37 @@ class MarketplacePaymentFeeTest extends BaseTestCase
         $this->assertSame($ordersTotal, $this->gatewayAmountFor('stripe', $ordersTotal));
     }
 
+    protected function storeFee(string $method, float $orderAmount, bool $isFirstStore): float
+    {
+        return app(OrderSupportServiceProvider::class, ['app' => app()])
+            ->calculateStorePaymentFee($method, $orderAmount, $isFirstStore);
+    }
+
+    public function test_fixed_fee_is_charged_once_per_checkout_not_per_vendor(): void
+    {
+        // A flat $2 COD fee is displayed once at checkout. It used to be added in full to every
+        // vendor sub-order, so a 3-vendor cart was charged $6.
+        $this->seedFee('cod', 2, PaymentFeeTypeEnum::FIXED);
+
+        $fees = [
+            $this->storeFee('cod', 40.0, true),
+            $this->storeFee('cod', 25.0, false),
+            $this->storeFee('cod', 60.0, false),
+        ];
+
+        $this->assertSame([2.0, 0.0, 0.0], $fees);
+        $this->assertSame(2.0, array_sum($fees));
+    }
+
+    public function test_percentage_fee_repeats_per_vendor_but_fee_fixed_applies_once(): void
+    {
+        // 2.9% + $0.30: the percentage part is proportional per vendor, the $0.30 only once.
+        $this->seedFee('stripe', 2.9, PaymentFeeTypeEnum::PERCENTAGE, 0.30);
+
+        $this->assertEqualsWithDelta(3.20, $this->storeFee('stripe', 100.0, true), 0.0001);
+        $this->assertEqualsWithDelta(1.45, $this->storeFee('stripe', 50.0, false), 0.0001);
+    }
+
     public function test_payment_method_is_still_reported_to_the_gateway(): void
     {
         // The fee block used to be the only reader of payment_method in this method; guard

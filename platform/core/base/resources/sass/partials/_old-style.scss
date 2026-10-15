@@ -48,7 +48,7 @@
     text-shadow: 0 0 0 var(--bb-body-color)
 }
 
-[data-bs-theme=dark] .ui-select, body[data-bs-theme=dark] [data-bs-theme=light] .ui-select {
+[data-bs-theme=dark] .ui-select, [data-bs-theme=dark] [data-bs-theme=light] .ui-select {
     --bb-form-select-bg-img: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23dce1e7' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E")
 }
 
@@ -90,6 +90,12 @@
         }
 
         input[type=checkbox] {
+            // This legacy markup paints its own check icon; Tabler 1.6 also draws one
+            // with a masked ::before on .form-check-input. Keep only ours.
+            &::before {
+                content: none;
+            }
+
             box-shadow: var(--bb-box-shadow-input);
             float: left;
             margin-left: -2rem;
@@ -277,6 +283,12 @@ label.text-title-field ~ label {
     margin-right: 1rem;
 
     input {
+        // This legacy markup paints its own check icon; Tabler 1.6 also draws one
+        // with a masked ::before on .form-check-input. Keep only ours.
+        &::before {
+            content: none;
+        }
+
         float: left;
         margin-left: -2rem;
         --bb-form-check-bg: var(--bb-bg-forms);

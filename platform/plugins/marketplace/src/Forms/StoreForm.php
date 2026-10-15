@@ -145,6 +145,7 @@ class StoreForm extends FormAbstract
             ->add('customer_id', SelectField::class, [
                 'label' => trans('plugins/marketplace::store.forms.store_owner'),
                 'required' => true,
+                'attr' => ['class' => 'select-search-full'],
                 'choices' => [0 => trans('plugins/marketplace::store.forms.select_store_owner')] + Customer::query()
                     ->where('is_vendor', true)
                     ->pluck('name', 'id')

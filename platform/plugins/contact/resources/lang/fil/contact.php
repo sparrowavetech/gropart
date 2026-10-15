@@ -142,7 +142,7 @@ return [
         'admin_reply_our_response' => 'Ang Aming Sagot:',
         'admin_reply_additional_questions' => 'Kung mayroon kang mga karagdagang tanong, huwag mag-atubiling sumagot sa email na ito o makipag-ugnayan sa amin muli.',
         'admin_reply_best_regards' => 'Mga Pagbati,',
-        'admin_reply_team' => 'Koponan ng {{ site_title }}',
+        'admin_reply_team' => 'Koponan ng :site_title',
 
         // Notice email template
         'notice_title' => 'Bagong Contact Message',

@@ -48,6 +48,7 @@ return [
         ],
         'success' => 'Teie .env faili seaded on salvestatud.',
         'errors' => '.env faili salvestamine ebaõnnestus, palun looge see käsitsi.',
+        'database_connection_failed' => 'Andmebaasiga ühenduse loomine ebaõnnestus. Palun kontrollige andmebaasi hosti, porti, nime, kasutajanime ja parooli. Viga: :message',
     ],
     'theme' => [
         'title' => 'Valige teema',

@@ -85,10 +85,13 @@ class LanguageFlagTest extends TestCase
     {
         config(['core.base.general.max_inline_language_flag_size' => 'not-a-number']);
 
-        $this->assertSame(4096, max_inline_language_flag_size());
+        $nonNumericSize = max_inline_language_flag_size();
 
         config(['core.base.general.max_inline_language_flag_size' => -1]);
 
-        $this->assertSame(4096, max_inline_language_flag_size());
+        $negativeSize = max_inline_language_flag_size();
+
+        $this->assertSame(4096, $nonNumericSize);
+        $this->assertSame(4096, $negativeSize);
     }
 }

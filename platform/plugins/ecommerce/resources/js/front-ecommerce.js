@@ -1256,7 +1256,9 @@ class Ecommerce {
             (price[1] ? currencies.decimal_separator + price[1] : '')
 
         if (currencies.show_symbol_or_title) {
-            price = currencies.is_prefix_symbol ? priceUnit + price : price + priceUnit
+            const space = priceUnit && currencies.space_between_price_and_currency ? ' ' : ''
+
+            price = currencies.is_prefix_symbol ? priceUnit + space + price : price + space + priceUnit
         }
 
         return price

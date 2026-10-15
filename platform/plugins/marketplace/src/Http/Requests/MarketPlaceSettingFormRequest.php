@@ -15,7 +15,7 @@ class MarketPlaceSettingFormRequest extends BaseProductRequest
 {
     protected function prepareForValidation(): void
     {
-        if (! array_filter($this->input('payout_methods'))) {
+        if (! array_filter((array) $this->input('payout_methods', []))) {
             $this->merge([
                 'payout_methods' => [],
             ]);
@@ -35,6 +35,7 @@ class MarketPlaceSettingFormRequest extends BaseProductRequest
     {
         $rules = [
             'mode' => ['required', Rule::in(MarketplaceModeEnum::values())],
+            'enable_public_subscription_plans' => ['sometimes', new OnOffRule()],
             'subscription_unpublish_products_on_expired' => ['sometimes', new OnOffRule()],
             'subscription_allow_balance_payment' => ['sometimes', new OnOffRule()],
             'subscription_require_admin_approval' => ['sometimes', new OnOffRule()],
@@ -86,7 +87,7 @@ class MarketPlaceSettingFormRequest extends BaseProductRequest
 
         if ($this->input('enable_commission_fee_for_each_category')) {
             // validate request setting category commission
-            $commissionByCategory = $this->input('commission_by_category');
+            $commissionByCategory = (array) $this->input('commission_by_category', []);
             foreach ($commissionByCategory as $key => $item) {
                 $commissionFeeName = sprintf('%s.%s.commission_fee', 'commission_by_category', $key);
                 $categoryName = sprintf('%s.%s.categories', 'commission_by_category', $key);
@@ -104,7 +105,7 @@ class MarketPlaceSettingFormRequest extends BaseProductRequest
 
         if ($this->input('enable_commission_fee_for_each_category') == 1) {
             // validate request setting category commission
-            $commissionByCategory = $this->input('commission_by_category');
+            $commissionByCategory = (array) $this->input('commission_by_category', []);
             foreach ($commissionByCategory as $key => $item) {
                 $commissionFeeName = sprintf('%s.%s.commission_fee', 'commission_by_category', $key);
                 $categoryName = sprintf('%s.%s.categories', 'commission_by_category', $key);

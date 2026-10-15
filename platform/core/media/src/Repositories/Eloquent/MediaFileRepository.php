@@ -376,7 +376,13 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
                 ->leftJoin('media_folders', 'media_folders.id', '=', 'media_files.folder_id')
                 ->where(function ($query): void {
                     $query
-                        ->where('media_files.folder_id', 0)
+                        // '0' as a string, never int 0: on installs configured for UUID keys
+                        // this column is char(36), and MySQL compares a char column to a number by
+                        // casting the STRING to a number - 'a29a4604-...' becomes 0, so `= 0`
+                        // matches every nested file and the root scope silently returns the whole
+                        // library. Quoting it forces a string comparison; on an int-keyed install
+                        // MySQL casts the '0' literal back to 0, so both schemas behave the same.
+                        ->where('media_files.folder_id', '0')
                         ->orWhereNull('media_folders.deleted_at');
                 });
         } else {
@@ -427,7 +433,9 @@ class MediaFileRepository extends RepositoriesAbstract implements MediaFileInter
             $files
                 ->leftJoin('media_folders', 'media_folders.id', '=', 'media_files.folder_id')
                 ->where(function (EloquentBuilder $query) use ($onlyTrashed): void {
-                    $query->where('media_files.folder_id', 0);
+                    // See the note on the sibling scope above: int 0 matches every UUID
+                    // folder_id under MySQL's string-to-number coercion.
+                    $query->where('media_files.folder_id', '0');
 
                     if ($onlyTrashed) {
                         // Mirror getTrashed(): files nested under a trashed folder are

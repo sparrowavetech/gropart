@@ -15,6 +15,18 @@ class InstallerStepThemePresetsTest extends TestCase
         parent::setUp();
 
         $this->resetStaticPresetCache();
+
+        // A product may register a permanent listener on this hook — Ecommerce SaaS
+        // forces the central install wizard's preset picker off, because a store's
+        // preset is chosen at signup, not during the platform's own install. That
+        // listener is process-wide hook state, so left in place every assertion
+        // below would see whatever the product decided instead of what
+        // Manager::getThemePresets() returns. This suite's job is the RAW
+        // transformation InstallerStep::getThemePresets() performs — id/name/
+        // database defaulting, string-entry filtering — so the hook is cleared
+        // here. A no-op on products that register nothing; parent::setUp()
+        // rebuilds a fresh Application for the next test either way.
+        remove_filter('cms_installer_theme_presets');
     }
 
     protected function tearDown(): void
@@ -44,7 +56,7 @@ class InstallerStepThemePresetsTest extends TestCase
      */
     protected function themeStub(): object
     {
-        return new class {
+        return new class () {
             public function getThemeScreenshot(string $theme, ?string $name = null): string
             {
                 return 'stub-screenshot.png';

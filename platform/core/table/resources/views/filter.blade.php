@@ -18,6 +18,7 @@
                     name="filter_columns[]"
                     :options="array_combine(array_keys($columns), array_column($columns, 'title'))"
                     class="filter-column-key"
+                    :aria-label="trans('core/table::table.select_field')"
                 />
             </div>
 
@@ -31,6 +32,7 @@
                         '<' => trans('core/table::table.less_than'),
                     ]"
                     class="filter-operator filter-column-operator"
+                    :aria-label="trans('core/table::table.operator')"
                 />
             </div>
 
@@ -40,6 +42,7 @@
                         class="form-control filter-column-value"
                         type="text"
                         placeholder="{{ trans('core/table::table.value') }}"
+                        aria-label="{{ trans('core/table::table.value') }}"
                         name="filter_values[]"
                     >
                 </span>
@@ -86,6 +89,7 @@
                                 array_combine(array_keys($columns), array_column($columns, 'title'))"
                             :value="$filterItem['column']"
                             class="filter-column-key"
+                            :aria-label="trans('core/table::table.select_field')"
                         />
                     </div>
 
@@ -100,6 +104,7 @@
                             ]"
                             :value="$filterItem['operator']"
                             class="filter-operator filter-column-operator"
+                            :aria-label="trans('core/table::table.operator')"
                         />
                     </div>
 
@@ -109,6 +114,7 @@
                                 class="form-control filter-column-value"
                                 type="text"
                                 placeholder="{{ trans('core/table::table.value') }}"
+                                aria-label="{{ trans('core/table::table.value') }}"
                                 name="filter_values[]"
                                 value="{{ $filterItem['value'] }}"
                             >
@@ -151,6 +157,7 @@
                 icon="ti ti-refresh"
                 class="w-6"
                 :icon-only="true"
+                :aria-label="trans('core/table::table.reset')"
             />
         </div>
     </x-core::form>

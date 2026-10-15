@@ -3,4 +3,5 @@
     type="checkbox"
     name="id[]"
     value="{{ $id }}"
+    aria-label="{{ trans('core/base::tables.select_row', ['id' => $id]) }}"
 >

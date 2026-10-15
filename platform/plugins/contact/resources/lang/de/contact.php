@@ -141,7 +141,7 @@ return [
         'admin_reply_our_response' => 'Unsere Antwort:',
         'admin_reply_additional_questions' => 'Wenn Sie weitere Fragen haben, können Sie gerne auf diese E-Mail antworten oder uns erneut kontaktieren.',
         'admin_reply_best_regards' => 'Mit freundlichen Grüßen,',
-        'admin_reply_team' => '{{ site_title }} Team',
+        'admin_reply_team' => ':site_title Team',
         'notice_title' => 'Neue Kontaktnachricht',
         'notice_greeting' => 'Lieber Administrator,',
         'notice_message_details' => 'Nachrichtendetails',

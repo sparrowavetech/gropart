@@ -48,6 +48,7 @@ return [
         ],
         'success' => 'Setările fișierului .env au fost salvate.',
         'errors' => 'Nu se poate salva fișierul .env, vă rugăm să îl creați manual.',
+        'database_connection_failed' => 'Nu s-a putut realiza conexiunea la baza de date. Verificați gazda, portul, numele, numele de utilizator și parola bazei de date. Eroare: :message',
     ],
     'theme' => [
         'title' => 'Alegeți tema',

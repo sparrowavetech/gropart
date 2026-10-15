@@ -141,7 +141,7 @@ return [
         'admin_reply_our_response' => 'ردنا:',
         'admin_reply_additional_questions' => 'إذا كان لديك أي أسئلة إضافية، لا تتردد في الرد على هذا البريد الإلكتروني أو الاتصال بنا مرة أخرى.',
         'admin_reply_best_regards' => 'مع أطيب التحيات،',
-        'admin_reply_team' => 'فريق {{ site_title }}',
+        'admin_reply_team' => 'فريق :site_title',
         'notice_title' => 'رسالة اتصال جديدة',
         'notice_greeting' => 'عزيزي المسؤول،',
         'notice_message_details' => 'تفاصيل الرسالة',

@@ -48,6 +48,7 @@ return [
         ],
         'success' => 'Tetapan fail .env anda telah disimpan.',
         'errors' => 'Tidak dapat menyimpan fail .env, Sila buat secara manual.',
+        'database_connection_failed' => 'Tidak dapat menyambung ke pangkalan data. Sila semak hos, port, nama, nama pengguna dan kata laluan pangkalan data. Ralat: :message',
     ],
     'theme' => [
         'title' => 'Pilih tema',

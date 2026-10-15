@@ -2,6 +2,7 @@
 
 return [
     'platform_admin' => 'Platform Administration',
+    'skip_to_main_content' => 'Skip to main content',
     'dashboard' => 'Dashboard',
     'widgets' => 'Widgets',
     'plugins' => 'Plugins',

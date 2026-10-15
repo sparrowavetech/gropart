@@ -27,6 +27,7 @@ return [
                 'shipment' => 'plugins/marketplace::marketplace.email.shipment',
                 'address' => 'plugins/marketplace::marketplace.email.address',
                 'products' => 'plugins/marketplace::marketplace.email.products',
+                'customer_email' => 'plugins/marketplace::marketplace.email.customer_email',
             ],
         ],
         'verify_vendor' => [
@@ -44,6 +45,7 @@ return [
                 'store_address' => 'plugins/marketplace::marketplace.store_address',
                 'store_url' => 'plugins/marketplace::marketplace.store_url',
                 'store' => 'plugins/marketplace::marketplace.email.store',
+                'customer_email' => 'plugins/marketplace::marketplace.email.customer_email',
             ],
         ],
         'vendor-account-approved' => [
@@ -186,6 +188,7 @@ return [
                 'order_id' => 'plugins/ecommerce::ecommerce.order_id',
                 'cancellation_reason' => 'plugins/ecommerce::order.order_cancellation_reason',
                 'product_list' => 'plugins/ecommerce::ecommerce.product_list',
+                'order_note' => 'plugins/ecommerce::ecommerce.order_note',
             ],
         ],
         'store-low-stock' => [
@@ -234,6 +237,7 @@ return [
                 'unverified_by' => 'plugins/marketplace::marketplace.email.unverified_by',
                 'unverified_at' => 'plugins/marketplace::marketplace.email.unverified_at',
                 'verification_note' => 'plugins/marketplace::marketplace.email.verification_note',
+                'contact_url' => 'plugins/marketplace::marketplace.email.contact_url',
             ],
         ],
         'vendor-subscription-activated' => [

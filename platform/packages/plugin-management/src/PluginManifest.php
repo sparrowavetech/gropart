@@ -73,6 +73,27 @@ class PluginManifest
 
         $plugins = get_active_plugins();
 
+        // Keep dependent plugins dormant when their required plugins are inactive.
+        // Repeat so indirect dependencies cannot boot against missing classes.
+        do {
+            $previousPlugins = $plugins;
+            $plugins = array_values(array_filter($plugins, function ($plugin) use ($previousPlugins): bool {
+                $path = plugin_path($plugin) . '/plugin.json';
+                if (! File::exists($path)) {
+                    return false;
+                }
+
+                $info = BaseHelper::getFileData($path);
+                foreach (Arr::get($info, 'require', []) as $dependency) {
+                    if (! in_array(Arr::last(explode('/', $dependency)), $previousPlugins, true)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }));
+        } while ($plugins !== $previousPlugins);
+
         foreach ($plugins as $plugin) {
             if (empty($plugin)) {
                 continue;

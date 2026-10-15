@@ -48,6 +48,7 @@ return [
         ],
         'success' => 'Jūsu .env faila iestatījumi ir saglabāti.',
         'errors' => 'Nevar saglabāt .env failu, lūdzu, izveidojiet to manuāli.',
+        'database_connection_failed' => 'Neizdevās izveidot savienojumu ar datubāzi. Lūdzu, pārbaudiet datubāzes resursdatoru, portu, nosaukumu, lietotājvārdu un paroli. Kļūda: :message',
     ],
     'theme' => [
         'title' => 'Izvēlieties tēmu',

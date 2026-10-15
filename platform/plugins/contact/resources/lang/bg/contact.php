@@ -141,7 +141,7 @@ return [
         'admin_reply_our_response' => 'Нашият отговор:',
         'admin_reply_additional_questions' => 'Ако имате допълнителни въпроси, не се колебайте да отговорите на този имейл или да се свържете с нас отново.',
         'admin_reply_best_regards' => 'С най-добри пожелания,',
-        'admin_reply_team' => 'Екип {{ site_title }}',
+        'admin_reply_team' => 'Екип :site_title',
         'notice_title' => 'Ново контактно съобщение',
         'notice_greeting' => 'Уважаеми администратор,',
         'notice_message_details' => 'Детайли на съобщението',

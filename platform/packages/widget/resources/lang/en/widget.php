@@ -6,6 +6,7 @@ return [
     'create' => 'New widget',
     'edit' => 'Edit widget',
     'delete' => 'Delete',
+    'back' => 'Back',
     'available' => 'Available Widgets',
     'usage_instruction' => 'To activate a widget drag and drop it to a sidebar. To deactivate a widget, open it in sidebar and click delete button.',
     'number_tag_display' => 'Number tags will be display',

@@ -141,7 +141,7 @@ return [
         'admin_reply_our_response' => '我们的回复:',
         'admin_reply_additional_questions' => '如果您有任何其他问题,请随时回复此电子邮件或再次联系我们。',
         'admin_reply_best_regards' => '此致敬礼,',
-        'admin_reply_team' => '{{ site_title }} 团队',
+        'admin_reply_team' => ':site_title 团队',
         'notice_title' => '新联系消息',
         'notice_greeting' => '尊敬的管理员,',
         'notice_message_details' => '消息详情',

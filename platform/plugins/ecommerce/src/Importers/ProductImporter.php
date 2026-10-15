@@ -175,6 +175,12 @@ class ProductImporter extends Importer implements WithMapping
                 ->rules([Rule::in(BaseStatusEnum::values())], trans('plugins/ecommerce::products.import.rules.in', ['attribute' => 'Status', 'values' => implode(', ', BaseStatusEnum::values())])),
             ImportColumn::make('is_featured')
                 ->rules(['nullable', 'bool'], trans('plugins/ecommerce::products.import.rules.nullable_bool', ['attribute' => 'Is featured'])),
+            ImportColumn::make('is_affiliate')
+                ->label('External product')
+                ->rules(['nullable', 'bool'], trans('plugins/ecommerce::products.import.rules.nullable_bool', ['attribute' => 'External product'])),
+            ImportColumn::make('external_url')
+                ->label('External URL')
+                ->rules(['nullable', 'string', 'max:400'], trans('plugins/ecommerce::products.import.rules.nullable_string_max', ['attribute' => 'External URL', 'max' => 400])),
             ImportColumn::make('brand')
                 ->rules(['nullable', 'string'], trans('plugins/ecommerce::products.import.rules.nullable_string', ['attribute' => 'Brand'])),
             ImportColumn::make('product_collections')
@@ -319,6 +325,8 @@ class ProductImporter extends Importer implements WithMapping
                 'categories' => 'category1,category2',
                 'status' => 'publish',
                 'is_featured' => 1,
+                'is_affiliate' => 0,
+                'external_url' => '',
                 'brand' => 'brand-name',
                 'product_collections' => 'collection1,collection2',
                 'labels' => 'label1,label2',
@@ -392,6 +400,8 @@ class ProductImporter extends Importer implements WithMapping
                 'categories' => implode(',', $product->categories->pluck('name')->all()),
                 'status' => $product->status->getValue(),
                 'is_featured' => $product->is_featured,
+                'is_affiliate' => $product->is_affiliate,
+                'external_url' => $product->external_url,
                 'brand' => $product->brand->name,
                 'product_collections' => implode(',', $product->productCollections->pluck('name')->all()),
                 'labels' => implode(',', $product->productLabels->pluck('name')->all()),
@@ -464,6 +474,8 @@ class ProductImporter extends Importer implements WithMapping
                         'categories' => '',
                         'status' => $variation->product->status->getValue(),
                         'is_featured' => '',
+                        'is_affiliate' => '',
+                        'external_url' => '',
                         'brand' => '',
                         'product_collections' => '',
                         'labels' => '',
@@ -1093,6 +1105,8 @@ class ProductImporter extends Importer implements WithMapping
             ['key' => 'cost_per_item', 'type' => 'number'],
             ['key' => 'barcode', 'type' => 'string'],
             ['key' => 'is_featured', 'type' => 'bool'],
+            ['key' => 'is_affiliate', 'type' => 'bool'],
+            ['key' => 'external_url', 'type' => 'string'],
             ['key' => 'product_labels', 'type' => 'array'],
             ['key' => 'labels', 'type' => 'array'],
             ['key' => 'images', 'type' => 'array'],

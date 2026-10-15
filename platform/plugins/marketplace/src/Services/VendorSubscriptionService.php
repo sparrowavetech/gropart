@@ -42,7 +42,7 @@ class VendorSubscriptionService
     {
         // Nothing to resolve, and nothing to create, while the marketplace runs on
         // commission — otherwise merely viewing a page would seed subscription rows.
-        if (! MarketplaceHelper::isSubscriptionMode()) {
+        if (! MarketplaceHelper::hasVendorSubscriptions()) {
             return null;
         }
 
@@ -119,7 +119,7 @@ class VendorSubscriptionService
 
     public function canPublishProducts(Customer $vendor): bool
     {
-        if (! MarketplaceHelper::isSubscriptionMode()) {
+        if (! MarketplaceHelper::hasVendorSubscriptions()) {
             return true;
         }
 
@@ -172,7 +172,7 @@ class VendorSubscriptionService
 
     public function canCreateProduct(Customer $vendor): bool
     {
-        if (! MarketplaceHelper::isSubscriptionMode()) {
+        if (! MarketplaceHelper::hasVendorSubscriptions()) {
             return true;
         }
 
@@ -190,7 +190,7 @@ class VendorSubscriptionService
      */
     public function allows(Customer $vendor, string $option): bool
     {
-        if (! MarketplaceHelper::isSubscriptionMode()) {
+        if (! MarketplaceHelper::hasVendorSubscriptions()) {
             return true;
         }
 

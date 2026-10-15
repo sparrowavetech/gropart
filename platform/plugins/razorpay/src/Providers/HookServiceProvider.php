@@ -224,8 +224,20 @@ class HookServiceProvider extends ServiceProvider
 
             do_action('payment_before_making_api_request', RAZORPAY_PAYMENT_METHOD_NAME, $requestData);
 
-            // @phpstan-ignore-next-line
-            $order = $api->order->create($requestData);
+            // Razorpay rejects orders it cannot accept (e.g. amount above the account's
+            // per-transaction limit, unsupported currency). Surface that as a checkout
+            // error instead of letting the API exception bubble up as a 500.
+            try {
+                // @phpstan-ignore-next-line
+                $order = $api->order->create($requestData);
+            } catch (Exception $exception) {
+                BaseHelper::logError($exception);
+
+                $data['error'] = true;
+                $data['message'] = $exception->getMessage();
+
+                return $data;
+            }
 
             do_action('payment_after_api_response', RAZORPAY_PAYMENT_METHOD_NAME, $requestData, $order->toArray());
 

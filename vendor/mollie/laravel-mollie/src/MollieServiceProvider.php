@@ -14,14 +14,9 @@ use RuntimeException;
 
 class MollieServiceProvider extends ServiceProvider
 {
-    const PACKAGE_VERSION = '4.1.0';
+    const PACKAGE_VERSION = '4.1.2';
 
-    /**
-     * Boot the service provider.
-     *
-     * @return void
-     */
-    public function boot()
+    public function boot(): void
     {
         $this->loadRoutesFrom(__DIR__ . '/../routes/webhook.php');
 
@@ -34,12 +29,7 @@ class MollieServiceProvider extends ServiceProvider
         }
     }
 
-    /**
-     * Register the service provider.
-     *
-     * @return void
-     */
-    public function register()
+    public function register(): void
     {
         $this->mergeConfigFrom(
             __DIR__ . '/../config/mollie.php', 'mollie'
@@ -51,7 +41,7 @@ class MollieServiceProvider extends ServiceProvider
                 $client = (new MollieApiClient(new MollieLaravelHttpClientAdapter))
                     ->addVersionString('MollieLaravel/' . self::PACKAGE_VERSION);
 
-                if (! empty($token = $app['config']['mollie.key'])) {
+                if ($token = config('mollie.key')) {
                     $client->setToken($token);
                 }
 
@@ -60,12 +50,21 @@ class MollieServiceProvider extends ServiceProvider
         );
 
         $this->app->singleton(SignatureValidator::class, function () {
+            $signingSecrets = config('mollie.webhooks.signing_secrets');
+
+            if (is_string($signingSecrets)) {
+                $signingSecrets = array_values(array_filter(
+                    array_map('trim', explode(',', $signingSecrets)),
+                    fn (string $secret) => $secret !== ''
+                ));
+            }
+
             throw_if(
-                ! config('mollie.webhooks.signing_secrets'),
+                ! $signingSecrets,
                 new RuntimeException('No signing secrets for Mollie webhooks are set')
             );
 
-            return new SignatureValidator(config('mollie.webhooks.signing_secrets'));
+            return new SignatureValidator($signingSecrets);
         });
 
         $this->app->bind(WebhookDispatcher::class, function (Container $app) {

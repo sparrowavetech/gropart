@@ -49,6 +49,7 @@ return [
         ],
         'success' => 'Your .env file settings have been saved.',
         'errors' => 'Unable to save the .env file, Please create it manually.',
+        'database_connection_failed' => 'Could not connect to the database. Please check the database host, port, name, username and password. Error: :message',
     ],
     'theme' => [
         'title' => 'Choose theme',

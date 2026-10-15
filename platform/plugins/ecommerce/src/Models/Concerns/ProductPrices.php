@@ -139,15 +139,12 @@ trait ProductPrices
     {
         return Attribute::get(function (): int {
             $convertedPrice = $this->getConvertedPrice();
-            $rawSale = $this->getRawSalePrice();
 
-            // Use the product's own sale_price (converted) for the percentage,
-            // ignoring pipeline reductions (cross-sale, up-sale). A sale price of
-            // exactly 0 is valid (100% off / free), so only null falls back to the
-            // base price.
-            $effectiveSale = $rawSale !== null && $rawSale >= 0
-                ? ($this->getConvertedSalePrice() ?? $rawSale)
-                : $convertedPrice;
+            // Base the percentage on publicly visible reductions only (own sale
+            // price, flash sale, promotion) and ignore contextual pipeline
+            // reductions (cross-sale, up-sale). A sale price of exactly 0 is
+            // valid (100% off / free).
+            $effectiveSale = $this->getPublicSalePrice();
 
             // getConvertedPrice() returns a float, so a strict !== 0 comparison
             // against an int would always pass and report 100% off for products
@@ -166,15 +163,31 @@ trait ProductPrices
 
     public function isOnSale(): bool
     {
-        // A product is on sale only when its own sale_price is genuinely lower
-        // than its base price. Use raw database values to avoid pipeline pollution
-        // (cross-sale/up-sale handlers that reduce front_sale_price at runtime).
+        // The product's own sale_price is checked against raw database values
+        // first, so a product stays "on sale" even when nothing else applies.
         // A sale price of exactly 0 is valid (100% off / free), so only null is
         // treated as "no sale price set".
         $rawSale = $this->getRawSalePrice();
         $base = $this->getRawPrice();
 
-        return $rawSale !== null && $rawSale >= 0 && $base - $rawSale > 0.00001;
+        if ($rawSale !== null && $rawSale >= 0 && $base - $rawSale > 0.00001) {
+            return true;
+        }
+
+        // A flash sale or a promotion is a public price cut as well and must
+        // render as on sale. Contextual reductions (cross-sale, up-sale) are
+        // excluded so they never pollute the sale badge or the struck-out price.
+        return $this->getConvertedPrice() - $this->getPublicSalePrice() > 0.00001;
+    }
+
+    /**
+     * Price after publicly visible reductions only: the product's own sale
+     * price, flash sale and promotions. Cross-sale and up-sale prices depend on
+     * what else is being viewed or bought, so they are deliberately excluded.
+     */
+    public function getPublicSalePrice(): float
+    {
+        return app(ProductPriceService::class)->getPublicPrice($this);
     }
 
     public function getOriginalPrice(): float

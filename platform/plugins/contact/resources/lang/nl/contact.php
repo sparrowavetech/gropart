@@ -141,7 +141,7 @@ return [
         'admin_reply_our_response' => 'Ons antwoord:',
         'admin_reply_additional_questions' => 'Als u aanvullende vragen heeft, aarzel dan niet om op deze e-mail te antwoorden of opnieuw contact met ons op te nemen.',
         'admin_reply_best_regards' => 'Met vriendelijke groet,',
-        'admin_reply_team' => '{{ site_title }} Team',
+        'admin_reply_team' => ':site_title Team',
         'notice_title' => 'Nieuw contactbericht',
         'notice_greeting' => 'Beste beheerder,',
         'notice_message_details' => 'Berichtdetails',

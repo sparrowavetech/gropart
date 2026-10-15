@@ -48,6 +48,7 @@ return [
         ],
         'success' => 'Jūsų .env failo nustatymai išsaugoti.',
         'errors' => 'Nepavyko išsaugoti .env failo, sukurkite jį rankiniu būdu.',
+        'database_connection_failed' => 'Nepavyko prisijungti prie duomenų bazės. Patikrinkite duomenų bazės serverį, prievadą, pavadinimą, naudotojo vardą ir slaptažodį. Klaida: :message',
     ],
     'theme' => [
         'title' => 'Pasirinkite temą',

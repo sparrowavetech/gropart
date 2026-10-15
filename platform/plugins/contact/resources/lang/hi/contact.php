@@ -142,7 +142,7 @@ return [
         'admin_reply_our_response' => 'Our Response:',
         'admin_reply_additional_questions' => 'If you have any additional questions, feel free to reply to this email or contact us again.',
         'admin_reply_best_regards' => 'Best regards,',
-        'admin_reply_team' => '{{ site_title }} Team',
+        'admin_reply_team' => ':site_title Team',
 
         // Notice email template
         'notice_title' => 'New Contact Message',

@@ -48,6 +48,7 @@ return [
         ],
         'success' => '.env dosyanızın ayarları kaydedildi.',
         'errors' => '.env dosyası kaydedilemedi. Lütfen manuel olarak oluşturun.',
+        'database_connection_failed' => 'Veritabanına bağlanılamadı. Lütfen veritabanı sunucusunu, portunu, adını, kullanıcı adını ve şifresini kontrol edin. Hata: :message',
     ],
     'theme' => [
         'title' => 'Tema seçin',

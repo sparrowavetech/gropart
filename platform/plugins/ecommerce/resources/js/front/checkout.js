@@ -526,6 +526,33 @@ class MainCheckout {
                     }
                 })
             })
+            .on('click', '[data-bb-toggle="remove-checkout-item"]', (e) => {
+                const $button = $(e.currentTarget)
+
+                $.ajax({
+                    type: 'GET',
+                    url: $button.data('url'),
+                    beforeSend: () => {
+                        $button.prop('disabled', true)
+                    },
+                    success: ({ error, message }) => {
+                        if (error) {
+                            MainCheckout.showError(message)
+                            $button.prop('disabled', false)
+                            return
+                        }
+
+                        // Removing an item can drop a whole vendor group, its shipping methods and
+                        // applied discounts, so reload to rebuild checkout from the updated cart.
+                        // An empty cart is redirected to the cart page by the checkout controller.
+                        window.location.reload()
+                    },
+                    error: (error) => {
+                        $button.prop('disabled', false)
+                        MainCheckout.handleError(error)
+                    },
+                })
+            })
 
         document.dispatchEvent(new CustomEvent('checkout:init'))
     }

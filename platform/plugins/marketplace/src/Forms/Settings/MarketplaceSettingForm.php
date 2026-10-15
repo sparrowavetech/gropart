@@ -14,6 +14,7 @@ use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Marketplace\Enums\MarketplaceModeEnum;
 use Botble\Marketplace\Enums\WithdrawalFeeTypeEnum;
 use Botble\Marketplace\Facades\MarketplaceHelper;
+use Botble\Marketplace\Forms\Settings\Concerns\HasModeCollapsible;
 use Botble\Marketplace\Forms\Settings\Concerns\HasSubscriptionFields;
 use Botble\Marketplace\Http\Requests\MarketPlaceSettingFormRequest;
 use Botble\Marketplace\Models\Store;
@@ -22,6 +23,7 @@ use Botble\Setting\Forms\SettingForm;
 
 class MarketplaceSettingForm extends SettingForm
 {
+    use HasModeCollapsible;
     use HasSubscriptionFields;
 
     public function setup(): void
@@ -50,7 +52,7 @@ class MarketplaceSettingForm extends SettingForm
             ->setValidatorClass(MarketPlaceSettingFormRequest::class)
             ->contentOnly()
             ->addMarketplaceModeField()
-            ->addOpenCollapsible('mode', MarketplaceModeEnum::COMMISSION, MarketplaceHelper::getMode())
+            ->addOpenModeCollapsible([MarketplaceModeEnum::COMMISSION, MarketplaceModeEnum::HYBRID])
             ->add(
                 'fee_per_order',
                 NumberField::class,
@@ -87,7 +89,7 @@ class MarketplaceSettingForm extends SettingForm
                     compact('commissionEachCategory')
                 )->render(),
             ])
-            ->addCloseCollapsible('mode', MarketplaceModeEnum::COMMISSION)
+            ->addCloseModeCollapsible([MarketplaceModeEnum::COMMISSION, MarketplaceModeEnum::HYBRID])
             ->addSubscriptionFields()
             ->add(
                 'fee_withdrawal',

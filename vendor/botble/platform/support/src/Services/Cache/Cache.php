@@ -68,8 +68,8 @@ class Cache implements CacheInterface
 
     public function remember(string $key, Closure|DateTimeInterface|DateInterval|int|null $ttl, Closure $callback): mixed
     {
-        if ($this->has($key)) {
-            return $this->get($key);
+        if ($this->has($key) && ! is_null($value = $this->get($key))) {
+            return $value;
         }
 
         $value = value($callback);

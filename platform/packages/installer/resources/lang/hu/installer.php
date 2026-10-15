@@ -48,6 +48,7 @@ return [
         ],
         'success' => 'A .env fájl beállításai mentve lettek.',
         'errors' => 'Nem sikerült menteni a .env fájlt, kérjük, hozza létre manuálisan.',
+        'database_connection_failed' => 'Nem sikerült csatlakozni az adatbázishoz. Kérjük, ellenőrizze az adatbázis kiszolgálóját, portját, nevét, felhasználónevét és jelszavát. Hiba: :message',
     ],
     'theme' => [
         'title' => 'Téma kiválasztása',

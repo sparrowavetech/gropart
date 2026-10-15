@@ -49,7 +49,11 @@ class RequirementsChecker
             }
         }
 
-        return $results;
+        // Lets a build add its own checks — a service it cannot run without, a
+        // connectivity probe — without this package knowing what they are. Listeners
+        // add rows under `$results['requirements'][<type>]` and set
+        // `$results['errors']` to hold the wizard on this step.
+        return apply_filters('cms_installer_requirements', $results);
     }
 
     public function checkPhpVersion(?string $minPhpVersion = null): array

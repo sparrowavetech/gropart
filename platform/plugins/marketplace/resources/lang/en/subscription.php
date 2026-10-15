@@ -4,6 +4,7 @@ return [
     'modes' => [
         'commission' => 'Commission based',
         'subscription' => 'Subscription based',
+        'hybrid' => 'Subscription + commission',
     ],
 
     'statuses' => [
@@ -44,6 +45,12 @@ return [
             'allow_product_import' => 'Allow importing products',
             'listing_priority' => 'Listing priority',
             'listing_priority_helper' => 'Higher values are shown first in store and product listings.',
+            'commission_override' => 'Commission override',
+            'commission_override_helper' => 'Hybrid mode only. Set the commission this plan\'s vendors pay on each order. Changes apply from the vendor\'s next renewal, not to their current period.',
+            'commission_percentage' => 'Commission (%)',
+            'commission_percentage_helper' => 'Use -1 to inherit the global commission fee. 0 means this plan pays no percentage commission.',
+            'commission_fixed' => 'Fixed commission (per order)',
+            'commission_fixed_helper' => 'Use -1 to inherit the global fixed commission fee. 0 means this plan pays no fixed fee.',
         ],
         'default_must_be_free' => 'The default plan is assigned automatically to vendors, so its price must be 0.',
     ],
@@ -164,8 +171,9 @@ return [
     ],
 
     'settings' => [
+        'no_default_plan_warning' => 'Settings saved. There is no published default plan, so vendors without a subscription cannot publish products. Create a default plan to avoid locking them out of their dashboard.',
         'mode' => 'Marketplace mode',
-        'mode_helper' => 'Commission based: you take a percentage of every order. Subscription based: vendors buy a plan to post listings and you take no commission.',
+        'mode_helper' => 'Commission based: you take a percentage of every order. Subscription based: vendors buy a plan to post listings and you take no commission. Subscription + commission: vendors buy a plan and you also take a commission, which is how you cover payment gateway fees where surcharging the buyer is not allowed.',
         'title' => 'Vendor subscriptions',
         'description' => 'Configure how vendors buy and renew their subscription plans.',
         'manage_plans' => 'Manage subscription plans',
@@ -186,6 +194,19 @@ return [
         'tax_enabled_helper' => 'Uses the default tax rate and its zone rules from ecommerce settings. Requires tax to be enabled for the store.',
         'invoice_prefix' => 'Subscription invoice prefix',
         'invoice_prefix_helper' => 'Subscription invoices are numbered separately from order invoices. For example: SUB-',
+        'enable_public_plans' => 'Show subscription plans publicly',
+        'enable_public_plans_helper' => 'Publish a public pricing page that anyone can view. The subscription plans shortcode works even when this is off.',
+    ],
+
+    'public' => [
+        'description' => 'Choose the plan that fits your store and start selling.',
+        'get_started' => 'Get started',
+        'sign_in' => 'Sign in',
+        'become_vendor' => 'Become a vendor',
+        'no_plans' => 'No subscription plans are available right now.',
+        'shortcode_name' => 'Vendor subscription plans',
+        'shortcode_description' => 'Display the public vendor subscription plans with pricing and a call to action.',
+        'shortcode_limit' => 'Number of plans to show',
     ],
 
     'billing' => [
@@ -268,27 +289,27 @@ return [
     'email' => [
         'vendor_subscription_activated_title' => 'Subscription activated',
         'vendor_subscription_activated_description' => 'Sent to a vendor when their subscription plan becomes active.',
-        'vendor_subscription_activated_subject' => 'Your :plan_name subscription is active',
+        'vendor_subscription_activated_subject' => 'Your {{ plan_name }} subscription is active',
 
         'vendor_subscription_renewed_title' => 'Subscription renewed',
         'vendor_subscription_renewed_description' => 'Sent to a vendor when their subscription is renewed.',
-        'vendor_subscription_renewed_subject' => 'Your :plan_name subscription has been renewed',
+        'vendor_subscription_renewed_subject' => 'Your {{ plan_name }} subscription has been renewed',
 
         'vendor_subscription_expiring_title' => 'Subscription expiring soon',
         'vendor_subscription_expiring_description' => 'Sent to a vendor a few days before their subscription expires.',
-        'vendor_subscription_expiring_subject' => 'Your :plan_name subscription expires in :days_left day(s)',
+        'vendor_subscription_expiring_subject' => 'Your {{ plan_name }} subscription expires in {{ days_left }} day(s)',
 
         'vendor_subscription_renewal_failed_title' => 'Automatic renewal failed',
         'vendor_subscription_renewal_failed_description' => 'Sent to a vendor when an automatic renewal could not be charged.',
-        'vendor_subscription_renewal_failed_subject' => 'We could not renew your :plan_name subscription',
+        'vendor_subscription_renewal_failed_subject' => 'We could not renew your {{ plan_name }} subscription',
 
         'vendor_subscription_expired_title' => 'Subscription expired',
         'vendor_subscription_expired_description' => 'Sent to a vendor when their subscription has expired.',
-        'vendor_subscription_expired_subject' => 'Your :plan_name subscription has expired',
+        'vendor_subscription_expired_subject' => 'Your {{ plan_name }} subscription has expired',
 
         'vendor_subscription_rejected_title' => 'Subscription rejected',
         'vendor_subscription_rejected_description' => 'Sent to a vendor when an administrator rejects their subscription request.',
-        'vendor_subscription_rejected_subject' => 'Your :plan_name subscription request was not approved',
+        'vendor_subscription_rejected_subject' => 'Your {{ plan_name }} subscription request was not approved',
 
         'vendor_subscription_pending_approval_title' => 'Subscription awaiting approval',
         'vendor_subscription_pending_approval_description' => 'Sent to administrators when a vendor subscription needs manual approval.',

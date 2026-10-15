@@ -18,8 +18,8 @@ class ExpireVendorSubscriptionsCommand extends Command
 {
     public function handle(SubscriptionRenewalService $renewalService): int
     {
-        if (! MarketplaceHelper::isSubscriptionMode()) {
-            $this->components->info('Marketplace is not in subscription mode, nothing to do.');
+        if (! MarketplaceHelper::hasVendorSubscriptions()) {
+            $this->components->info('Marketplace has no vendor subscriptions, nothing to do.');
 
             return self::SUCCESS;
         }

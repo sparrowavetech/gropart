@@ -58,6 +58,7 @@ class PreferenceForm extends FormAbstract
                     ->choices([
                         'light' => trans('core/setting::setting.admin_appearance.light'),
                         'dark' => trans('core/setting::setting.admin_appearance.dark'),
+                        'system' => trans('core/setting::setting.admin_appearance.system'),
                     ])
                     ->selected($user->getMeta('theme_mode', 'light'))
             )

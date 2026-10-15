@@ -142,7 +142,7 @@ return [
         'admin_reply_our_response' => 'Răspunsul nostru:',
         'admin_reply_additional_questions' => 'Dacă aveți întrebări suplimentare, vă rugăm să răspundeți la acest e-mail sau să ne contactați din nou.',
         'admin_reply_best_regards' => 'Cu stimă,',
-        'admin_reply_team' => 'Echipa {{ site_title }}',
+        'admin_reply_team' => 'Echipa :site_title',
 
         // Notice email template
         'notice_title' => 'Mesaj de contact nou',

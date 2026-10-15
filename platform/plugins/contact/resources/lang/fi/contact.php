@@ -142,7 +142,7 @@ return [
         'admin_reply_our_response' => 'Vastauksemme:',
         'admin_reply_additional_questions' => 'Jos sinulla on lisäkysymyksiä, vastaa tähän sähköpostiin tai ota meihin yhteyttä uudelleen.',
         'admin_reply_best_regards' => 'Ystävällisin terveisin,',
-        'admin_reply_team' => '{{ site_title }} Tiimi',
+        'admin_reply_team' => ':site_title Tiimi',
 
         // Notice email template
         'notice_title' => 'Uusi yhteydenottoviesti',

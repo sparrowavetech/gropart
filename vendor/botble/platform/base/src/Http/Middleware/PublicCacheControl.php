@@ -107,6 +107,18 @@ class PublicCacheControl
             return 'unsafe-method';
         }
 
+        // Only GET can be judged here. Symfony's Response::prepare() clears the body of a
+        // HEAD response (RFC 9110) inside the routing pipeline, long before RequestHandled
+        // fires, so responseContainsFlashMessages() and responseContainsCsrfTokens() below
+        // would both inspect an empty string and wave the response through: the very same
+        // URL would come back "private" as GET and "public" as HEAD, with its session
+        // cookies stripped. An intermediary may use that HEAD to refresh the metadata of
+        // the stored GET entry, so the cheapest correct answer is to never advertise a
+        // non-GET response as publicly cacheable.
+        if (! $request->isMethod('GET')) {
+            return 'non-get-method';
+        }
+
         if (! $response->isSuccessful()) {
             return 'unsuccessful-status';
         }

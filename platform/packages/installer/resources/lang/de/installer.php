@@ -49,6 +49,7 @@ return [
         ],
         'success' => 'Ihre .env-Dateieinstellungen wurden gespeichert.',
         'errors' => 'Die .env-Datei konnte nicht gespeichert werden. Bitte erstellen Sie sie manuell.',
+        'database_connection_failed' => 'Verbindung zur Datenbank fehlgeschlagen. Bitte überprüfen Sie Datenbank-Host, Port, Name, Benutzername und Passwort. Fehler: :message',
     ],
     'theme' => [
         'title' => 'Wählen Sie Thema',

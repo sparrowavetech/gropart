@@ -49,6 +49,7 @@ return [
                 'product_list' => 'plugins/ecommerce::ecommerce.product_list',
                 'order_note' => 'plugins/ecommerce::ecommerce.order_note',
                 'order_id' => 'plugins/ecommerce::ecommerce.order_id',
+                'customer_email' => 'plugins/ecommerce::ecommerce.customer_email',
             ],
         ],
         'customer_cancel_order' => [
@@ -61,6 +62,7 @@ return [
                 'order_id' => 'plugins/ecommerce::ecommerce.order_id',
                 'cancellation_reason' => 'plugins/ecommerce::order.order_cancellation_reason',
                 'product_list' => 'plugins/ecommerce::ecommerce.product_list',
+                'order_note' => 'plugins/ecommerce::ecommerce.order_note',
             ],
         ],
         'admin_cancel_order' => [
@@ -73,6 +75,7 @@ return [
                 'order_id' => 'plugins/ecommerce::ecommerce.order_id',
                 'cancellation_reason' => 'plugins/ecommerce::order.order_cancellation_reason',
                 'product_list' => 'plugins/ecommerce::ecommerce.product_list',
+                'order_note' => 'plugins/ecommerce::ecommerce.order_note',
             ],
         ],
         'order_cancellation_to_admin' => [
@@ -86,6 +89,7 @@ return [
                 'order_id' => 'plugins/ecommerce::ecommerce.order_id',
                 'cancellation_reason' => 'plugins/ecommerce::order.order_cancellation_reason',
                 'product_list' => 'plugins/ecommerce::ecommerce.product_list',
+                'order_note' => 'plugins/ecommerce::ecommerce.order_note',
             ],
         ],
         'customer_delivery_order' => [
@@ -101,6 +105,7 @@ return [
                 'shipping_company_name' => 'plugins/ecommerce::ecommerce.shipping_company_name',
                 'tracking_id' => 'plugins/ecommerce::ecommerce.tracking_id',
                 'tracking_link' => 'plugins/ecommerce::ecommerce.tracking_link',
+                'order_note' => 'plugins/ecommerce::ecommerce.order_note',
             ],
         ],
         'customer_order_delivered' => [
@@ -117,6 +122,7 @@ return [
                 'shipping_company_name' => 'plugins/ecommerce::ecommerce.shipping_company_name',
                 'tracking_id' => 'plugins/ecommerce::ecommerce.tracking_id',
                 'tracking_link' => 'plugins/ecommerce::ecommerce.tracking_link',
+                'order_note' => 'plugins/ecommerce::ecommerce.order_note',
             ],
         ],
         'admin_new_order' => [
@@ -134,6 +140,7 @@ return [
                 'product_list' => 'plugins/ecommerce::ecommerce.product_list',
                 'order_note' => 'plugins/ecommerce::ecommerce.order_note',
                 'order_id' => 'plugins/ecommerce::ecommerce.order_id',
+                'customer_email' => 'plugins/ecommerce::ecommerce.customer_email',
             ],
         ],
         'order_confirm' => [
@@ -150,6 +157,7 @@ return [
                 'product_list' => 'plugins/ecommerce::ecommerce.product_list',
                 'order_note' => 'plugins/ecommerce::ecommerce.order_note',
                 'order_id' => 'plugins/ecommerce::ecommerce.order_id',
+                'customer_email' => 'plugins/ecommerce::ecommerce.customer_email',
             ],
         ],
         'order_confirm_payment' => [
@@ -166,6 +174,7 @@ return [
                 'product_list' => 'plugins/ecommerce::ecommerce.product_list',
                 'order_note' => 'plugins/ecommerce::ecommerce.order_note',
                 'order_id' => 'plugins/ecommerce::ecommerce.order_id',
+                'customer_email' => 'plugins/ecommerce::ecommerce.customer_email',
             ],
         ],
         'order_recover' => [
@@ -252,6 +261,7 @@ return [
                 'order_note' => 'plugins/ecommerce::ecommerce.order_note',
                 'return_reason' => 'plugins/ecommerce::order.order_return_reason',
                 'product_list' => 'plugins/ecommerce::ecommerce.product_list',
+                'customer_email' => 'plugins/ecommerce::ecommerce.customer_email',
             ],
         ],
         'invoice-payment-created' => [

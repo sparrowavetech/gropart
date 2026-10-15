@@ -33,6 +33,7 @@ import postcss from 'postcss'
 import autoprefixer from 'autoprefixer'
 import cssnano from 'cssnano'
 import rtlcss from 'rtlcss'
+import { prefixCssVars } from './vite-build-css-var-prefix.mjs'
 import { glob } from 'node:fs/promises'
 import { dirname, resolve, join, relative } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -314,35 +315,55 @@ const inlineSfcCssPlugin = {
 
 // ============================================================================
 // Sass builds — compile via the modern Sass JS API, run through postcss
-// (autoprefixer + cssnano in prod), optionally rtlcss a sibling.
+// (autoprefixer, then cssnano in prod), optionally rtlcss a sibling.
+//
+// An entry may `prepend` a second stylesheet compiled on its own and put in
+// front of the entry's CSS. It's used for Tabler: its Sass writes bare custom
+// properties (`--primary`), so only that part gets the `cssVarPrefix` pass.
+// Botble partials keep their own unprefixed variables.
 // ============================================================================
 async function buildAllSass(spec, ctx) {
     if (!spec.sass?.length) return
     await Promise.all(spec.sass.map((entry) => buildSassEntry(entry, ctx)))
 }
 
+function compileSass(srcPath, ctx) {
+    return sass.compile(srcPath, {
+        style: 'expanded', // cssnano handles minification below
+        loadPaths: [resolve(REPO_ROOT, 'node_modules'), resolve(ctx.source, 'resources/sass')],
+        silenceDeprecations: SASS_SILENCED,
+        quietDeps: true,
+    }).css
+}
+
 async function buildSassEntry(entry, ctx) {
-    const srcPath = resolve(ctx.source, entry.src)
     const outPath = resolve(ctx.dist, 'css', entry.out)
     const outDir = dirname(outPath)
 
-    const result = sass.compile(srcPath, {
-        style: 'expanded', // cssnano handles minification below
-        sourceMap: !IS_PROD,
-        loadPaths: [resolve(REPO_ROOT, 'node_modules'), resolve(ctx.source, 'resources/sass')],
-        silenceDeprecations: SASS_SILENCED,
-    })
+    let css = compileSass(resolve(ctx.source, entry.src), ctx)
 
-    const plugins = [autoprefixer]
-    if (IS_PROD) plugins.push(cssnano({ preset: 'default' }))
-    const processed = await postcss(plugins).process(result.css, { from: undefined, to: outPath })
+    if (entry.prepend) {
+        const { src, cssVarPrefix } = entry.prepend
+        let prependCss = compileSass(resolve(ctx.source, src), ctx)
+        if (cssVarPrefix) prependCss = await prefixCssVars(prependCss, cssVarPrefix)
+        css = `${prependCss}\n${css}`
+    }
+
+    const { css: ltr } = await postcss([autoprefixer]).process(css, { from: undefined, to: outPath })
+
+    // rtlcss must see the un-minified CSS: cssnano strips the /*rtl:...*/
+    // directive comments that rtlcss reads.
+    const outputs = [[outPath, ltr]]
+    if (entry.rtl) outputs.push([resolve(outDir, entry.rtl), rtlcss.process(ltr)])
 
     await mkdir(outDir, { recursive: true })
-    await writeFile(outPath, processed.css)
+    await Promise.all(outputs.map(async ([path, content]) => writeFile(path, await minifyCss(content, path))))
+}
 
-    if (entry.rtl) {
-        await writeFile(resolve(outDir, entry.rtl), rtlcss.process(processed.css))
-    }
+async function minifyCss(css, outPath) {
+    if (!IS_PROD) return css
+    const result = await postcss([cssnano({ preset: 'default' })]).process(css, { from: undefined, to: outPath })
+    return result.css
 }
 
 // ============================================================================

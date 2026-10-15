@@ -1,6 +1,6 @@
 <?php
 
-use Botble\LanguageAdvanced\Http\Controllers\LanguageAdvancedController;
+use Botble\Marketplace\Http\Controllers\Fronts\LanguageAdvancedController;
 use Illuminate\Support\Facades\Route;
 
 Route::group([

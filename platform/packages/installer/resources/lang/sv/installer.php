@@ -48,6 +48,7 @@ return [
         ],
         'success' => 'Dina .env-filinställningar har sparats.',
         'errors' => 'Kan inte spara .env-filen, vänligen skapa den manuellt.',
+        'database_connection_failed' => 'Kunde inte ansluta till databasen. Kontrollera databasens värd, port, namn, användarnamn och lösenord. Fel: :message',
     ],
     'theme' => [
         'title' => 'Välj tema',

@@ -12,7 +12,11 @@ export default {
         'vue-app', 'repeater-field', 'system-update', 'crop-image',
     ],
     sass: [
-        { src: 'resources/sass/core.scss',                     out: 'core.css',              rtl: 'core.rtl.css' },
+        {
+            src: 'resources/sass/core.scss', out: 'core.css', rtl: 'core.rtl.css',
+            // Tabler is compiled separately and gets the `bb-` custom property prefix.
+            prepend: { src: 'resources/sass/tabler.scss', cssVarPrefix: 'bb-' },
+        },
         { src: 'resources/sass/libraries/select2/select2.scss', out: 'libraries/select2.css', rtl: 'select2.rtl.css' },
         { src: 'resources/sass/components/error-pages.scss',   out: 'error-pages.css' },
         { src: 'resources/sass/components/tree-category.scss', out: 'tree-category.css' },

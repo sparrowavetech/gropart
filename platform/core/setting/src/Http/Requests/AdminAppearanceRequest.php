@@ -20,7 +20,7 @@ class AdminAppearanceRequest extends Request
             'admin_favicon' => ['nullable', 'string'],
             'admin_favicon_type' => ['nullable', 'string', 'in:image/x-icon,image/png,image/svg+xml,image/gif,image/jpeg,image/webp'],
             'login_screen_backgrounds' => ['nullable', 'array'],
-            'login_screen_backgrounds*' => ['string', 'required'],
+            'login_screen_backgrounds.*' => ['nullable', 'string', 'max:255'],
             'admin_title' => ['nullable', 'string', 'max:255'],
             'admin_appearance_locale' => ['sometimes', 'nullable', Rule::in(['' , ...array_keys(AdminHelper::getAdminLocales())])],
             'admin_appearance_locale_direction' => ['required', 'in:ltr,rtl'],

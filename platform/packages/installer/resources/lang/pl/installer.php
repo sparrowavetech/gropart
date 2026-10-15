@@ -48,6 +48,7 @@ return [
         ],
         'success' => 'Ustawienia pliku .env zostały zapisane.',
         'errors' => 'Nie można zapisać pliku .env, utwórz go ręcznie.',
+        'database_connection_failed' => 'Nie można połączyć się z bazą danych. Sprawdź host, port, nazwę, nazwę użytkownika i hasło bazy danych. Błąd: :message',
     ],
     'theme' => [
         'title' => 'Wybierz motyw',

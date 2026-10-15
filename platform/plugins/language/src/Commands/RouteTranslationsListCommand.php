@@ -7,15 +7,31 @@ use Botble\Language\Traits\TranslatedRouteCommandContext;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Foundation\Console\RouteListCommand;
+use Illuminate\Routing\Router;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 
+#[AsCommand(name: 'route:trans:list')]
 class RouteTranslationsListCommand extends RouteListCommand implements PromptsForMissingInput
 {
     use TranslatedRouteCommandContext;
 
-    protected $name = 'route:trans:list';
-
     protected $description = 'List all registered routes for specific locales';
+
+    public function __construct(Router $router)
+    {
+        // The parent declares a $signature ('route:list ...') since Laravel 13, and
+        // Command::__construct() lets an inherited signature win over $name - which made
+        // this command replace the framework's own route:list. Let the parent build its
+        // full option set first, then rename and add the locale argument on top.
+        parent::__construct($router);
+
+        // The description is already applied by Command::__construct(); only the name
+        // and the extra argument need correcting here.
+        $this
+            ->setName('route:trans:list')
+            ->addArgument('locale', InputArgument::REQUIRED, 'The locale to list routes for.');
+    }
 
     public function handle(): int
     {
@@ -51,10 +67,5 @@ class RouteTranslationsListCommand extends RouteListCommand implements PromptsFo
         }
 
         $this->router = $app['router'];
-    }
-
-    protected function configure(): void
-    {
-        $this->addArgument('locale', InputArgument::REQUIRED, 'The locale to list routes for.');
     }
 }

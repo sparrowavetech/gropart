@@ -142,7 +142,7 @@ return [
         'admin_reply_our_response' => 'Naša odpoveď:',
         'admin_reply_additional_questions' => 'Ak máte ďalšie otázky, neváhajte odpovedať na tento e-mail alebo nás opäť kontaktujte.',
         'admin_reply_best_regards' => 'S pozdravom,',
-        'admin_reply_team' => 'Tím {{ site_title }}',
+        'admin_reply_team' => 'Tím :site_title',
 
         // Notice email template
         'notice_title' => 'Nová kontaktná správa',

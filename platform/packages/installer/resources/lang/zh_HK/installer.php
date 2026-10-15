@@ -48,6 +48,7 @@ return [
         ],
         'success' => '你的 .env 文件設置已經保存。',
         'errors' => '無法保存 .env 文件，請手動創建它。',
+        'database_connection_failed' => '無法連接到數據庫。請檢查數據庫主機、端口、名稱、用戶名和密碼。錯誤：:message',
     ],
     'theme' => [
         'title' => '選擇主題',

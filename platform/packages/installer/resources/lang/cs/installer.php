@@ -48,6 +48,7 @@ return [
         ],
         'success' => 'Nastavení vašeho souboru .env byla uložena.',
         'errors' => 'Nelze uložit soubor .env, vytvořte jej prosím ručně.',
+        'database_connection_failed' => 'Nelze se připojit k databázi. Zkontrolujte prosím hostitele, port, název, uživatelské jméno a heslo databáze. Chyba: :message',
     ],
     'theme' => [
         'title' => 'Vyberte motiv',

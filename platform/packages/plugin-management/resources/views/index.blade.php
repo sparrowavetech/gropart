@@ -156,6 +156,8 @@
                             type="search"
                             name="search"
                             :placeholder="trans('packages/plugin-management::plugin.search')"
+                            :label="trans('packages/plugin-management::plugin.search')"
+                            :label-sr-only="true"
                             :group-flat="true"
                             data-bb-toggle="change-search"
                         >

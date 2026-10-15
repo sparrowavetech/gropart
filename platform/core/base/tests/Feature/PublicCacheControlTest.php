@@ -148,18 +148,38 @@ class PublicCacheControlTest extends BaseTestCase
         $this->assertEquals('private', $response->headers->get('Cache-Control'));
     }
 
-    public function test_head_request_applies_cache_control(): void
+    /**
+     * A HEAD response has already had its body cleared by Response::prepare() by the time
+     * RequestHandled fires, so the flash-message and CSRF-token gates cannot see anything
+     * and would pass a page the equivalent GET refuses to cache. HEAD must never be
+     * advertised as publicly cacheable, or the same URL is public or private depending on
+     * the request method - and a shared cache may reuse that HEAD to refresh the stored
+     * GET entry.
+     */
+    public function test_head_request_does_not_apply_cache_control(): void
     {
-        config(['core.base.general.enable_public_cache_control' => true]);
+        config(['core.base.general.enable_public_cache_control' => true, 'app.debug' => true]);
 
         $request = Request::create('/', 'HEAD');
         $response = new Response('');
 
         $this->invokeHandler($request, $response);
 
-        $cacheControl = $response->headers->get('Cache-Control');
-        $this->assertStringContainsString('public', $cacheControl);
-        $this->assertStringContainsString('max-age=600', $cacheControl);
+        $this->assertStringNotContainsString('public', (string) $response->headers->get('Cache-Control'));
+        $this->assertEquals('non-get-method', $response->headers->get('X-Public-Cache-Skip'));
+    }
+
+    public function test_head_request_keeps_session_cookies(): void
+    {
+        config(['core.base.general.enable_public_cache_control' => true]);
+
+        $request = Request::create('/', 'HEAD');
+        $response = new Response('');
+        $response->headers->setCookie(cookie('laravel_session', 'value'));
+
+        $this->invokeHandler($request, $response);
+
+        $this->assertNotEmpty($response->headers->getCookies());
     }
 
     public function test_authenticated_user_skips_cache_control(): void

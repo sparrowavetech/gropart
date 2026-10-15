@@ -500,8 +500,28 @@ class ThemeOption
 
             $attributes['name'] = $name;
 
+            // The options view renders <label for="{field id}">; give the control that id so the label is linked.
+            if (isset($field['id']) && isset($attributes['options']) && is_array($attributes['options'])) {
+                $attributes['options']['id'] ??= $field['id'];
+            }
+
             if (Arr::get($field, 'type') !== 'hidden' && $this->hasOption($name)) {
                 $attributes['value'] = $this->getOption($name);
+            }
+
+            // SelectField carries no attributes array, and customSelect otherwise picks a random id.
+            // Arguments are positional (name, choices, selected, selectAttributes), so rebuild them in order.
+            if (
+                isset($field['id'])
+                && Arr::get($field, 'type') === 'customSelect'
+                && ! array_diff(array_keys($attributes), ['name', 'choices', 'list', 'value'])
+            ) {
+                $attributes = [
+                    'name' => $name,
+                    'choices' => $attributes['choices'] ?? $attributes['list'] ?? [],
+                    'value' => $attributes['value'] ?? null,
+                    'options' => ['id' => $field['id']],
+                ];
             }
 
             return call_user_func_array([Form::class, $field['type']], array_values($attributes));

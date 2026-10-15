@@ -13,6 +13,7 @@ use Botble\Marketplace\Http\Controllers\Fronts\SpecificationAttributeController;
 use Botble\Marketplace\Http\Controllers\Fronts\SpecificationGroupController;
 use Botble\Marketplace\Http\Controllers\Fronts\SpecificationTableController;
 use Botble\Marketplace\Http\Controllers\Vendor\LanguageSettingController;
+use Botble\Marketplace\Http\Middleware\EnsureVendorTableRequest;
 use Botble\Marketplace\Http\Middleware\LocaleMiddleware;
 use Botble\Marketplace\Http\Middleware\RequireActiveVendorSubscription;
 use Illuminate\Support\Facades\Route;
@@ -25,7 +26,12 @@ Route::group([
 ], function (): void {
     Route::get('tags/all', [ProductTagController::class, 'getAllTags'])->name('tags.all');
 
-    require core_path('table/routes/web-actions.php');
+    // See EnsureVendorTableRequest: these shared core routes accept an arbitrary
+    // TableAbstract class name from the request, so only vendor-scoped (ForVendor)
+    // tables may be reached through the vendor panel.
+    Route::middleware(EnsureVendorTableRequest::class)->group(function (): void {
+        require core_path('table/routes/web-actions.php');
+    });
 
     Route::group(['prefix' => 'ajax'], function (): void {
         Route::post('upload', [

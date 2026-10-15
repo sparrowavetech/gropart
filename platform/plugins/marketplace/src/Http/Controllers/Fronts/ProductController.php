@@ -672,7 +672,7 @@ class ProductController extends BaseController
      */
     protected function guardProductQuota()
     {
-        if (! MarketplaceHelper::isSubscriptionMode()) {
+        if (! MarketplaceHelper::hasVendorSubscriptions()) {
             return null;
         }
 

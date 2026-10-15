@@ -3,6 +3,7 @@ import Toastify from './base/toast'
 class Botble {
     static noticesTimeout = {}
     static noticesTimeoutCount = 500
+    static formHintCount = 0
 
     constructor() {
         this.initGlobalModal()
@@ -871,6 +872,8 @@ class Botble {
             $(element).html(urlify($(element).html()))
         })
 
+        Botble.linkFormHints()
+
         Botble.initDatePicker('.datepicker')
 
         if (jQuery().textareaAutoSize) {
@@ -884,6 +887,35 @@ class Botble {
         Botble.initCoreIcon()
 
         document.dispatchEvent(new CustomEvent('core-init-resources'))
+    }
+
+    /**
+     * Point each field at its help text through aria-describedby, so screen
+     * readers announce the hint with the field. Only hints whose wrapper holds a
+     * single control are linked; anything else is ambiguous and left alone.
+     */
+    static linkFormHints() {
+        document.querySelectorAll('.form-hint').forEach((hint) => {
+            if (hint.id && document.querySelector(`[aria-describedby~="${hint.id}"]`)) {
+                return
+            }
+
+            const controls = hint.parentElement
+                ? hint.parentElement.querySelectorAll('input:not([type=hidden]), select, textarea')
+                : []
+
+            if (controls.length !== 1) {
+                return
+            }
+
+            if (!hint.id) {
+                hint.id = `form-hint-${++Botble.formHintCount}`
+            }
+
+            const control = controls[0]
+            const describedBy = (control.getAttribute('aria-describedby') || '').split(' ').filter(Boolean)
+            control.setAttribute('aria-describedby', [...describedBy, hint.id].join(' '))
+        })
     }
 
     static initGlobalResources() {

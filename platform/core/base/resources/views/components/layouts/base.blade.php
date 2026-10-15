@@ -1,8 +1,12 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html
+    lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+    data-bs-theme="{{ AdminHelper::initialThemeMode() }}"
+>
 
 <head>
     <meta charset="UTF-8">
+    @include('core/base::layouts.partials.theme-mode-script')
     <meta
         name="viewport"
         content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
@@ -74,7 +78,6 @@
     style="@yield('body-style', $bodyStyle ?? null)"
     @if (BaseHelper::adminLanguageDirection() === 'rtl') dir="rtl" @endif
     {!! Html::attributes($bodyAttributes ?? []) !!}
-    @if (AdminHelper::themeMode() === 'dark') data-bs-theme="dark" @endif
 >
     {!! AdminAppearance::getCustomJs('body') !!}
 

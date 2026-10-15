@@ -13,7 +13,7 @@ class PreferenceRequest extends Request
         return [
             'locale' => ['sometimes', Rule::in(array_keys(AdminHelper::getAdminLocales()))],
             'locale_direction' => ['required', 'string', 'in:ltr,rtl'],
-            'theme_mode' => ['required', 'string', 'in:light,dark'],
+            'theme_mode' => ['required', 'string', Rule::in(AdminHelper::themeModes())],
         ];
     }
 }

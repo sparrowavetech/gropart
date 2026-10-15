@@ -15,7 +15,13 @@ class SubscriptionPlanRequest extends Request
         $optionRules = [];
 
         foreach (array_keys(SubscriptionPlan::defaultOptions()) as $option) {
-            $optionRules['options.' . $option] = 'sometimes|nullable|integer|min:-1';
+            // Commission rates are money, not quotas: they must accept decimals. -1 means
+            // "inherit the global rate", hence min:-1 rather than min:0 across the board.
+            $optionRules['options.' . $option] = match ($option) {
+                'commission_percentage' => 'sometimes|nullable|numeric|min:-1|max:100',
+                'commission_fixed' => 'sometimes|nullable|numeric|min:-1',
+                default => 'sometimes|nullable|integer|min:-1',
+            };
         }
 
         return array_merge([

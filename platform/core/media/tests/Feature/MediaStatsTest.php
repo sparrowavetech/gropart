@@ -40,7 +40,12 @@ class MediaStatsTest extends TestCase
         return $user->fresh();
     }
 
-    protected function createFolder(int $userId, int $parentId = 0): MediaFolder
+    /**
+     * Keys are typed int|string, not int: this application configures User, MediaFolder and
+     * MediaFile with non-incrementing string (UUID) keys, so $model->getKey() hands back a string.
+     * `0` stays a valid $parentId - it is the root-folder sentinel, not an id.
+     */
+    protected function createFolder(int|string $userId, int|string $parentId = 0): MediaFolder
     {
         return MediaFolder::create([
             'name' => 'Test Folder ' . uniqid(),
@@ -52,8 +57,8 @@ class MediaStatsTest extends TestCase
     }
 
     protected function createFile(
-        int $folderId,
-        int $userId,
+        int|string $folderId,
+        int|string $userId,
         string $mimeType = 'image/jpeg',
         int $size = 1000
     ): MediaFile {

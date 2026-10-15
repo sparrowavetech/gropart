@@ -63,6 +63,7 @@ return [
         'theme_mode' => 'Theme mode',
         'dark' => 'Dark',
         'light' => 'Light',
+        'system' => 'System',
         'container_width' => [
             'title' => 'Container width',
             'title_helper' => 'Set the maximum width for content containers in the admin panel',
@@ -455,6 +456,13 @@ return [
     'back' => 'Back',
     'enter_sample_value' => 'Enter sample values for testing',
     'preview' => 'Preview',
+    'preview_live' => 'Live preview',
+    'preview_updating' => 'Updating…',
+    'preview_live_hint' => 'The preview updates as you type. Values are saved in the page URL, so you can refresh or share it.',
+    'preview_copy_link' => 'Copy link',
+    'preview_link_copied' => 'Link copied',
+    'preview_clear_values' => 'Clear values',
+    'preview_no_variables' => 'This template has no variables to fill in.',
     'media_size_width' => ':size size width must be greater than 0',
     'media_size_height' => ':size size height must be greater than 0',
     'security' => [

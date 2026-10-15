@@ -144,7 +144,7 @@ class HandleFrontPages
                     Theme::breadcrumb()->add($category->name, $category->url);
                 }
 
-                Theme::breadcrumb()->add($product->name);
+                Theme::breadcrumb()->add($product->name, $product->url);
 
                 Theme::addBodyAttributes(['class' => 'single-product']);
 
@@ -273,7 +273,7 @@ class HandleFrontPages
                     }
                 }
 
-                Theme::breadcrumb()->add($category->name);
+                Theme::breadcrumb()->add($category->name, $category->url);
 
                 do_action(BASE_ACTION_PUBLIC_RENDER_SINGLE, PRODUCT_CATEGORY_MODULE_SCREEN_NAME, $category);
 
@@ -323,7 +323,7 @@ class HandleFrontPages
 
                 SeoHelper::setTitle($brand->name)->setDescription($brand->description);
 
-                Theme::breadcrumb()->add($brand->name);
+                Theme::breadcrumb()->add($brand->name, $brand->url);
 
                 $meta = new SeoOpenGraph();
                 if ($brand->logo) {
@@ -404,7 +404,7 @@ class HandleFrontPages
 
                 Theme::breadcrumb()
                     ->add(__('Products'), route('public.products'))
-                    ->add($tag->name);
+                    ->add($tag->name, $tag->url);
 
                 if (function_exists('admin_bar')) {
                     admin_bar()
@@ -476,7 +476,7 @@ class HandleFrontPages
 
                 Theme::breadcrumb()
                     ->add(__('Products'), route('public.products'))
-                    ->add($collection->name);
+                    ->add($collection->name, $collection->url);
 
                 if (function_exists('admin_bar')) {
                     admin_bar()

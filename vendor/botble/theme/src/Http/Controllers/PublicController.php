@@ -102,8 +102,8 @@ class PublicController extends BaseController
     public function getSiteMap()
     {
         // When the Language plugin is active and the request hits the locale-less
-        // /sitemap.xml URL, return a sitemap index of every active locale's sitemap
-        // so search engines can discover the per-locale sitemaps.
+        // /sitemap.xml URL, return one sitemap index covering every active locale
+        // so search engines can discover all per-locale sitemaps from a single URL.
         if (
             is_plugin_active('language')
             && ! Language::checkLocaleInSupportedLocales(request()->segment(1))
@@ -115,28 +115,65 @@ class PublicController extends BaseController
             $supportedLocales = Language::getSupportedLocales();
 
             if (count($supportedLocales) > 1) {
-                $sitemaps = collect($supportedLocales)
-                    ->map(fn (array $language, string $localeCode) => [
-                        'loc' => url($localeCode . '/sitemap.xml'),
-                        'lastmod' => null,
-                    ])
-                    ->values()
-                    ->all();
+                // A sitemap index must not list other sitemap indexes: Google flags
+                // /{locale}/sitemap.xml entries as "Nested indexing" and reads 0 pages
+                // from them. List every locale's sub-sitemaps (/{locale}/pages.xml…)
+                // directly instead. Sitemap listeners do not scope their queries by
+                // locale, so the locale-less index holds the same keys for each locale.
+                // A hidden default locale keeps the locale-less URL: /{default}/... would
+                // list page URLs that 302 to their locale-less form.
+                $hiddenDefaultLocale = Language::hideDefaultLocaleInURL() ? Language::getDefaultLocale() : null;
 
-                // Resolve the sitemap service so its deferred provider boots and
-                // registers the `packages/sitemap` view namespace before render.
-                app('sitemap');
+                $urlPrefixes = array_map(
+                    fn (string $localeCode) => $localeCode === $hiddenDefaultLocale ? '' : $localeCode . '/',
+                    array_keys($supportedLocales)
+                );
 
-                return response()
-                    ->view('packages/sitemap::sitemapindex', [
-                        'sitemaps' => $sitemaps,
-                        'style' => null,
-                    ])
-                    ->header('Content-Type', 'application/xml');
+                // Key the cache on the locale set so adding/removing a language or
+                // toggling the hidden default never serves a stale index.
+                $siteMap = SiteMapManager::init(null, 'xml', '-locales:' . implode(',', $urlPrefixes))->getSiteMap();
+
+                if (! $siteMap->isCached()) {
+                    event(new RenderingSiteMapEvent());
+
+                    $siteMap->resetSitemaps($this->localizeSitemapEntries($siteMap->getSitemaps(), $urlPrefixes));
+                }
+
+                return SiteMapManager::render('sitemapindex');
             }
         }
 
         return $this->getSiteMapIndex();
+    }
+
+    /**
+     * Repeat each locale-less sub-sitemap entry (/pages.xml) once per URL prefix
+     * (/{prefix}pages.xml). Entries outside this site's base URL are kept as-is.
+     */
+    protected function localizeSitemapEntries(array $sitemaps, array $urlPrefixes): array
+    {
+        $baseUrl = rtrim(url('/'), '/') . '/';
+
+        $localized = [];
+
+        foreach ($sitemaps as $sitemap) {
+            if (! str_starts_with($sitemap['loc'], $baseUrl)) {
+                $localized[] = $sitemap;
+            }
+        }
+
+        foreach ($urlPrefixes as $urlPrefix) {
+            foreach ($sitemaps as $sitemap) {
+                if (str_starts_with($sitemap['loc'], $baseUrl)) {
+                    $localized[] = [
+                        ...$sitemap,
+                        'loc' => url($urlPrefix . Str::after($sitemap['loc'], $baseUrl)),
+                    ];
+                }
+            }
+        }
+
+        return $localized;
     }
 
     public function getSiteMapIndex(?string $key = null, string $extension = 'xml')
