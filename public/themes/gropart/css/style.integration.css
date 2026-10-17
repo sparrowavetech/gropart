@@ -18,6 +18,7 @@ html[lang="hi"] .product-inner .product__title {
     line-height: 1.75;
   	padding-top: 2px;
 }
+.post-item__inner .entry-meta a.btn, .ck-content a.btn { color: #ffffff; }
 .header-upper-top { position:relative; padding: 10px 0; background: linear-gradient(to right, #a395f7, #e1b7f8, #ffc58f); }
 .header-upper-top .top-dismiss { position: absolute; right: 40px; top: 7px; font-size: 20px; color: #bd9676; cursor: pointer; }
 #search-mobile.panel--sidebar.panel--sidebar__right .bb-form-quick-search .bb-quick-search-item-info { width: 75% }

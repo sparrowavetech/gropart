@@ -1,6 +1,6 @@
 <section id="order-details" class="order-tracking py-4">
     <div class="row justify-content-center">
-        <div class="col-md-6">
+        <div class="col-md-12">
             {!! $form->renderForm() !!}
         </div>
     </div>
