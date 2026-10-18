@@ -39,6 +39,8 @@ class HookServiceProvider extends ServiceProvider
 
         // 3. Inherit on Variation Created
         Event::listen(ProductVariationCreated::class, [$this, 'inheritVariationFreeShipping']);
+        // New variations are linked to their product after the event is dispatched.
+        ProductVariation::saved(fn (ProductVariation $variation) => $this->syncVariationFreeShipping($variation));
 
         // 4. Shipping Fee & Weight Deduction Hook (Priority 125 to run after all shipping gateways)
         add_filter('handle_shipping_fee', [$this, 'handleShippingRatesAndWeight'], 125, 3);
@@ -168,16 +170,31 @@ class HookServiceProvider extends ServiceProvider
             return;
         }
 
-        $variation = $event->productVariation;
+        $product = $event->product;
 
-        if (! $variation instanceof ProductVariation) {
+        if (! $product->is_variation) {
             return;
         }
 
+        $variation = ProductVariation::query()->where('product_id', $product->getKey())->first();
+
+        if ($variation) {
+            $this->syncVariationFreeShipping($variation);
+        }
+    }
+
+    protected function syncVariationFreeShipping(ProductVariation $variation): void
+    {
+        if (! ProductFreeShippingHelper::isEnabled() || ! $variation->product_id) {
+            return;
+        }
+
+        $variation->unsetRelation('product');
+        $variation->unsetRelation('configurableProduct');
         $parentProduct = $variation->configurableProduct;
         $product = $variation->product;
 
-        if ($parentProduct && $product) {
+        if ($parentProduct->exists && $product->exists) {
             $product->product_free_shipping = (bool) $parentProduct->product_free_shipping;
             $product->saveQuietly();
         }
