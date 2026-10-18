@@ -37,6 +37,17 @@ class ShipmozoServiceProvider extends ServiceProvider
             ->loadMigrations()
             ->publishAssets();
 
+        // Stored order weight already uses the store unit. The core view converts it
+        // to grams but labels it with the store unit (0.84 kg becomes '840 kilograms').
+        // Scope this presentation override to Shipmozo; API payloads stay in grams.
+        $this->app['view']->composer('plugins/ecommerce::orders.edit.order-info', function ($view): void {
+            $order = $view->getData()['order'] ?? null;
+            if ($order instanceof \Botble\Ecommerce\Models\Order
+                && $order->shipping_method->getValue() === SHIPMOZO_SHIPPING_METHOD_NAME) {
+                $view->setPath(plugin_path('shipmozo/resources/views/overrides/order-info.blade.php'));
+            }
+        });
+
         $this->app['events']->listen(
             OrderConfirmedEvent::class,
             OrderConfirmedListener::class

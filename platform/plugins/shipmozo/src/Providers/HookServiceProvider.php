@@ -211,6 +211,11 @@ class HookServiceProvider extends ServiceProvider
 
     public function addPincodeCheck(?string $html, $product): string
     {
+        // AJAX popups arrive after DOMContentLoaded; keep the checker on product pages.
+        if (request()->routeIs('public.ajax.quick-shop', 'public.ajax.quick-view') || request()->is('ajax/quick-shop/*', '*/ajax/quick-shop/*', 'ajax/quick-view', 'ajax/quick-view/*', '*/ajax/quick-view', '*/ajax/quick-view/*')) {
+            return (string) $html;
+        }
+
         if (setting('shipping_shipmozo_status') != 1 || ! $product) {
             return $html;
         }
