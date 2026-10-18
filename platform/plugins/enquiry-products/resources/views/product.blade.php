@@ -1,13 +1,9 @@
 <section class="ep-shell ep-product-page">
-    @php($gallery = collect([$product->image, ...($product->images ?: [])])->filter()->unique()->values())
     <div class="ep-product-overview">
-        <div class="ep-product-gallery">
-            <div class="ep-thumbnails">
-                @foreach($gallery as $picture)
-                    <button type="button" data-ep-image="{{ RvMedia::getImageUrl($picture, null, false, RvMedia::getDefaultImage()) }}" aria-label="{{ __('plugins/enquiry-products::messages.view_image_number', ['number' => $loop->iteration]) }}" aria-pressed="{{ $loop->first ? 'true' : 'false' }}"><img src="{{ RvMedia::getImageUrl($picture, 'thumb', false, RvMedia::getDefaultImage()) }}" alt=""></button>
-                @endforeach
-            </div>
-            <img tabindex="0" role="button" aria-label="{{ __('plugins/enquiry-products::messages.zoom_product_image') }}" aria-haspopup="dialog" class="ep-gallery-main" src="{{ RvMedia::getImageUrl($product->image, null, false, RvMedia::getDefaultImage()) }}" alt="{{ $product->name }}">
+        <div class="ep-product-gallery" style="display:block">
+            @include(EcommerceHelper::viewPath('includes.product-gallery'), [
+                'productImages' => collect([$product->image, ...($product->images ?: [])])->filter()->unique()->values()->all(),
+            ])
         </div>
         <article class="ep-product-summary">
             <h1>{{ $product->name }}</h1>
@@ -38,14 +34,3 @@
         </section>
     @endif
 </section>
-<dialog class="ep-lightbox" aria-label="{{ __('plugins/enquiry-products::messages.product_image_viewer') }}">
-    <div class="ep-lightbox-toolbar">
-        <button type="button" data-ep-zoom aria-pressed="false">{{ __('plugins/enquiry-products::messages.zoom') }} +</button>
-        <button type="button" data-ep-close aria-label="{{ __('plugins/enquiry-products::messages.close_image_viewer') }}">×</button>
-    </div>
-    <button type="button" class="ep-lightbox-prev" aria-label="{{ __('plugins/enquiry-products::messages.previous_image') }}">‹</button>
-    <div class="ep-lightbox-stage"><img alt="{{ $product->name }}"></div>
-    <button type="button" class="ep-lightbox-next" aria-label="{{ __('plugins/enquiry-products::messages.next_image') }}">›</button>
-    <p class="ep-lightbox-count" aria-live="polite"></p>
-</dialog>
-<script src="{{ asset('vendor/core/plugins/enquiry-products/gallery.js') }}" defer></script>

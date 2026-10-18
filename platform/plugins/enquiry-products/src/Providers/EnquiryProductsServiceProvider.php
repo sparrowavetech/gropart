@@ -85,7 +85,7 @@ class EnquiryProductsServiceProvider extends ServiceProvider
                 }
                 return $slug;
             }, 5);
-            add_filter(THEME_FRONT_HEADER, fn (?string $html) => ($html ?? '') . '<link rel="stylesheet" href="' . e(asset('vendor/core/plugins/enquiry-products/enquiry-products.css')) . '">', 145);
+            add_filter(THEME_FRONT_HEADER, fn (?string $html) => ($html ?? '') . '<link rel="stylesheet" href="' . e(asset('vendor/core/plugins/enquiry-products/enquiry-products.css') . '?v=' . (is_file(public_path('vendor/core/plugins/enquiry-products/enquiry-products.css')) ? filemtime(public_path('vendor/core/plugins/enquiry-products/enquiry-products.css')) : '1')) . '">', 145);
             if (function_exists('add_shortcode')) {
                 add_shortcode('enquiry-products', __('plugins/enquiry-products::messages.enquiry_products'), __('plugins/enquiry-products::messages.searchable_equipment_enquiry_catalog'), function ($shortcode): string {
                     $catalog = app(Catalog::class);
