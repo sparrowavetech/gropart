@@ -5,8 +5,8 @@
     "provider": "SparroWave\\FarmartHelper\\Providers\\FarmartHelperServiceProvider",
     "author": "SparroWave Technologies",
     "url": "https://www.sparrowave.com",
-    "version": "1.0.0",
-    "description": "Non-invasive custom form extensions, country-code phone selection, location dropdowns, and request sanitizers for Gropart.",
+    "version": "1.2.0",
+    "description": "Gropart form, payment, shipping and inclusive GST integrity extensions without vendor-file patches.",
     "minimum_core_version": "7.0.0",
     "require": [
         "ecommerce"

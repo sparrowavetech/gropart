@@ -14,6 +14,12 @@ class FarmartHelperServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->register(HookServiceProvider::class);
+        $this->app->register(CheckoutIntegrityServiceProvider::class);
+        $this->app->register(RazorpayCheckoutServiceProvider::class);
+        $this->app->register(OrderWeightDisplayServiceProvider::class);
+        $this->app->register(ProductCardServiceProvider::class);
+        $this->app->register(SidebarAdsServiceProvider::class);
+        $this->app->register(ProductDescriptionServiceProvider::class);
     }
 
     public function boot(): void
