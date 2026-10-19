@@ -55,8 +55,7 @@ class CatalogController extends BaseController
         if ($store) { $query->where('store_id', $store->id); }
         return response()->json($query->whereHas('slugable')->limit(8)->get()->map(function ($product): array {
             $store = is_plugin_active('marketplace') ? $product->store : null;
-            $type = $store && is_plugin_active('vendor-verified-badge')
-                ? \SparroWave\VendorVerifiedBadge\Supports\VendorBadgeHelper::getShopType($store)?->label() : null;
+            $type = $store ? (apply_filters('ecommerce_store_type_label', '', $store) ?: null) : null;
             return [
                 'name' => $product->name,
                 'url' => route('public.enquiry-products.show', $product->slugable->key),
