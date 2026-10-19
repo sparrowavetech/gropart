@@ -21,6 +21,11 @@ class IndianGstServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
+    public function register(): void
+    {
+        $this->app->register(InclusiveTaxServiceProvider::class);
+    }
+
     public function boot(): void
     {
         $this
