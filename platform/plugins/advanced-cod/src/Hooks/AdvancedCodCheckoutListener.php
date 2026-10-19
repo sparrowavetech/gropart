@@ -10,6 +10,7 @@ use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Models\Payment;
 use Botble\Ecommerce\Models\OrderHistory;
 use Botble\Ecommerce\Enums\OrderHistoryActionEnum;
+use SparroWave\AdvancedCod\Supports\CodAmounts;
 
 class AdvancedCodCheckoutListener
 {
@@ -395,7 +396,17 @@ class AdvancedCodCheckoutListener
         $rawTotal = $cart->rawTotal(); 
         $percentage = (float) get_payment_setting('prepayment_percentage', 'cod', 30);
         
-        $initialPrepayment = $rawTotal * ($percentage / 100);
+        $initialPrepayment = \SparroWave\AdvancedCod\Supports\CodAmounts::split((float)$rawTotal, $percentage)['advance'];
+        $token = request()->route('token') ?: (request()->hasSession() ? session('tracked_start_checkout') : null);
+        $frozenAdvance = null;
+        if ($token) {
+            $saved = Order::where('token', $token)->get()->map(fn ($order) => \SparroWave\AdvancedCod\Supports\AdvancePayment::intent($order));
+            if ($saved->isNotEmpty() && $saved->every(fn ($intent) => (bool)$intent)) {
+                $frozenAdvance = (float)$saved->sum('advance');
+                $initialPrepayment = $frozenAdvance;
+                $rawTotal = (float)$saved->sum('total');
+            }
+        }
         $initialRemaining = $rawTotal - $initialPrepayment;
         $currency = get_application_currency();
         $currencySymbol = $currency->symbol;
@@ -427,6 +438,7 @@ class AdvancedCodCheckoutListener
             <script>
                 document.addEventListener("DOMContentLoaded", function() {
                     const percentage = ' . $percentage . ';
+                    const frozenAdvance = ' . json_encode($frozenAdvance) . ';
                     const currencySymbol = "' . $currencySymbol . '";
 
                     function updateCodBreakdown() {
@@ -450,8 +462,8 @@ class AdvancedCodCheckoutListener
 
                         if (isNaN(total) || total <= 0) return;
 
-                        const prepay = total * (percentage / 100);
-                        const remain = total - prepay;
+                        const remain = frozenAdvance !== null ? Math.round((total - frozenAdvance) * 100) / 100 : Math.min(Math.floor(total), Math.round(total * (1 - percentage / 100)));
+                        const prepay = Math.round((total - remain) * 100) / 100;
 
                         // Formatter
                         const formatter = new Intl.NumberFormat("en-US", {
@@ -498,102 +510,36 @@ class AdvancedCodCheckoutListener
             return $data;
         }
 
-        // Find an online payment method (Razorpay or Instamojo)
+        $gateways = apply_filters('advanced_cod_online_gateways', array_values(\Botble\Payment\Enums\PaymentMethodEnum::toArray()));
+        $preferred = (string) get_payment_setting('advance_gateway', 'cod', 'razorpay');
+        $gateways = array_unique(array_merge([$preferred], $gateways));
         $onlineMethod = null;
-        if (is_plugin_active('razorpay') && get_payment_setting('status', 'razorpay') == 1) {
-            $onlineMethod = 'razorpay';
-        } elseif (is_plugin_active('instamojo') && get_payment_setting('status', 'instamojo') == 1) {
-            $onlineMethod = 'instamojo';
+        foreach ($gateways as $gateway) {
+            if (!in_array($gateway, ['cod', 'bank_transfer'], true) && get_payment_setting('status', $gateway) == 1) {
+                $onlineMethod = $gateway;
+                break;
+            }
         }
-
-        if (! $onlineMethod) {
-            return $data;
+        if (!$onlineMethod) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['payment_method'=>'No online gateway is available for the COD advance.']);
         }
-
-        // Store flag for amount adjustment
-        session()->put('advanced_cod_prepayment_active', true);
-        session()->put('advanced_cod_order_ids', (array) $request->input('order_id', []));
-        
-        // Prepare data for online gateway
+        \SparroWave\AdvancedCod\Supports\AdvancePayment::finalizeFees((array)$request->input('order_id', []));
+        \SparroWave\AdvancedCod\Supports\AdvancePayment::prepare((array)$request->input('order_id', []), $onlineMethod);
+        // Request-scoped intent: stale session flags cannot discount a later prepaid checkout.
+        $request->attributes->set('advanced_cod_order_ids', (array)$request->input('order_id', []));
         $request->merge(['payment_method' => $onlineMethod]);
         $data['type'] = $onlineMethod;
-
-        self::markOrdersAsAdvancedCodPending((array) $request->input('order_id', []), (float) $data['amount']);
-
         return $data;
     }
 
     public static function adjustPaymentDataAmount(array $data, \Illuminate\Http\Request $request): array
     {
-        if (session()->has('advanced_cod_prepayment_active')) {
-            if (! isset($data['amount'])) {
-                return $data;
-            }
-
-            $totalAmount = $data['amount'];
-            $percentage = get_payment_setting('prepayment_percentage', 'cod', 30);
-            $prepaymentAmount = $totalAmount * ($percentage / 100);
-            
-            $data['amount'] = $prepaymentAmount;
-        }
-
+        $ids = $request->attributes->get('advanced_cod_order_ids', []);
+        if (!$ids || !isset($data['amount'])) return $data;
+        $orders = Order::whereIn('id', $ids)->get();
+        if ($request->hasSession()) session()->put('selected_payment_method', 'cod');
+        $data['amount'] = round($orders->sum(fn ($order) => \SparroWave\AdvancedCod\Supports\AdvancePayment::intent($order)['advance'] ?? 0), 2);
         return $data;
-    }
-
-    public static function handlePaymentSuccess(array $data): void
-    {
-        $orderIds = (array) ($data['order_id'] ?? []);
-
-        if (! self::shouldHandleAdvancedCodSuccess($orderIds)) {
-            return;
-        }
-
-        if (($data['status'] ?? null) != PaymentStatusEnum::COMPLETED) {
-            return;
-        }
-
-        foreach ($orderIds as $orderId) {
-            $order = Order::query()->find($orderId);
-            if ($order) {
-                $prepaymentAmount = (float) ($data['amount'] ?? 0);
-
-                if ($prepaymentAmount <= 0 && ! empty($data['charge_id'])) {
-                    $payment = Payment::query()
-                        ->where('charge_id', $data['charge_id'])
-                        ->where('order_id', $order->id)
-                        ->first();
-
-                    $prepaymentAmount = (float) ($payment?->amount ?? 0);
-                }
-
-                if ($prepaymentAmount <= 0) {
-                    continue;
-                }
-
-                $remainingAmount = max((float) $order->amount - $prepaymentAmount, 0);
-
-                $order->cod_prepayment_amount = $prepaymentAmount;
-                $order->cod_remaining_amount = $remainingAmount;
-                $order->save();
-
-                $historyExists = OrderHistory::query()
-                    ->where('order_id', $order->id)
-                    ->where('description', 'like', 'Partial COD Prepayment%')
-                    ->exists();
-
-                if (! $historyExists) {
-                    OrderHistory::query()->create([
-                        'action' => OrderHistoryActionEnum::CONFIRM_ORDER,
-                        'description' => 'Partial COD Prepayment of ' . format_price($prepaymentAmount) . ' received. Remaining balance: ' . format_price($remainingAmount),
-                        'order_id' => $order->id,
-                        'user_id' => 0,
-                    ]);
-                }
-            }
-        }
-
-        session()->forget('advanced_cod_prepayment_active');
-        session()->forget('advanced_cod_order_ids');
     }
 
     protected static function isAdvancedCodRequired(): bool
@@ -634,42 +580,4 @@ class AdvancedCodCheckoutListener
         return $product;
     }
 
-    protected static function markOrdersAsAdvancedCodPending(array $orderIds, float $orderAmount): void
-    {
-        if (! $orderIds || $orderAmount <= 0) {
-            return;
-        }
-
-        $percentage = (float) get_payment_setting('prepayment_percentage', 'cod', 30);
-        $prepaymentAmount = $orderAmount * ($percentage / 100);
-
-        foreach ($orderIds as $orderId) {
-            $order = Order::query()->find($orderId);
-
-            if (! $order) {
-                continue;
-            }
-
-            $order->cod_prepayment_amount = $prepaymentAmount;
-            $order->cod_remaining_amount = max((float) $order->amount - $prepaymentAmount, 0);
-            $order->save();
-        }
-    }
-
-    protected static function shouldHandleAdvancedCodSuccess(array $orderIds): bool
-    {
-        if (session()->has('advanced_cod_prepayment_active')) {
-            return true;
-        }
-
-        if (! $orderIds) {
-            return false;
-        }
-
-        return Order::query()
-            ->whereIn('id', $orderIds)
-            ->whereNotNull('cod_prepayment_amount')
-            ->whereNotNull('cod_remaining_amount')
-            ->exists();
-    }
 }
