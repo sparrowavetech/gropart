@@ -138,10 +138,7 @@ class Shipmozo
             $qty = max((int) Arr::get($item, 'qty', 1), 1);
 
             // Check if this specific item has free delivery enabled
-            $isFreeShipping = false;
-            if (is_plugin_active('product-free-shipping') && class_exists(\SparroWave\ProductFreeShipping\Supports\ProductFreeShippingHelper::class)) {
-                $isFreeShipping = \SparroWave\ProductFreeShipping\Supports\ProductFreeShippingHelper::isProductFreeShipping($item);
-            }
+            $isFreeShipping = (bool) apply_filters('ecommerce_product_has_free_shipping', false, $item);
 
             if ($isFreeShipping) {
                 // Free shipping product -> skip adding weight and dimensions to ShipMozo billable payload
@@ -391,8 +388,8 @@ class Shipmozo
 
         $origin = EcommerceHelper::getOriginAddress();
 
-        $payment = is_plugin_active('payment') ? $order->payment : null;
-        $isCod = $payment && $payment->payment_channel->getValue() == PaymentMethodEnum::COD;
+        $collectionAmount = \SparroWave\Shipmozo\Supports\CollectionAmount::forOrder($order);
+        $isCod = $collectionAmount > 0;
 
         $phone = preg_replace('/[^0-9]/', '', (string) $address->phone);
         if (strlen($phone) > 10) {
@@ -435,7 +432,7 @@ class Shipmozo
             'consignee_state' => $this->sanitize($address->state_name),
             'product_detail' => $cleanItems,
             'payment_type' => $isCod ? 'COD' : 'PREPAID',
-            'cod_amount' => $isCod ? $this->formatAmount($finalTotal) : '',
+            'cod_amount' => $isCod ? $this->formatAmount($collectionAmount) : '',
             'weight' => (int) max($totalWeight, 200),
             'length' => (int) max($maxLength, 10),
             'width' => (int) max($maxWidth, 10),
