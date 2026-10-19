@@ -23,6 +23,11 @@ class HookServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        add_filter('ecommerce_product_has_free_shipping', fn ($free, $product) => $free || ProductFreeShippingHelper::isProductFreeShipping($product), 20, 2);
+        add_filter('ecommerce_order_product_item_extra_info', function ($html, $item, $order) {
+            if (!\Botble\Base\Facades\AdminHelper::isInAdmin()) return $html;
+            return $html . $this->renderProductDetailBadge('', $item->product?->original_product);
+        }, 191, 3);
         // 1. Form Injections (Admin & Marketplace Vendor)
         ProductForm::extend(function (ProductForm $form) {
             $this->injectProductFormField($form);
