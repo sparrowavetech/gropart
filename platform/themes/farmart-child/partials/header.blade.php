@@ -88,7 +88,7 @@
         class="header header-js-handler"
         data-sticky="{{ theme_option('sticky_header_enabled', 'yes') == 'yes' ? 'true' : 'false' }}"
     >
-        @if (theme_option('top_upper_header_text'))
+        @if (theme_option('enable_top_upper_header', 'yes') === 'yes' && theme_option('top_upper_header_text'))
             <div class="header-upper-top">
                 <div class="container-xxxl">
                     <div class="row align-items-center">
