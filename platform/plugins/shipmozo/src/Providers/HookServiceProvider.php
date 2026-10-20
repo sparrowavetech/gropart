@@ -25,7 +25,7 @@ class HookServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        add_filter('handle_shipping_fee', [$this, 'handleShippingFee'], 11, 2);
+        add_filter('handle_shipping_fee', [$this, 'handleShippingFee'], 130, 2);
 
         if ($this->supportsMarketplaceWarehouses()) {
             add_filter(BASE_FILTER_BEFORE_RENDER_FORM, [$this, 'addWarehouseToStoreForm'], 120, 2);
@@ -145,51 +145,49 @@ class HookServiceProvider extends ServiceProvider
 
     public function handleShippingFee(array $result, array $data): array
     {
-        if (setting('shipping_shipmozo_status') == 1) {
-            // Check if this package belongs to a vendor who manages their own shipping
-            if (is_plugin_active('marketplace')) {
-                $storeId = Arr::get($data, 'store_id');
-                if ($storeId) {
-                    $store = Store::find($storeId);
-                    if ($store && ($store->vendor_managed_shipping || $store->is_manage_shipping)) {
-                        // Vendor manages their own shipping -> bypass ShipMozo and use Botble default configured rates
-                        return $result;
-                    }
+        if (setting('shipping_shipmozo_status') != 1 || empty($data['items'])) {
+            return $result;
+        }
 
-                    if ($store && $store->warehouse_id) {
-                        $data['origin_warehouse_id'] = $store->warehouse_id;
-                    }
-                }
-            }
-
-            $addressTo = Arr::get($data, 'address_to', []);
-            $deliveryPincode = Arr::get($addressTo, 'zip_code') ?: Arr::get($addressTo, 'zip') ?: Arr::get($data, 'zip_code') ?: Arr::get($data, 'zip');
-
-            if (! empty($deliveryPincode)) {
-                try {
-                    $results = app(Shipmozo::class)->getRates($data);
-                    $rates = Arr::get($results, 'shipment.rates', []);
-
-                    if ($rates) {
-                        $result[SHIPMOZO_SHIPPING_METHOD_NAME] = $rates;
-
-                        // When ShipMozo has valid active courier options, suppress Botble default rates
-                        // so customers only see real-time ShipMozo couriers and no duplicate flat rates
-                        $hasActiveRates = collect($rates)->contains(function ($rate) {
-                            return is_array($rate) && empty($rate['disabled']);
-                        });
-
-                        if ($hasActiveRates) {
-                            unset($result[ShippingMethodEnum::DEFAULT]);
-                        }
-                    }
-                } catch (\Throwable $exception) {
-                    app(Shipmozo::class)->logError('Rate calculation failed', [
-                        'message' => $exception->getMessage(),
-                    ]);
-                }
+        // Marketplace puts the store in extra; older callers used a top-level key.
+        $storeId = Arr::get($data, 'extra.store_id', Arr::get($data, 'store_id'));
+        if (is_plugin_active('marketplace') && $storeId) {
+            $store = Store::find($storeId);
+            // Only the current Vendor Managed Shipping setting controls self-fulfilment.
+            // The legacy is_manage_shipping flag can remain set on carrier-managed stores.
+            if ($store && $store->vendor_managed_shipping) {
+                return $result;
             }
         }
+
+        // Run after Product Free Shipping: zero customer delivery cost still needs
+        // a real courier. Keep the selected courier for booking the physical parcel.
+        $freeDelivery = isset($result[ShippingMethodEnum::DEFAULT]['free_shipping']);
+        $data['shipmozo_serviceability_only'] = $freeDelivery;
+        $shipmozo = app(Shipmozo::class);
+        try {
+            $rates = Arr::get($shipmozo->getRates($data), 'shipment.rates', []);
+            if (! $rates) {
+                $rates = $shipmozo->unavailableRates('unavailable');
+            }
+        } catch (\Throwable $exception) {
+            $shipmozo->logError('Rate calculation failed', ['message' => $exception->getMessage()]);
+            $rates = $shipmozo->unavailableRates('api_error');
+        }
+
+        if ($freeDelivery) {
+            foreach ($rates as &$rate) {
+                if (empty($rate['disabled'])) {
+                    $rate['price'] = 0;
+                }
+            }
+            unset($rate);
+        }
+
+        // Never silently substitute an unverified flat/free rate for this carrier.
+        // Other explicitly installed carrier methods remain independent alternatives.
+        unset($result[ShippingMethodEnum::DEFAULT]);
+        $result[SHIPMOZO_SHIPPING_METHOD_NAME] = $rates;
 
         return $result;
     }

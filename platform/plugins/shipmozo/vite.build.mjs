@@ -1,3 +1,3 @@
 export default {
-    js: ['shipmozo'],
+    js: ['shipmozo', 'checkout'],
 }

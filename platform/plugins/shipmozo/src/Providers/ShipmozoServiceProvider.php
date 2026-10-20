@@ -37,6 +37,22 @@ class ShipmozoServiceProvider extends ServiceProvider
             ->loadMigrations()
             ->publishAssets();
 
+        if (setting('shipping_shipmozo_status') == 1) {
+            $this->app->bind(
+                \Botble\Ecommerce\Http\Controllers\Fronts\PublicUpdateCheckoutController::class,
+                \SparroWave\Shipmozo\Http\Controllers\UpdateCheckoutController::class
+            );
+            $this->app->bind(
+                \Botble\Ecommerce\Services\HandleShippingFeeService::class,
+                \SparroWave\Shipmozo\Services\CheckoutShippingFeeService::class
+            );
+            $this->app['view']->composer('plugins/ecommerce::orders.partials.shipping-option', function ($view): void {
+                if (($view->getData()['shippingKey'] ?? null) === SHIPMOZO_SHIPPING_METHOD_NAME) {
+                    $view->setPath(plugin_path('shipmozo/resources/views/overrides/shipping-option.blade.php'));
+                }
+            });
+        }
+
         // Stored order weight already uses the store unit. The core view converts it
         // to grams but labels it with the store unit (0.84 kg becomes '840 kilograms').
         // Scope this presentation override to Shipmozo; API payloads stay in grams.
@@ -55,6 +71,10 @@ class ShipmozoServiceProvider extends ServiceProvider
 
         $this->app['events']->listen(RouteMatched::class, function (RouteMatched $event): void {
             $this->app['router']->aliasMiddleware('shipmozo.webhook', WebhookMiddleware::class);
+
+            if ($event->route->getName() === 'public.checkout.information') {
+                $event->route->middleware(\SparroWave\Shipmozo\Http\Middleware\CheckoutAssets::class);
+            }
 
             if (in_array($event->route->getName(), ['public.orders.tracking', 'customer.orders.view'], true)) {
                 $trackingParams = $event->route->getName() === 'customer.orders.view'

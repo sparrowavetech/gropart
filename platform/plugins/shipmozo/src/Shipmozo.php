@@ -120,13 +120,16 @@ class Shipmozo
         $addressTo = Arr::get($data, 'address_to', []);
         $deliveryPincode = Arr::get($addressTo, 'zip_code') ?: Arr::get($addressTo, 'zip') ?: Arr::get($data, 'zip_code') ?: Arr::get($data, 'zip');
 
-        if (! $deliveryPincode) {
-            return [];
+        if (! preg_match('/^[1-9][0-9]{5}$/', (string) $deliveryPincode)) {
+            return ['shipment' => ['rates' => $this->unavailableRates('destination')]];
         }
 
         // Get pickup pincode from first vendor, or default store location
         $origin = Arr::get($data, 'origin') ?: EcommerceHelper::getOriginAddress();
         $pickupPincode = Arr::get($origin, 'zip_code', '');
+        if (! preg_match('/^[1-9][0-9]{5}$/', (string) $pickupPincode)) {
+            return ['shipment' => ['rates' => $this->unavailableRates('pickup')]];
+        }
 
         $items = Arr::get($data, 'items', []);
         $length = 0;
@@ -134,13 +137,13 @@ class Shipmozo
         $height = 0;
         $billableItemCount = 0;
 
-        foreach ($items as $item) {
+        foreach ($items as $productId => $item) {
             $qty = max((int) Arr::get($item, 'qty', 1), 1);
 
             // Check if this specific item has free delivery enabled
-            $isFreeShipping = (bool) apply_filters('ecommerce_product_has_free_shipping', false, $item);
+            $isFreeShipping = (bool) apply_filters('ecommerce_product_has_free_shipping', false, $item + ['id' => $productId]);
 
-            if ($isFreeShipping) {
+            if ($isFreeShipping && empty($data['shipmozo_serviceability_only'])) {
                 // Free shipping product -> skip adding weight and dimensions to ShipMozo billable payload
                 continue;
             }
@@ -286,15 +289,15 @@ class Shipmozo
         }
 
         if (empty($formattedRates) && ! empty($deliveryPincode)) {
-            $formattedRates['no_service'] = [
-                'id' => 'no_service',
-                'name' => 'ShipMozo Delivery',
-                'price' => 0,
-                'estimated_delivery' => '',
-                'disabled' => true,
-                'error_message' => 'Sorry we do not deliver to this pincode, try another pincode.',
-                'image' => null,
-            ];
+            $message = strtolower((string) Arr::get($responseData, 'message', ''));
+            $reason = match (true) {
+                str_contains($message, 'pickup') => 'pickup',
+                str_contains($message, 'delivery pincode') && str_contains($message, 'invalid') => 'destination',
+                Arr::get($responseData, 'result') == 1,
+                str_contains($message, 'serviceab'), str_contains($message, 'not service') => 'unavailable',
+                default => 'api_error',
+            };
+            $formattedRates = $this->unavailableRates($reason);
         } else {
             // Check Botble's sort direction setting
             $sortDirection = setting('ecommerce_sort_shipping_options_direction', 'price_lower_to_higher');
@@ -311,6 +314,22 @@ class Shipmozo
         }
 
         return ['shipment' => ['rates' => $formattedRates]];
+    }
+
+    public function unavailableRates(string $reason): array
+    {
+        $message = match ($reason) {
+            'destination' => __('Enter a valid six-digit delivery PIN to check shipping.'),
+            'pickup' => __('Shipping is unavailable from this seller location. Please contact support.'),
+            'unavailable' => __('No courier is available for this pickup and delivery route. Try another delivery PIN or contact support.'),
+            default => __('Shipping rates could not be checked. Please retry in a moment.'),
+        };
+
+        return ['no_service' => [
+            'id' => 'no_service', 'name' => 'ShipMozo Delivery', 'price' => 0,
+            'disabled' => true, 'error_message' => $message,
+            'shipmozo_status' => $reason, 'estimated_delivery' => '', 'image' => null,
+        ]];
     }
 
     public function pushOrder(Order $order): array
