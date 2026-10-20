@@ -32,6 +32,22 @@ class VendorBadgeSettingForm extends SettingForm
                     ->value(setting('vendor_verified_badge_icon'))
             )
             ->add(
+                'vendor_shop_type_visible',
+                OnOffCheckboxField::class,
+                OnOffFieldOption::make()
+                    ->label('Show shop type labels on the website')
+                    ->helperText('Show Retailer, Manufacturer and Wholesaler badges. Admin records and vendor category selection remain available.')
+                    ->value(setting('vendor_shop_type_visible', true))
+            )
+            ->add(
+                'vendor_verified_label',
+                TextField::class,
+                TextFieldOption::make()
+                    ->label('Verified badge label')
+                    ->helperText('Text beside the verified icon on the website. Leave blank for icon only.')
+                    ->value(setting('vendor_verified_label', 'Gropart Verified'))
+            )
+            ->add(
                 'vendor_verified_tooltip_text',
                 TextField::class,
                 TextFieldOption::make()

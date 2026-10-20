@@ -114,11 +114,26 @@ class VendorBadgeHelper
             (int) $size
         );
 
+        if (! is_in_admin()) {
+            $label = trim((string) setting('vendor_verified_label', 'Gropart Verified'));
+            if ($label !== '') {
+                // A single tooltip target covers both the icon and its label.
+                $attributes = ' title="' . e($tooltip) . '" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="' . e($tooltip) . '" data-bs-original-title="' . e($tooltip) . '"';
+                $img = str_replace($attributes, '', $img);
+                $img = '<span class="vendor-verified-label"' . $attributes . '>'
+                    . $img . '<span class="vendor-verified-label-text">' . e($label) . '</span></span>';
+            }
+        }
+
         return new HtmlString($img);
     }
 
     public static function renderShopTypeBadge(mixed $store, array $options = []): string|HtmlString
     {
+        if (! is_in_admin() && ! (bool) setting('vendor_shop_type_visible', true)) {
+            return '';
+        }
+
         $shopType = static::getShopType($store);
         if (! $shopType) {
             return '';

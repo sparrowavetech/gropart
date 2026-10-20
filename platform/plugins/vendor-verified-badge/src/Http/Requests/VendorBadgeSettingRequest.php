@@ -9,6 +9,8 @@ class VendorBadgeSettingRequest extends Request
     public function rules(): array
     {
         return [
+            'vendor_shop_type_visible' => ['nullable', 'in:0,1'],
+            'vendor_verified_label' => ['nullable', 'string', 'max:100'],
             'vendor_verified_badge_icon' => ['nullable', 'string', 'max:255'],
             'vendor_verified_application_url' => ['nullable', 'url', 'max:255'],
             'vendor_verified_menu_gating_enabled' => ['nullable', 'in:0,1'],

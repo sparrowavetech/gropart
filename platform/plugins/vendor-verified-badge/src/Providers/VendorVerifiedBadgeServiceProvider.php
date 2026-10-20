@@ -88,7 +88,7 @@ class VendorVerifiedBadgeServiceProvider extends ServiceProvider
             ->usePath(false)
             ->add(
                 'vendor-badge-css',
-                asset('vendor/core/plugins/vendor-verified-badge/css/vendor-badge.css')
+                asset('vendor/core/plugins/vendor-verified-badge/css/vendor-badge.css') . '?v=20261020-2'
             )
             ->add(
                 'vendor-badge-js',

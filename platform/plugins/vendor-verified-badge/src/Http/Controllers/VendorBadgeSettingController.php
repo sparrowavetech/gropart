@@ -21,7 +21,11 @@ class VendorBadgeSettingController extends SettingController
 
     public function update(VendorBadgeSettingRequest $request)
     {
-        return $this->performUpdate($request->validated());
+        $data = $request->validated();
+        $data['vendor_shop_type_visible'] = $request->boolean('vendor_shop_type_visible') ? '1' : '0';
+        $data['vendor_verified_label'] = trim((string) ($data['vendor_verified_label'] ?? ''));
+
+        return $this->performUpdate($data);
     }
 
     public function quickVerify(Store $store, BaseHttpResponse $response): BaseHttpResponse

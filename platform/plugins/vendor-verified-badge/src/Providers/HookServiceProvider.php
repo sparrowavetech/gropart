@@ -40,7 +40,9 @@ class HookServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        add_filter('ecommerce_store_type_label', fn ($label, $store) => VendorBadgeHelper::getShopType($store)?->label() ?? $label, 20, 2);
+        add_filter('ecommerce_store_type_label', fn ($label, $store) => ! is_in_admin() && ! (bool) setting('vendor_shop_type_visible', true)
+            ? ''
+            : (VendorBadgeHelper::getShopType($store)?->label() ?? $label), 20, 2);
         $this->extendCustomerForm();
         $this->extendVendorStoreForm();
         $this->extendBecomeVendorForm();
