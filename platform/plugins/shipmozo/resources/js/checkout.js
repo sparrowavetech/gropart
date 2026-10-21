@@ -120,6 +120,7 @@ class MainCheckout {
         const customerBillingAddressForm = '.customer-billing-address-form'
         const customerTaxInformationForm = '.customer-tax-information-form'
 
+        let addressSavePending = false
         let shippingRevision = 0
         let shippingInFlight = false
         let shippingPending = false
@@ -260,6 +261,31 @@ class MainCheckout {
         const runShippingQuote = () => {
             if (shippingInFlight) return
             shippingInFlight = true
+            // Address persistence shares the quote queue. Parallel saves can restore
+            // an old PIN after a newer quote/coupon response has already completed.
+            if (addressSavePending && validatedFormFields() && $checkoutForm.valid?.()) {
+                addressSavePending = false
+                const saveRevision = shippingRevision
+                disablePaymentMethodsForm()
+                $.ajax({
+                    type: 'POST', url: $('#save-shipping-information-url').val(),
+                    data: new FormData($checkoutForm.get(0)), contentType: false,
+                    processData: false, timeout: 90000,
+                    success: ({ error }) => {
+                        if (error) addressSavePending = true
+                        else document.dispatchEvent(new CustomEvent('checkout:address-saved'))
+                    },
+                    error: () => { addressSavePending = true },
+                    complete: () => {
+                        shippingInFlight = false
+                        // A failed save must not loop indefinitely. Final checkout
+                        // still validates/persists contact details server-side.
+                        if (saveRevision === shippingRevision) addressSavePending = false
+                        runShippingQuote()
+                    },
+                })
+                return
+            }
             const revision = shippingRevision
             const formData = new FormData($checkoutForm.get(0))
             const methods = pendingMethods
@@ -377,13 +403,13 @@ class MainCheckout {
         document.addEventListener('coupon:applied', function() {
             const paymentMethod = $(document).find('input[name=payment_method]:checked').first()
 
-            calculateShippingFee(paymentMethod)
+            calculateShippingFee({ payment_method: paymentMethod.val() })
         })
 
         document.addEventListener('coupon:removed', function() {
             const paymentMethod = $(document).find('input[name=payment_method]:checked').first()
 
-            calculateShippingFee(paymentMethod)
+            calculateShippingFee({ payment_method: paymentMethod.val() })
         })
 
         const validatedFormFields = () => {
@@ -427,30 +453,9 @@ class MainCheckout {
             _self.closest('.form-group').find('.text-danger').remove()
             const $form = _self.closest('form')
 
-            if (validatedFormFields() && $form.valid && $form.valid()) {
-                $.ajax({
-                    type: 'POST',
-                    cache: false,
-                    url: $('#save-shipping-information-url').val(),
-                    data: new FormData($form[0]),
-                    contentType: false,
-                    processData: false,
-                    success: ({ error }) => {
-                        if (!error) {
-                            document.dispatchEvent(new CustomEvent('checkout:address-saved', {
-                                detail: { field: $(event.target).prop('name') }
-                            }))
+            addressSavePending = true
+            scheduleShippingQuote()
 
-                            if (/country|state|city|address/.test($(event.target).prop('name'))) {
-                                calculateShippingFee()
-                            }
-                        }
-                    },
-                    error: (response) => {
-                        MainCheckout.handleError(response, $form)
-                    },
-                })
-            }
         }
 
         $(document).on('input change', '#address_id, #address_country, #address_state, #address_city, #address_zip_code', scheduleShippingQuote)

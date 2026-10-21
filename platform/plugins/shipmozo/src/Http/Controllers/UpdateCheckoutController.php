@@ -42,6 +42,13 @@ class UpdateCheckoutController extends BaseCheckoutController
             $sessionCheckoutData['is_new_address'] = $addressId === 'new';
         }
         $sessionCheckoutData = array_replace($sessionCheckoutData, $location);
+        // Coupon recalculation writes each vendor's saved address back into the
+        // root checkout session. Keep destination fields current in every slice.
+        foreach ((array) ($sessionCheckoutData['marketplace'] ?? []) as $storeId => $storeData) {
+            if (is_array($storeData)) {
+                $sessionCheckoutData['marketplace'][$storeId] = array_replace($storeData, $location);
+            }
+        }
         OrderHelper::setOrderSessionData($token, $sessionCheckoutData);
 
         /**
