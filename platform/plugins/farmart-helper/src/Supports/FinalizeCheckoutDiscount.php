@@ -23,7 +23,7 @@ class FinalizeCheckoutDiscount
                 $shares[$order->id]=round($before-$order->amount,2);
             }
         }
-        if (abs(array_sum($shares)-$discount)>.011 || count(array_filter($shares,fn($v)=>$v<0))) {
+        if (abs(array_sum(array_map([CheckoutAmounts::class, 'paise'], $shares)) - CheckoutAmounts::paise($discount)) > CheckoutAmounts::TOLERANCE_PAISE || count(array_filter($shares,fn($v)=>$v<0))) {
             throw new RuntimeException('Loyalty discount does not match the checkout total. Please retry checkout.');
         }
         $remaining=$points;$last=$orders->last()?->id;

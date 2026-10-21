@@ -3,7 +3,6 @@
 namespace SparroWave\FarmartHelper\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Botble\Theme\Facades\Theme;
 
 class ProductCardServiceProvider extends ServiceProvider
 {
@@ -13,39 +12,24 @@ class ProductCardServiceProvider extends ServiceProvider
             return;
         }
 
-        foreach (['farmart', 'farmart-child'] as $theme) {
-            $this->app['view']->composer("theme.{$theme}::partials.ecommerce.product-cart-form", function ($view) use ($theme): void {
-                $view->setPath(plugin_path("farmart-helper/resources/views/product-cards/{$theme}.blade.php"));
-            });
-        }
-
-        add_filter('farmart_helper_product_card_extra_html', function ($html, $product): string {
-            $html = (string) apply_filters(ECOMMERCE_PRODUCT_DETAIL_EXTRA_HTML, $html, $product);
-            if (is_plugin_active('fob-request-quote')) {
-                // Remove only the quote plugin's exact markup in card context.
-                $button = view('plugins/fob-request-quote::button', compact('product'))->render();
-                $html = str_replace($button, '', $html);
-            }
-            return $html;
-        }, 20, 2);
-
-        $modalRendered = false;
-        // A future child-theme update may include the modal itself.
-        $this->app['view']->composer([
-            'theme.farmart::partials.ecommerce.quick-shop-modal',
-            'theme.farmart-child::partials.ecommerce.quick-shop-modal',
-        ], function () use (&$modalRendered): void {
-            $modalRendered = true;
+        // Farmart Child owns its template; retain parent-theme compatibility.
+        $this->app['view']->composer('theme.farmart::partials.ecommerce.product-cart-form', function ($view): void {
+            $view->setPath(plugin_path('farmart-helper/resources/views/product-cards/farmart.blade.php'));
         });
 
-        add_filter(THEME_FRONT_FOOTER, function (?string $html) use (&$modalRendered): string {
-            if ($modalRendered || Theme::getThemeName() !== 'farmart-child') {
-                return (string) $html;
+        $this->app['view']->composer('plugins/fob-request-quote::button', function ($view): void {
+            if (request()->attributes->get('farmart_helper_card_context', false)) {
+                $view->setPath(plugin_path('farmart-helper/resources/views/product-cards/quote-placeholder.blade.php'));
             }
-
-            $modalRendered = true;
-
-            return $html . Theme::partial('ecommerce.quick-shop-modal');
-        }, 20);
+        });
+        add_filter('farmart_helper_product_card_extra_html', function ($html, $product): string {
+            $previous = request()->attributes->get('farmart_helper_card_context', false);
+            request()->attributes->set('farmart_helper_card_context', true);
+            try {
+                return (string) apply_filters(ECOMMERCE_PRODUCT_DETAIL_EXTRA_HTML, $html, $product);
+            } finally {
+                request()->attributes->set('farmart_helper_card_context', $previous);
+            }
+        }, 20, 2);
     }
 }

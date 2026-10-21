@@ -8,7 +8,13 @@ class SerializeCheckout
 {
     public function handle($request, Closure $next)
     {
-        $token = $request->route('token') ?? $request->input('payload.payment.entity.notes.order_token');
+        if (! $request->routeIs('public.checkout.*', 'payments.razorpay.callback', 'payments.razorpay.webhook')) {
+            return $next($request);
+        }
+        $token = $request->route('token');
+        if ($request->routeIs('payments.razorpay.webhook')) {
+            $token = $request->input('payload.payment.entity.notes.order_token');
+        }
         if (!$token && $request->routeIs('payments.razorpay.webhook')) {
             $charge = $request->input('payload.payment.entity.id');
             if ($charge) {

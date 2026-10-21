@@ -67,8 +67,9 @@ class DeferredRazorpayCheckout extends HookServiceProvider
 
     protected function present(array $options, string $retryUrl): void
     {
-        // Like the core hosted checkout response, this terminates before unpaid order finalization.
-        response()->view('plugins/farmart-helper::razorpay.standard', compact('options', 'retryUrl'))->send();
-        exit;
+        // Stop unpaid finalization while allowing middleware/finally lock cleanup.
+        throw new \Illuminate\Http\Exceptions\HttpResponseException(
+            response()->view('plugins/farmart-helper::razorpay.standard', compact('options', 'retryUrl'))
+        );
     }
 }

@@ -12,20 +12,14 @@ class SidebarAdsServiceProvider extends ServiceProvider
             return;
         }
 
-        // Widget views use a slash-based name rather than normal dotted partial names.
-        $this->app['view']->composer('*', function ($view): void {
-            $name = $view->name();
-            foreach (['farmart', 'farmart-child'] as $theme) {
-                foreach (['frontend', 'backend'] as $template) {
-                    if (in_array($name, [
-                        "theme.{$theme}::/../widgets/ads/templates.{$template}",
-                        "theme.{$theme}::widgets.ads.templates.{$template}",
-                    ], true)) {
-                        $view->setPath(plugin_path("farmart-helper/resources/views/widgets/ads/{$template}.blade.php"));
-                        return;
-                    }
-                }
-            }
-        });
+        // Child widgets now own their templates; retain the parent compatibility adapter.
+        foreach (['frontend', 'backend'] as $template) {
+            $this->app['view']->composer([
+                "theme.farmart::/../widgets/ads/templates.{$template}",
+                "theme.farmart::widgets.ads.templates.{$template}",
+            ], function ($view) use ($template): void {
+                $view->setPath(plugin_path("farmart-helper/resources/views/widgets/ads/{$template}.blade.php"));
+            });
+        }
     }
 }

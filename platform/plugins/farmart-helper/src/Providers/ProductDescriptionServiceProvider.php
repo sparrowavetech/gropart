@@ -29,10 +29,9 @@ class ProductDescriptionServiceProvider extends ServiceProvider
             return $rules;
         }, 20, 2);
 
-        foreach (['farmart', 'farmart-child'] as $theme) {
-            $this->app['view']->composer("theme.{$theme}::views.ecommerce.product", function ($view) use ($theme): void {
-                $view->setPath(plugin_path("farmart-helper/resources/views/product-description/{$theme}.blade.php"));
-            });
-        }
+        // Farmart Child owns its template; retain parent-theme compatibility.
+        $this->app['view']->composer('theme.farmart::views.ecommerce.product', function ($view): void {
+            $view->setPath(plugin_path('farmart-helper/resources/views/product-description/farmart.blade.php'));
+        });
     }
 }

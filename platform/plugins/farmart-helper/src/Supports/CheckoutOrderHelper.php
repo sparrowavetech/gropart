@@ -16,9 +16,6 @@ class CheckoutOrderHelper extends OrderHelper
     {
         $tokens = Order::whereIn('id', (array) $orderIds)->orderBy('token')->pluck('token')->unique()->all();
         $run = function () use ($orderIds, $chargeId) {
-        foreach (Order::whereIn('id', (array) $orderIds)->where('is_finished', true)->pluck('id') as $id) {
-            \Illuminate\Support\Facades\Log::info('checkout_integrity.duplicate_finalization_skipped', ['order_id'=>$id]);
-        }
         $policy = app(CheckoutPaymentPolicy::class);
         $allowed = Order::query()->whereIn('id', (array) $orderIds)->get()
             ->reject(fn (Order $order) => $policy->blocksFinalization($order, $chargeId))
@@ -31,15 +28,6 @@ class CheckoutOrderHelper extends OrderHelper
             $run = fn () => app(PaymentSnapshot::class)->synchronized($token, $next);
         }
         return $run();
-    }
-
-    public function captureFootprints(Order $order): void
-    {
-        if ($order->referral()->exists()) return;
-        parent::captureFootprints($order);
-        if ($order->referral()->exists()) {
-            \Illuminate\Support\Facades\Log::info('checkout_integrity.source_saved', ['order_id'=>$order->id]);
-        }
     }
 
     public function isCheckoutTokenSpent(?string $token): bool

@@ -46,12 +46,12 @@ class PaymentSnapshot
         $orders = Order::where('token', $token)->get();
         if (!$token || $orders->isEmpty()) throw new RuntimeException('Please refresh checkout before starting payment.');
         foreach ($orders as $order) {
-            if ($order->products()->where('product_type', 'physical')->exists() && (!$order->address->name || !$order->address->zip_code || !$order->shipping_option)) {
+            if ($order->products()->where('product_type', 'physical')->exists() && (!$order->address?->name || (\Botble\Ecommerce\Facades\EcommerceHelper::isZipCodeEnabled() && !$order->address?->zip_code) || !$order->shipping_option)) {
                 throw new RuntimeException('Complete delivery details and select shipping before starting payment.');
             }
         }
         $expected = (float) apply_filters('ecommerce_expected_online_amount', (float)$orders->sum('amount'), $orders);
-        if (abs(round($expected * 100) - $request['amount']) > 1) {
+        if (abs(CheckoutAmounts::paise($expected) - $request['amount']) > CheckoutAmounts::TOLERANCE_PAISE) {
             Log::warning('checkout_integrity.creation_amount_rejected', ['order_ids'=>$orders->modelKeys(), 'requested_paise'=>$request['amount'], 'expected_paise'=>(int)round($expected*100)]);
             throw new RuntimeException('Checkout total changed. Please refresh checkout before paying.');
         }

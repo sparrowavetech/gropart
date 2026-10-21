@@ -2,7 +2,7 @@
 (function () {
     try {
         var key = 'gropart_checkout_source', source = sessionStorage.getItem(key);
-        if (!source && !/^\/(admin|payment|checkout)(\/|$)/.test(location.pathname)) {
+        if (!source && @json(!\Botble\Base\Facades\AdminHelper::isInAdmin(true) && !request()->routeIs('public.checkout.*', 'payments.*'))) {
             var params = new URLSearchParams(location.search), data = {
                 landing_domain: location.hostname, landing_page: location.pathname,
                 referrer_domain: document.referrer ? new URL(document.referrer).hostname : null

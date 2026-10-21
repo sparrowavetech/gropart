@@ -21,10 +21,15 @@ class CheckoutIntegrityServiceProvider extends ServiceProvider
 
         $this->app->bind(BaseOrderHelper::class, CheckoutOrderHelper::class);
         OrderHelper::clearResolvedInstance(BaseOrderHelper::class);
-        $this->app->bind(\Botble\Razorpay\Http\Controllers\RazorpayController::class, \SparroWave\FarmartHelper\Http\Controllers\PartialPaymentRazorpayController::class);
 
         $this->app->booted(function () {
-            if (is_plugin_active('ecommerce-wholesale')) $this->app->bind(\Botble\EcommerceWholesale\Listeners\SaveOrderWholesalePrices::class, \SparroWave\FarmartHelper\Listeners\PreserveCheckoutWholesalePrices::class);
+            if (is_plugin_active('ecommerce-wholesale')) {
+                // Wrap the resolved listener so Indian GST retains its pricing policy.
+                $this->app->extend(
+                    \Botble\EcommerceWholesale\Listeners\SaveOrderWholesalePrices::class,
+                    fn ($listener) => new \SparroWave\FarmartHelper\Listeners\PreserveCheckoutWholesalePrices($listener)
+                );
+            }
             if (is_plugin_active('loyalty-points')) {
                 $this->app->bind(\Botble\LoyaltyPoints\Listeners\SaveOrderLoyaltyPoints::class, \SparroWave\FarmartHelper\Listeners\FinalizeLoyaltySnapshot::class);
                 add_action('ecommerce_before_processing_payment', [app(\SparroWave\FarmartHelper\Supports\FinalizeCheckoutDiscount::class), 'handle'], 110, 4);
@@ -59,7 +64,6 @@ class CheckoutIntegrityServiceProvider extends ServiceProvider
             add_action('payment_before_making_api_request', [app(\SparroWave\FarmartHelper\Supports\PaymentSnapshot::class), 'before'], 5, 2);
             add_action('payment_after_api_response', [app(\SparroWave\FarmartHelper\Supports\PaymentSnapshot::class), 'after'], 100, 3);
             \Botble\Ecommerce\Models\Order::updating(fn ($order) => app(\SparroWave\FarmartHelper\Supports\PaymentSnapshot::class)->protect($order));
-            \Botble\Ecommerce\Models\Order::updated(fn ($order) => app(CheckoutOrderHelper::class)->captureFootprints($order));
             foreach (['creating', 'updating', 'deleting'] as $event) {
                 \Botble\Ecommerce\Models\OrderProduct::$event(function ($item) use ($event) {
                     $order = \Botble\Ecommerce\Models\Order::find($item->order_id);
@@ -74,7 +78,6 @@ class CheckoutIntegrityServiceProvider extends ServiceProvider
                     throw \Illuminate\Validation\ValidationException::withMessages(['payment'=> 'Payment has already started for this order. Its items and total cannot be changed.']);
                 });
             }
-            \Botble\Ecommerce\Models\Order::created(fn ($order) => app(CheckoutOrderHelper::class)->captureFootprints($order));
         }
     }
 }
