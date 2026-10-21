@@ -27,10 +27,14 @@ class ManualConfirmation
         $fee=$intent?(float)$order->payment_fee:round(PaymentFeeHelper::calculateFee('cod',$base),2);
         $total=$intent?(float)$order->amount:round($base+$fee,2);
         $advance=$intent?(float)$intent['advance']:CodAmounts::split($total,CodAmounts::getPrepaymentPercentage())['advance'];
-        $locked=(bool) apply_filters('ecommerce_payment_attempt_locked', (bool)$order->getOrderMetadata('advanced_cod_gateway_attempt'), $order) || Payment::where('order_id',$order->id)->whereIn('status',['pending','completed','refunding','refunded'])->exists();
-        $retry_required=(bool) apply_filters('ecommerce_payment_attempt_inconsistent', false, $order);
-        $fingerprint=hash('sha256',json_encode([$order->getRawOriginal(),$flags,$fee,$total,$advance]));
-        return compact('fee','total','advance','locked','fingerprint','flags','retry_required')+['remaining'=>round($total-$advance,2),'frozen'=>(bool)$intent];
+        $hasRealPayment = Payment::where('order_id', $order->id)->whereIn('status', ['pending', 'completed', 'refunding', 'refunded'])->exists();
+        $hasStaleAttempt = (bool)$order->getOrderMetadata('advanced_cod_gateway_attempt') || (bool) apply_filters('ecommerce_payment_attempt_locked', false, $order);
+        $locked = $hasRealPayment;
+        $stale_attempt = $hasStaleAttempt && !$hasRealPayment;
+        $retry_required = (bool) apply_filters('ecommerce_payment_attempt_inconsistent', false, $order);
+        $fingerprint = hash('sha256', json_encode([$order->getRawOriginal(), $flags, $fee, $total, $advance]));
+
+        return compact('fee', 'total', 'advance', 'locked', 'stale_attempt', 'fingerprint', 'flags', 'retry_required') + ['remaining' => round($total - $advance, 2), 'frozen' => (bool)$intent];
     }
 
     public static function confirm(Order $order,array $data,$actor): Order
@@ -82,6 +86,7 @@ class ManualConfirmation
                     $payment=Payment::create(['order_id'=>$order->id,'amount'=>$p['advance'],'currency'=>AdvancePayment::intent($order)['currency'],
                         'payment_channel'=>self::CHANNEL,'charge_id'=>'manual-cod-'.hash('sha256',strtoupper(trim($data['reference']))),'status'=>'completed','payment_fee'=>0,'user_id'=>$order->user_id ?? 0]);
                     $order->setOrderMetadata('advanced_cod_manual_receipt',(string)$payment->id);
+                    $order->setOrderMetadata('advanced_cod_gateway_attempt', null);
                 }else{
                     $order->cod_prepayment_amount=0;$order->cod_remaining_amount=$p['total'];$order->save();
                     $order->setOrderMetadata(AdvancePayment::KEY,json_encode(['admin_full_cod'=>true,'gateway'=>'cod','currency'=>get_application_currency()->title,
