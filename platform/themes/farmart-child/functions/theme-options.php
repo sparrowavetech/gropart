@@ -6,6 +6,17 @@ app('events')->listen(RenderingThemeOptionSettings::class, function (): void {
     if (function_exists('theme_option')) {
         theme_option()
             ->setField([
+                'id' => 'product_description_layout',
+                'section_id' => 'opt-text-subsection-ecommerce',
+                'type' => 'customSelect',
+                'label' => __('Product description layout'),
+                'attributes' => [
+                    'name' => 'product_description_layout',
+                    'list' => ['legacy' => __('Use existing shopping setting'), 'tabs' => __('Tabs'), 'sections' => __('Full-width sections')],
+                    'value' => 'legacy',
+                ],
+            ])
+            ->setField([
                 'id' => 'enable_top_upper_header',
                 'section_id' => 'opt-text-subsection-general',
                 'type' => 'customSelect',

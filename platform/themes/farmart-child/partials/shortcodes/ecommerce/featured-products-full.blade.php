@@ -8,7 +8,7 @@
                 <div class="product-deals-day__body arrows-top-right">
                     <div class="product-deals-day-body row">
                         @foreach ($products as $product)
-                            <div class="product-inner col-sm-4 col-md-3 col-lg-2 col-6">
+                            <div class="product-inner col-6 col-md-4 col-lg-2">
                                 {!! Theme::partial('ecommerce.product-item', compact('product', 'wishlistIds')) !!}
                             </div>
                         @endforeach

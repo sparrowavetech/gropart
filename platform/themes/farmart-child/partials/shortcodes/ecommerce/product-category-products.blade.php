@@ -45,7 +45,7 @@
                                     ],
                                 ],
                                 [
-                                    'breakpoint' => 1025,
+                                    'breakpoint' => 1200,
                                     'settings' => [
                                         'arrows' => true,
                                         'dots' => false,
@@ -54,7 +54,7 @@
                                     ],
                                 ],
                                 [
-                                    'breakpoint' => 769,
+                                    'breakpoint' => 1025,
                                     'settings' => [
                                         'arrows' => true,
                                         'dots' => false,
@@ -63,7 +63,7 @@
                                     ],
                                 ],
                                 [
-                                    'breakpoint' => 440,
+                                    'breakpoint' => 768,
                                     'settings' => [
                                         'arrows' => true,
                                         'dots' => false,

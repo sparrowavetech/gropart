@@ -24,7 +24,7 @@
     />
 
     @if (EcommerceHelper::isCartEnabled() || !empty($withButtons))
-        {!! apply_filters(ECOMMERCE_PRODUCT_DETAIL_EXTRA_HTML, null, $product) !!}
+        {!! apply_filters('farmart_child_product_card_extra_html', null, $product) !!}
         <div class="product-button w-100">
             @if (EcommerceHelper::isCartEnabled())
                 @if ($product->has_variation && empty($isQuickShop) && empty($withButtons))

@@ -157,6 +157,9 @@
         </div>
     </div>
     <div class="container-xxxl">
+        @if (theme_option('product_description_layout', 'legacy') === 'sections' || (theme_option('product_description_layout', 'legacy') === 'legacy' && get_ecommerce_setting('enable_full_page_product_description', false)))
+            {!! Theme::partial('ecommerce.product-description-sections', ['product' => $product]) !!}
+        @else
         <div class="row product-detail-tabs mt-3 mb-4">
             <div class="col-md-3">
                 <div
@@ -297,6 +300,7 @@
                 </div>
             </div>
         </div>
+        @endif
     </div>
 </div>
 

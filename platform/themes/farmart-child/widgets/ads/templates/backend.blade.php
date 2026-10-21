@@ -6,7 +6,7 @@
             id="widget-name"
             name="name"
             type="text"
-            value="{{ $config['name'] }}"
+            value="{{ $config['name'] ?? '' }}"
         >
     </div>
 
@@ -14,15 +14,16 @@
         <label class="form-label" for="widget_ads">{{ __('Select Ads') }}</label>
         {!! Form::customSelect(
             'ads_key[]',
-            AdsManager::getData(true)->pluck('name', 'key')->toArray(),
-            Arr::wrap($config['ads_key'] ?? null),
-            ['class' => 'form-control select-full', 'multiple' => true],
+            ['' => __('-- Select --')] +
+                AdsManager::getData(true)->pluck('name', 'key')->toArray(),
+            (array) ($config['ads_key'] ?? []),
+            ['class' => 'form-control select-full', 'multiple' => 'multiple'],
         ) !!}
     </div>
 
     <div class="mb-3">
         <label>{{ __('Background') }}</label>
-        {!! Form::mediaImage('background', $config['background']) !!}
+        {!! Form::mediaImage('background', $config['background'] ?? '') !!}
     </div>
 
     <div class="mb-3">
@@ -34,8 +35,20 @@
                 'large' => __('Large'),
                 'medium' => __('Medium'),
             ],
-            $config['size'],
+            $config['size'] ?? 'full-with',
             ['class' => 'form-control select-full'],
         ) !!}
+    </div>
+    <div class="mb-3">
+        <label class="form-label">{{ __('Autoplay') }}</label>
+        {!! Form::customSelect('autoplay', ['yes' => __('Yes'), 'no' => __('No')], $config['autoplay'] ?? 'yes', ['class' => 'form-control']) !!}
+    </div>
+    <div class="mb-3">
+        <label class="form-label">{{ __('Autoplay interval (milliseconds)') }}</label>
+        <input class="form-control" type="number" name="autoplay_speed" min="1000" max="30000" value="{{ $config['autoplay_speed'] ?? 3000 }}">
+    </div>
+    <div class="mb-3">
+        <label class="form-label">{{ __('Transition duration (milliseconds)') }}</label>
+        <input class="form-control" type="number" name="transition_speed" min="0" max="3000" value="{{ $config['transition_speed'] ?? 800 }}">
     </div>
 @endif

@@ -225,3 +225,19 @@ app('events')->listen(RouteMatched::class, function (): void {
         return $html;
     }, 20, 4);
 });
+
+// Suppress only the quote view while rendering card hooks; preserve every other hook.
+app('view')->composer('plugins/fob-request-quote::button', function ($view): void {
+    if (request()->attributes->get('farmart_child_card_context', false)) {
+        $view->setPath(__DIR__ . '/../partials/ecommerce/card-quote-placeholder.blade.php');
+    }
+});
+add_filter('farmart_child_product_card_extra_html', function ($html, $product): string {
+    $previous = request()->attributes->get('farmart_child_card_context', false);
+    request()->attributes->set('farmart_child_card_context', true);
+    try {
+        return (string) apply_filters(ECOMMERCE_PRODUCT_DETAIL_EXTRA_HTML, $html, $product);
+    } finally {
+        request()->attributes->set('farmart_child_card_context', $previous);
+    }
+}, 20, 2);

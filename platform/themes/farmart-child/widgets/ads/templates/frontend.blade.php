@@ -1,35 +1,37 @@
 @if (is_plugin_active('ads'))
     @php
-        $images = collect(Arr::wrap($config['ads_key'] ?? null))
-            ->filter(fn ($key) => is_string($key) || is_numeric($key))
-            ->map(fn ($key) => display_ads_advanced((string) $key, ['class' => 'd-flex justify-content-center']))
-            ->filter();
+        $ads = [];
+        foreach ((array) ($config['ads_key'] ?? []) as $key) {
+            if ($key && ($ad = AdsManager::displayAds($key, ['class' => 'd-flex justify-content-center']))) {
+                $ads[] = $ad;
+            }
+        }
+        $size = match ($config['size'] ?? '') {
+            'large' => 'xxl',
+            'medium' => 'lg',
+            default => 'xxxl',
+        };
+        $slider = count($ads) > 1;
+        $options = [
+            'rtl' => BaseHelper::isRtlEnabled(),
+            'arrows' => false,
+            'dots' => true,
+            'autoplay' => ($config['autoplay'] ?? 'yes') === 'yes',
+            'infinite' => false,
+            'autoplaySpeed' => max(1000, min(30000, (int) ($config['autoplay_speed'] ?? 3000))),
+            'speed' => max(0, min(3000, (int) ($config['transition_speed'] ?? 800))),
+            'slidesToShow' => 1,
+            'slidesToScroll' => 1,
+        ];
     @endphp
-
-    @if ($images->isNotEmpty())
-        <div
-            class="lazyload"
-            @if ($config['background']) data-bg="{{ RvMedia::getImageUrl($config['background']) }}" @endif
-        >
-            @php
-                $size = 'xxxl';
-                switch ($config['size']) {
-                    case 'large':
-                        $size = 'xxl';
-                        break;
-                    case 'medium':
-                        $size = 'lg';
-                        break;
-                }
-            @endphp
-            <div class="container-{{ $size }}">
-                <div class="row">
-                    @foreach ($images as $image)
-                        <div class="my-5">
-                            {!! $image !!}
-                        </div>
-                    @endforeach
-                </div>
+    @if ($ads)
+        <div class="lazyload" @if (!empty($config['background'])) data-bg="{{ RvMedia::getImageUrl($config['background']) }}" @endif>
+            <div class="ad-widget-sidebar mb-4 {{ $slider ? 'slick-slides-carousel' : '' }}" @if ($slider) data-slick='@json($options)' @endif>
+                @foreach ($ads as $ad)
+                    <div class="container-{{ $size }}">
+                        <div class="row"><div class="my-4">{!! $ad !!}</div></div>
+                    </div>
+                @endforeach
             </div>
         </div>
     @endif

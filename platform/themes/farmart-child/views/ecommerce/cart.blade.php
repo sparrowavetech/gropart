@@ -203,6 +203,25 @@
                                 >{{ __('Apply') }}</button>
                             </div>
                         </div>
+
+                        @php
+                            $availableDiscounts = Botble\Ecommerce\Models\Discount::query()
+                                ->where('type', Botble\Ecommerce\Enums\DiscountTypeEnum::COUPON)
+                                ->where('display_at_checkout', true)
+                                ->active()
+                                ->available()
+                                ->get();
+                        @endphp
+
+                        @if ($availableDiscounts->isNotEmpty())
+                            <div class="cart-available-coupons mt-3">
+                                @include(EcommerceHelper::viewPath('discounts.partials.form'), [
+                                    'discounts' => $availableDiscounts,
+                                    'isMobile' => false,
+                                    'isCartPage' => true,
+                                ])
+                            </div>
+                        @endif
                     </div>
                     <div class="col-lg-4 col-md-2"></div>
                     <div class="col-lg-4 col-md-5">
@@ -264,12 +283,15 @@
                                     </span>
                                 </div>
                             </div>
-                            @if (session('tracked_start_checkout'))
+                            @php
+                                $checkoutToken = session('tracked_start_checkout') ?: OrderHelper::getOrderSessionToken();
+                            @endphp
+                            @if ($checkoutToken)
                                 <div class="proceed-to-checkout">
                                     <div class="d-grid gap-2">
                                         <a
                                             class="checkout-button btn btn-primary"
-                                            href="{{ route('public.checkout.information', session('tracked_start_checkout')) }}"
+                                            href="{{ route('public.checkout.information', $checkoutToken) }}"
                                         >{{ __('Proceed to checkout') }}</a>
                                     </div>
                                 </div>
@@ -284,7 +306,7 @@
             <div class="row align-items-center mb-2 widget-header">
                 <h2 class="col-auto mb-0 py-2">{{ __('Customers who bought this item also bought') }}</h2>
             </div>
-            <div class="row row-cols-lg-6 row-cols-md-4 row-cols-3 g-0 products-with-border">
+            <div class="row row-cols-lg-6 row-cols-md-3 row-cols-2 g-0 products-with-border">
                 @foreach ($crossSellProducts as $crossSellProduct)
                     <div class="col">
                         <div class="product-inner">
