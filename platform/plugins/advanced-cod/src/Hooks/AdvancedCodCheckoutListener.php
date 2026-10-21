@@ -62,43 +62,9 @@ class AdvancedCodCheckoutListener
         if ($hasCodEligible && $hasNonEligible) {
             $conflictHtml = '
                 <style>
-                    /* Premium Checkout Button Styling */
-                    .payment-checkout-btn {
+                    /* Premium Checkout Button & Theme Button Styling */
+                    .payment-checkout-btn, #checkout-button, .btn-checkout, form.checkout-form button[type="submit"], .btn-payment-checkout {
                         display: none !important;
-                        background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
-                        border: none !important;
-                        color: white !important;
-                        padding: 14px 24px !important;
-                        font-size: 1.1rem !important;
-                        font-weight: 600 !important;
-                        border-radius: 8px !important;
-                        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2), 0 2px 4px -1px rgba(37, 99, 235, 0.1) !important;
-                        transition: all 0.3s ease !important;
-                        text-align: center;
-                        width: 100%;
-                        letter-spacing: 0.5px;
-                        margin-top: 10px;
-                        justify-content: center;
-                        align-items: center;
-                    }
-                    .payment-checkout-btn::before {
-                        content: \'\';
-                        display: inline-block;
-                        width: 18px;
-                        height: 18px;
-                        background-image: url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'24\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'white\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpath d=\'M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0\'/%3E%3Cpath d=\'M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0\'/%3E%3Cpath d=\'M17 17h-11v-14h-2\'/%3E%3Cpath d=\'M6 5l14 1l-1 7h-13\'/%3E%3C/svg%3E");
-                        background-repeat: no-repeat;
-                        background-position: center;
-                        background-size: contain;
-                        margin-right: 8px;
-                    }
-                    .payment-checkout-btn:hover {
-                        transform: translateY(-2px);
-                        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3) !important;
-                        background: linear-gradient(135deg, #1d4ed8, #1e40af) !important;
-                    }
-                    .payment-checkout-btn:active {
-                        transform: translateY(0);
                     }
                 
                     /* Existing Conflict Card Styles */
@@ -241,10 +207,10 @@ class AdvancedCodCheckoutListener
                 <div class="conflict-alert-card" id="cod-conflict-alert">
                     <div class="conflict-alert-header">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-alert-triangle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 9v4" /><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" /><path d="M12 16h.01" /></svg>
-                        ' . __('COD Availability Conflict') . '
+                        ' . trans('plugins/advanced-cod::advanced-cod.conflict_title') . '
                     </div>
                     <p class="conflict-alert-body">
-                        ' . __('Your cart contains items that are <strong>not eligible for Cash on Delivery</strong>. To enable COD, please remove the following items below, or proceed to pay online for the entire order.') . '
+                        ' . trans('plugins/advanced-cod::advanced-cod.conflict_body') . '
                     </p>
                     <div class="ineligible-list">
             ';
@@ -256,7 +222,7 @@ class AdvancedCodCheckoutListener
                             <span class="ineligible-item-name">' . e($item['name']) . '</span>
                             <a href="' . $removeUrl . '" class="btn-remove-item">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
-                                ' . __('Remove') . '
+                                ' . trans('plugins/advanced-cod::advanced-cod.remove') . '
                             </a>
                         </div>
                 ';
@@ -267,9 +233,9 @@ class AdvancedCodCheckoutListener
                     <div class="btn-pay-online-wrapper">
                         <button type="button" class="btn-pay-online" id="btn-pay-online-action">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 5m0 3a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v8a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3z" /><path d="M3 10l18 0" /><path d="M7 15l.01 0" /><path d="M11 15l2 0" /></svg>
-                            ' . __('Pay Entire Order Online') . '
+                            ' . trans('plugins/advanced-cod::advanced-cod.pay_entire_online') . '
                         </button>
-                        <p class="text-center mt-2 mb-0" style="font-size: 0.85rem; color: #6b7280;">' . __('Secure payment via Razorpay / Online Gateway') . '</p>
+                        <p class="text-center mt-2 mb-0" style="font-size: 0.85rem; color: #6b7280;">' . trans('plugins/advanced-cod::advanced-cod.secure_online_payment') . '</p>
                     </div>
                 </div>
                 
@@ -277,10 +243,10 @@ class AdvancedCodCheckoutListener
                     <div class="undo-content">
                         <span class="undo-text">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle" style="margin-right: 8px;"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 9h.01" /><path d="M11 12h1v4h1" /></svg>
-                            ' . __('You include non-COD items in your payment.') . '
+                            ' . trans('plugins/advanced-cod::advanced-cod.conflict_minimized') . '
                         </span>
                         <a href="javascript:void(0);" id="btn-undo-cod-conflict" class="btn-undo-action">
-                            ' . __('Review Conflict') . '
+                            ' . trans('plugins/advanced-cod::advanced-cod.review_conflict') . '
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px;"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 11l-4 4l4 4m-4 -4h11a4 4 0 0 0 0 -8h-1" /></svg>
                         </a>
                     </div>
@@ -292,19 +258,20 @@ class AdvancedCodCheckoutListener
                         var undoBtn = document.getElementById("btn-undo-cod-conflict");
                         var alertCard = document.getElementById("cod-conflict-alert");
                         var minimizedCard = document.getElementById("cod-conflict-minimized");
+                        var checkoutSelector = ".payment-checkout-btn, #checkout-button, .btn-checkout, form.checkout-form button[type=\'submit\'], .btn-payment-checkout";
 
                         if (payBtn) {
                             payBtn.addEventListener("click", function(e) {
                                 e.preventDefault();
-                                // Unhide checkout button
-                                var checkoutBtns = document.querySelectorAll(".payment-checkout-btn");
-                                checkoutBtns.forEach(function(el) { el.style.setProperty("display", "flex", "important"); });
+                                // Unhide checkout buttons across any theme
+                                var checkoutBtns = document.querySelectorAll(checkoutSelector);
+                                checkoutBtns.forEach(function(el) { el.style.setProperty("display", "", "important"); });
                                 
                                 // Hide conflict alert & Show minimized
                                 if (alertCard) alertCard.style.display = "none";
                                 if (minimizedCard) minimizedCard.style.display = "block";
                                 
-                                // Select Razorpay or any online method
+                                // Select first available online method
                                 var onlineInputs = document.querySelectorAll("input[name=\'payment_method\']");
                                 var found = false;
                                 onlineInputs.forEach(function(input) {
@@ -317,7 +284,7 @@ class AdvancedCodCheckoutListener
                                 });
                                 
                                 if (!found) {
-                                    alert("' . __('No online payment method found. Please contact support.') . '");
+                                    alert(' . json_encode(trans('plugins/advanced-cod::advanced-cod.no_online_method_found')) . ');
                                 }
                             });
                         }
@@ -325,8 +292,8 @@ class AdvancedCodCheckoutListener
                         if (undoBtn) {
                             undoBtn.addEventListener("click", function(e) {
                                 e.preventDefault();
-                                // Hide checkout button again
-                                var checkoutBtns = document.querySelectorAll(".payment-checkout-btn");
+                                // Hide checkout buttons again
+                                var checkoutBtns = document.querySelectorAll(checkoutSelector);
                                 checkoutBtns.forEach(function(el) { el.style.setProperty("display", "none", "important"); });
 
                                 // Show conflict alert & Hide minimized
@@ -357,9 +324,9 @@ class AdvancedCodCheckoutListener
 
         $label = '';
         if ($product->is_cod_eligible) {
-            $label = '<div style="margin-top: 4px;"><span class="badge bg-success text-white" style="font-size: 0.7em; padding: 0.35em 0.65em;">' . __('COD Eligible') . '</span></div>';
+            $label = '<div style="margin-top: 4px;"><span class="badge bg-success text-white" style="font-size: 0.7em; padding: 0.35em 0.65em;">' . trans('plugins/advanced-cod::advanced-cod.cod_eligible') . '</span></div>';
         } else {
-            $label = '<div style="margin-top: 4px;"><span class="badge bg-danger text-white" style="font-size: 0.7em; padding: 0.35em 0.65em;">' . __('Not Eligible for COD') . '</span></div>';
+            $label = '<div style="margin-top: 4px;"><span class="badge bg-danger text-white" style="font-size: 0.7em; padding: 0.35em 0.65em;">' . trans('plugins/advanced-cod::advanced-cod.not_eligible_for_cod') . '</span></div>';
         }
 
         return $html . $label;
@@ -394,7 +361,7 @@ class AdvancedCodCheckoutListener
         // But the REAL calculation will happen via JS to include Shipping/Tax updates dynamically.
         $cart = Cart::instance('cart');
         $rawTotal = $cart->rawTotal(); 
-        $percentage = (float) get_payment_setting('prepayment_percentage', 'cod', 30);
+        $percentage = \SparroWave\AdvancedCod\Supports\CodAmounts::getPrepaymentPercentage();
         
         $initialPrepayment = \SparroWave\AdvancedCod\Supports\CodAmounts::split((float)$rawTotal, $percentage)['advance'];
         $token = request()->route('token') ?: (request()->hasSession() ? session('tracked_start_checkout') : null);
@@ -415,23 +382,23 @@ class AdvancedCodCheckoutListener
             <div class="cod-payment-breakdown mt-2 p-3" style="background: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 6px;">
                 <h6 class="text-success mb-2" style="font-weight: bold; display: flex; align-items: center;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-check" style="margin-right: 5px;"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
-                    ' . __('Smart COD Available') . '
+                    ' . trans('plugins/advanced-cod::advanced-cod.smart_cod_available', ['percentage' => $percentage]) . '
                 </h6>
                 <p class="mb-2" style="font-size: 0.9em;">
-                    ' . __('Pay just <strong id="cod-text-amount">:amount</strong> now to confirm your order.', ['amount' => format_price($initialPrepayment)]) . '
+                    ' . trans('plugins/advanced-cod::advanced-cod.pay_just_amount_now', ['percentage' => $percentage, 'amount' => '<strong id="cod-text-amount">' . format_price($initialPrepayment) . '</strong>']) . '
                 </p>
                 <div style="background: white; padding: 10px; border-radius: 4px; border: 1px solid #eee;">
                     <div style="display: flex; justify-content: space-between; font-size: 0.9em; margin-bottom: 4px;">
-                        <span>' . __('Pay Now (Online):') . '</span>
+                        <span>' . trans('plugins/advanced-cod::advanced-cod.pay_now_online') . '</span>
                         <strong class="text-success" id="cod-pay-now-val">' . format_price($initialPrepayment) . '</strong>
                     </div>
                     <div style="display: flex; justify-content: space-between; font-size: 0.9em;">
-                        <span>' . __('Pay on Delivery:') . '</span>
+                        <span>' . trans('plugins/advanced-cod::advanced-cod.pay_on_delivery') . '</span>
                         <strong id="cod-pay-later-val">' . format_price($initialRemaining) . '</strong>
                     </div>
                 </div>
                 <p class="mt-2 mb-0 text-muted" style="font-size: 0.8em; font-style: italic;">
-                    * ' . __('Calculated on final order total including shipping & taxes.') . '
+                    ' . trans('plugins/advanced-cod::advanced-cod.calculated_on_total') . '
                 </p>
             </div>
             
@@ -439,40 +406,40 @@ class AdvancedCodCheckoutListener
                 document.addEventListener("DOMContentLoaded", function() {
                     const percentage = ' . $percentage . ';
                     const frozenAdvance = ' . json_encode($frozenAdvance) . ';
-                    const currencySymbol = "' . $currencySymbol . '";
+                    const currencyCode = "' . $currency->title . '";
+
+                    function parseAmount(text) {
+                        if (!text) return 0;
+                        let clean = text.replace(/[^0-9.,]/g, "");
+                        if (clean.includes(",") && clean.includes(".")) {
+                            if (clean.indexOf(",") < clean.indexOf(".")) {
+                                clean = clean.replace(/,/g, "");
+                            } else {
+                                clean = clean.replace(/\./g, "").replace(",", ".");
+                            }
+                        } else if (clean.includes(",")) {
+                            clean = clean.replace(/,/g, "");
+                        }
+                        return parseFloat(clean) || 0;
+                    }
 
                     function updateCodBreakdown() {
-                        // Find the total element. Classes from Botble amount.blade.php
-                        const totalEl = document.querySelector(".ec-checkout-total-row .total-text");
+                        const totalEl = document.querySelector(".ec-checkout-total-row .total-text, .checkout-total-amount, .order-summary .total, .payment-total-amount, [data-checkout-total]");
                         if (!totalEl) return;
 
-                        // Parse price. Remove currency symbol, commas. 
-                        // Assuming format like $1,234.56 or 1.234,56 based on locale is hard in JS without config.
-                        // But usually stripping non-digit non-dot works for standard. 
-                        // If Botble uses comma as decimal, this simple regex might fail.
-                        // We try to use the raw number if available in data attribute, else parse text.
-                        
-                        let total = 0;
-                        const priceText = totalEl.innerText.trim();
-                        
-                        // Simple parser: remove everything except digits and dots. 
-                        // Note: this assumes . is decimal. 
-                        const cleanPrice = priceText.replace(/[^0-9.]/g, "");
-                        total = parseFloat(cleanPrice);
-
+                        let total = parseAmount(totalEl.innerText.trim());
                         if (isNaN(total) || total <= 0) return;
 
                         const remain = frozenAdvance !== null ? Math.round((total - frozenAdvance) * 100) / 100 : Math.min(Math.floor(total), Math.round(total * (1 - percentage / 100)));
                         const prepay = Math.round((total - remain) * 100) / 100;
 
-                        // Formatter
-                        const formatter = new Intl.NumberFormat("en-US", {
+                        const locale = document.documentElement.lang || "en-US";
+                        const formatter = new Intl.NumberFormat(locale, {
                             style: "currency",
-                            currency: "' . $currency->title . '",
+                            currency: currencyCode,
                             minimumFractionDigits: 2
                         });
 
-                        // Update DOM
                         const payNowEl = document.getElementById("cod-pay-now-val");
                         const payLaterEl = document.getElementById("cod-pay-later-val");
                         const textEl = document.getElementById("cod-text-amount");
@@ -482,10 +449,7 @@ class AdvancedCodCheckoutListener
                         if (textEl) textEl.innerText = formatter.format(prepay);
                     }
 
-                    // Run initially
                     updateCodBreakdown();
-
-                    // Poll for changes (simple and robust for AJAX updates)
                     setInterval(updateCodBreakdown, 1000);
                 });
             </script>
@@ -511,18 +475,25 @@ class AdvancedCodCheckoutListener
         }
 
         $gateways = apply_filters('advanced_cod_online_gateways', array_values(\Botble\Payment\Enums\PaymentMethodEnum::toArray()));
-        $preferred = (string) get_payment_setting('advance_gateway', 'cod', 'razorpay');
-        $gateways = array_unique(array_merge([$preferred], $gateways));
+        $preferred = (string) get_payment_setting('advance_gateway', 'cod', 'auto');
+        if ($preferred !== 'auto' && !empty($preferred)) {
+            $gateways = array_unique(array_merge([$preferred], $gateways));
+        }
+
         $onlineMethod = null;
         foreach ($gateways as $gateway) {
-            if (!in_array($gateway, ['cod', 'bank_transfer'], true) && get_payment_setting('status', $gateway) == 1) {
+            if (!in_array($gateway, ['cod', 'bank_transfer', 'auto'], true) && get_payment_setting('status', $gateway) == 1) {
                 $onlineMethod = $gateway;
                 break;
             }
         }
+
         if (!$onlineMethod) {
-            throw \Illuminate\Validation\ValidationException::withMessages(['payment_method'=>'No online gateway is available for the COD advance.']);
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'payment_method' => trans('plugins/advanced-cod::advanced-cod.no_gateway_available_for_advance')
+            ]);
         }
+
         \SparroWave\AdvancedCod\Supports\AdvancePayment::finalizeFees((array)$request->input('order_id', []));
         \SparroWave\AdvancedCod\Supports\AdvancePayment::prepare((array)$request->input('order_id', []), $onlineMethod);
         // Request-scoped intent: stale session flags cannot discount a later prepaid checkout.
@@ -538,7 +509,39 @@ class AdvancedCodCheckoutListener
         if (!$ids || !isset($data['amount'])) return $data;
         $orders = Order::whereIn('id', $ids)->get();
         if ($request->hasSession()) session()->put('selected_payment_method', 'cod');
-        $data['amount'] = round($orders->sum(fn ($order) => \SparroWave\AdvancedCod\Supports\AdvancePayment::intent($order)['advance'] ?? 0), 2);
+
+        $advanceTotal = round($orders->sum(fn ($order) => \SparroWave\AdvancedCod\Supports\AdvancePayment::intent($order)['advance'] ?? 0), 2);
+        $data['amount'] = $advanceTotal;
+
+        // Bridge for line-item based gateways (Stripe, PayPal, Mollie, etc.)
+        // When gateways construct checkout sessions from $data['products'] & shipping,
+        // this synthetic line item ensures only the partial advance is charged.
+        $orderCodes = $orders->pluck('code')->filter()->implode(', ');
+        $percentage = \SparroWave\AdvancedCod\Supports\CodAmounts::getPrepaymentPercentage();
+        $lineItemTitle = trans('plugins/advanced-cod::advanced-cod.advance_line_item_name', [
+            'percentage' => $percentage,
+            'order' => $orderCodes ? '(' . $orderCodes . ')' : '',
+        ]);
+
+        $data['products'] = [
+            [
+                'id' => 'cod_advance_prepayment',
+                'name' => $lineItemTitle,
+                'price' => $advanceTotal,
+                'qty' => 1,
+            ],
+        ];
+
+        if (isset($data['shipping_amount'])) {
+            $data['shipping_amount'] = 0;
+        }
+        if (isset($data['tax_amount'])) {
+            $data['tax_amount'] = 0;
+        }
+        if (isset($data['discount_amount'])) {
+            $data['discount_amount'] = 0;
+        }
+
         return $data;
     }
 

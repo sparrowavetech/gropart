@@ -26,7 +26,7 @@ class ManualConfirmation
         $base=round((float)$order->amount-(float)$order->payment_fee,2);
         $fee=$intent?(float)$order->payment_fee:round(PaymentFeeHelper::calculateFee('cod',$base),2);
         $total=$intent?(float)$order->amount:round($base+$fee,2);
-        $advance=$intent?(float)$intent['advance']:CodAmounts::split($total,(float)get_payment_setting('prepayment_percentage','cod',30))['advance'];
+        $advance=$intent?(float)$intent['advance']:CodAmounts::split($total,CodAmounts::getPrepaymentPercentage())['advance'];
         $locked=(bool) apply_filters('ecommerce_payment_attempt_locked', (bool)$order->getOrderMetadata('advanced_cod_gateway_attempt'), $order) || Payment::where('order_id',$order->id)->whereIn('status',['pending','completed','refunding','refunded'])->exists();
         $retry_required=(bool) apply_filters('ecommerce_payment_attempt_inconsistent', false, $order);
         $fingerprint=hash('sha256',json_encode([$order->getRawOriginal(),$flags,$fee,$total,$advance]));

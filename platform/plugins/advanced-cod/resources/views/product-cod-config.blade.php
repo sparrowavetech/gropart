@@ -120,9 +120,9 @@
 
 <div class="advanced-cod-config">
     <div class="advanced-cod-config__content">
-        <label for="is_cod_eligible" class="advanced-cod-config__label">Eligible for Cash on Delivery (COD)?</label>
+        <label for="is_cod_eligible" class="advanced-cod-config__label">{{ trans('plugins/advanced-cod::advanced-cod.product_cod_eligible_label') }}</label>
         <p class="advanced-cod-config__help">
-            If enabled, this product will be available for Cash on Delivery. If the cart contains any product where this is disabled, COD will be hidden at checkout.
+            {{ trans('plugins/advanced-cod::advanced-cod.product_cod_eligible_help') }}
         </p>
     </div>
 
@@ -132,7 +132,7 @@
         <label class="advanced-cod-switch__label" for="is_cod_eligible" aria-label="Toggle COD eligibility">
             <span class="advanced-cod-switch__handle"></span>
         </label>
-        <span class="advanced-cod-status advanced-cod-status--enabled">COD enabled</span>
-        <span class="advanced-cod-status advanced-cod-status--disabled">COD disabled</span>
+        <span class="advanced-cod-status advanced-cod-status--enabled">{{ trans('plugins/advanced-cod::advanced-cod.cod_enabled') }}</span>
+        <span class="advanced-cod-status advanced-cod-status--disabled">{{ trans('plugins/advanced-cod::advanced-cod.cod_disabled') }}</span>
     </div>
 </div>

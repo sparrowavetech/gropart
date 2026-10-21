@@ -33,7 +33,7 @@
             <div class="col-md-6 mb-3"><label class="form-label" for="cod-manual-time">Received at ({{ config('app.timezone') }})</label><input class="form-control" type="datetime-local" name="occurred_at" id="cod-manual-time" value="{{ old('occurred_at') }}"></div>
         </div></fieldset>
         <div class="mb-3"><label class="form-label" for="cod-confirm-note">Evidence / reason</label><textarea class="form-control" name="note" id="cod-confirm-note" required maxlength="1000">{{ old('note') }}</textarea></div>
-        <button class="btn btn-primary" type="submit" @disabled(!$p['flags']['cod'])>Confirm &amp; place order</button>
+        <button class="btn btn-primary" type="submit" @disabled(!$p['flags']['cod'])>{{ trans('plugins/advanced-cod::advanced-cod.confirm_and_place') }}</button>
     </form>
     <script>document.addEventListener('DOMContentLoaded',function(){const m=document.getElementById('cod-confirm-mode'),f=document.getElementById('cod-manual-fields');function update(){document.getElementById('cod-preview-advance').textContent=m.value==='full_cod'?@json(format_price(0)):@json(format_price($p['advance']));document.getElementById('cod-preview-remaining').textContent=m.value==='full_cod'?@json(format_price($p['total'])):@json(format_price($p['remaining']));f.hidden=m.value!=='manual';f.disabled=f.hidden;for(const e of f.querySelectorAll('input,select'))e.required=!f.hidden;}m.addEventListener('change',update);update();});</script>
     @endif

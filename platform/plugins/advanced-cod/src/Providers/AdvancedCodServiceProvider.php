@@ -12,6 +12,16 @@ class AdvancedCodServiceProvider extends ServiceProvider
 {
     use LoadAndPublishDataTrait;
 
+    public function register(): void
+    {
+        if (is_plugin_active('razorpay')) {
+            $this->app->bind(
+                \Botble\Razorpay\Http\Controllers\RazorpayController::class,
+                \SparroWave\AdvancedCod\Http\Controllers\PartialPaymentRazorpayController::class
+            );
+        }
+    }
+
     public function boot(): void
     {
         $this
@@ -30,11 +40,31 @@ class AdvancedCodServiceProvider extends ServiceProvider
             add_filter('ecommerce_order_checkout_locked', fn ($locked, $order) => $locked || (bool) \SparroWave\AdvancedCod\Supports\AdvancePayment::intent($order), 20, 2);
             add_action('ecommerce_checkout_restarted', function () { if (request()->hasSession()) session()->forget(['advanced_cod_prepayment', 'advanced_cod_order_ids']); }, 20, 2);
             add_action('payment_after_api_response', function ($method, $requestData, $response) {
-                $ids = explode(',', (string)($requestData['notes']['order_id'] ?? ''));
+                $rawOrderIds = $requestData['notes']['order_id'] 
+                    ?? $requestData['metadata']['order_id'] 
+                    ?? $requestData['order_id'] 
+                    ?? '';
+                if (is_array($rawOrderIds)) {
+                    $ids = $rawOrderIds;
+                } else {
+                    $ids = explode(',', (string) $rawOrderIds);
+                }
+                $ids = array_filter(array_map('intval', $ids));
+                if (empty($ids)) {
+                    return;
+                }
+
+                $resId = is_array($response) ? ($response['id'] ?? null) : ($response->id ?? null);
+                $resAmount = is_array($response) ? ($response['amount'] ?? null) : ($response->amount ?? null);
+
                 foreach (\Botble\Ecommerce\Models\Order::whereIn('id', $ids)->get() as $order) {
                     $intent = \SparroWave\AdvancedCod\Supports\AdvancePayment::intent($order);
-                    if ($intent && $intent['gateway'] === $method && isset($response['id'], $response['amount'])) {
-                        $order->setOrderMetadata('advanced_cod_gateway_attempt', json_encode(['gateway' => $method, 'id' => $response['id'], 'amount' => $response['amount']]));
+                    if ($intent && $intent['gateway'] === $method && $resId && $resAmount) {
+                        $order->setOrderMetadata('advanced_cod_gateway_attempt', json_encode([
+                            'gateway' => $method,
+                            'id' => $resId,
+                            'amount' => $resAmount,
+                        ]));
                     }
                 }
             }, 110, 3);

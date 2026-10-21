@@ -42,7 +42,7 @@ class AdvancePayment
     {
         $orders = Order::whereIn('id', $ids)->orderBy('id')->get();
         if ($orders->isEmpty() || $orders->count() !== count(array_unique($ids))) throw new RuntimeException('Invalid COD order group.');
-        $percentage = (float) get_payment_setting('prepayment_percentage', 'cod', 30);
+        $percentage = CodAmounts::getPrepaymentPercentage();
         $parts = CodAmounts::allocate($orders->pluck('amount', 'id')->all(), $percentage);
         foreach ($orders as $order) {
             $old = self::intent($order);
@@ -98,7 +98,11 @@ class AdvancePayment
     /** Returns true only when the verified gateway event belongs to this plugin. */
     public static function handle(array $data): bool
     {
-        $ids = array_values(array_unique((array) ($data['order_id'] ?? [])));
+        $rawIds = $data['order_id'] ?? [];
+        if (is_string($rawIds)) {
+            $rawIds = explode(',', $rawIds);
+        }
+        $ids = array_values(array_filter(array_unique(array_map('intval', (array) $rawIds))));
         $orders = Order::whereIn('id', $ids)->orderBy('id')->get();
         if ($orders->isEmpty() || !$orders->contains(fn ($o) => self::intent($o))) return false;
         if ($orders->count() !== count($ids) || $orders->contains(fn ($o) => !self::intent($o))) {

@@ -1,5 +1,5 @@
 <div class="advanced-cod-summary" style="width:100%;float:none;box-sizing:border-box;page-break-inside:avoid;border:1px solid #ccd7d0;padding:12px;margin:12px 0;font-size:13px;text-align:left">
-    <small>{{ $s['currency'] }}</small><br><strong>Advanced COD — {{ $s['label'] }}</strong>
+    <small>{{ $s['currency'] }}</small><br><strong>{{ trans('plugins/advanced-cod::advanced-cod.name') }} — {{ $s['label'] }}</strong>
     <table style="width:100%;margin-top:8px">
         @foreach ([
             'Order total'=>$s['total'],
