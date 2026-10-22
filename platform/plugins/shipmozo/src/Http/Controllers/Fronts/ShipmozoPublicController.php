@@ -76,7 +76,7 @@ class ShipmozoPublicController extends BaseController
         $order = $query->first();
 
         if (! $order || ! $order->shipment || ! $order->shipment->tracking_id) {
-            return $response->setError()->setMessage('Tracking not found.');
+            return $response->setError()->setMessage(trans('plugins/shipmozo::shipmozo.tracking_not_found'));
         }
 
         $awb = $order->shipment->tracking_id;
@@ -89,11 +89,11 @@ class ShipmozoPublicController extends BaseController
                 'message' => $exception->getMessage(),
             ]);
 
-            return $response->setError()->setMessage('Unable to load tracking at this time.');
+            return $response->setError()->setMessage(trans('plugins/shipmozo::shipmozo.tracking_unavailable'));
         }
 
         if (empty($trackingData)) {
-            return $response->setError()->setMessage('No tracking update available.');
+            return $response->setError()->setMessage(trans('plugins/shipmozo::shipmozo.no_tracking_available'));
         }
 
         $html = view('plugins/shipmozo::tracking-timeline', compact('trackingData'))->render();
@@ -155,14 +155,14 @@ class ShipmozoPublicController extends BaseController
                 && Arr::get($rate, 'id') !== 'no_service');
 
             if ($serviceableRate) {
-                return $response->setMessage('Delivery is available for this pincode!')
+                return $response->setMessage(trans('plugins/shipmozo::shipmozo.pincode_available'))
                     ->setData(['pickup_pincode' => $pickupPincode, 'delivery_pincode' => $deliveryPincode]);
             }
 
-            return $response->setError(true)->setMessage('Delivery is not available for this pincode.')
+            return $response->setError(true)->setMessage(trans('plugins/shipmozo::shipmozo.pincode_unavailable'))
                 ->setData(['pickup_pincode' => $pickupPincode, 'delivery_pincode' => $deliveryPincode]);
         } catch (Throwable $e) {
-            return $response->setError(true)->setMessage('Unable to verify pincode at this time.');
+            return $response->setError(true)->setMessage(trans('plugins/shipmozo::shipmozo.pincode_verify_error'));
         }
     }
 }

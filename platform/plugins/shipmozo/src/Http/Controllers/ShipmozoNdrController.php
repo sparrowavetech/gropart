@@ -16,12 +16,12 @@ class ShipmozoNdrController extends BaseController
 
     public function index()
     {
-        PageTitle::setTitle('ShipMozo NDR Management');
+        PageTitle::setTitle(trans('plugins/shipmozo::shipmozo.ndr.management_title'));
 
         try {
             $ndrs = $this->shipmozo->getNdrAll();
         } catch (Throwable $exception) {
-            $this->shipmozo->logError('Unable to load NDR records', ['message' => $exception->getMessage()]);
+            $this->shipmozo->logError(trans('plugins/shipmozo::shipmozo.ndr.load_failed'), ['message' => $exception->getMessage()]);
             $ndrs = [];
         }
 
@@ -40,15 +40,15 @@ class ShipmozoNdrController extends BaseController
                 'message' => $exception->getMessage(),
             ]);
 
-            return $response->setError()->setMessage('Unable to perform the NDR action at this time.');
+            return $response->setError()->setMessage(trans('plugins/shipmozo::shipmozo.ndr.action_failed'));
         }
 
         if (Arr::get($result, 'result') != 1 || Arr::get($result, 'error')) {
             return $response->setError()->setMessage(
-                Arr::get($result, 'message', Arr::get($result, 'data.error', 'Failed to perform NDR action.'))
+                Arr::get($result, 'message', Arr::get($result, 'data.error', trans('plugins/shipmozo::shipmozo.ndr.action_failed')))
             );
         }
 
-        return $response->setMessage('NDR action triggered successfully.');
+        return $response->setMessage(trans('plugins/shipmozo::shipmozo.ndr.action_success'));
     }
 }

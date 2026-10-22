@@ -1,8 +1,8 @@
 <div class="shipmozo-pincode-checker mb-3">
-    <label for="shipmozo-pincode" class="form-label text-muted mb-1" style="font-size: 14px; font-weight: 600;">{{ __('Check Delivery Availability') }}:</label>
+    <label for="shipmozo-pincode" class="form-label text-muted mb-1" style="font-size: 14px; font-weight: 600;">{{ trans('plugins/shipmozo::shipmozo.check_delivery_availability') }}:</label>
     <div class="input-group shipmozo-pincode-group" style="width: 100%;">
-        <input type="text" id="shipmozo-pincode" class="form-control shipmozo-pincode-input" placeholder="{{ __('Enter Delivery Pincode') }}" maxlength="6" inputmode="numeric" autocomplete="postal-code" style="min-width: 0;">
-        <button type="button" class="btn btn-primary" id="shipmozo-check-btn">{{ __('Check') }}</button>
+        <input type="text" id="shipmozo-pincode" class="form-control shipmozo-pincode-input" placeholder="{{ trans('plugins/shipmozo::shipmozo.enter_delivery_pincode') }}" maxlength="6" inputmode="numeric" autocomplete="postal-code" style="min-width: 0;">
+        <button type="button" class="btn btn-primary" id="shipmozo-check-btn">{{ trans('plugins/shipmozo::shipmozo.check') }}</button>
     </div>
     <div id="shipmozo-pincode-result" class="mt-2"></div>
 </div>
@@ -33,7 +33,7 @@
                 const pincode = pincodeInput.value.trim();
 
                 if (!/^[1-9][0-9]{5}$/.test(pincode)) {
-                    showResult(@json(__("Please enter a valid pincode")), 'danger');
+                    showResult(@json(trans('plugins/shipmozo::shipmozo.valid_pincode_required')), 'danger');
                     return;
                 }
 
@@ -42,7 +42,7 @@
                 }
 
                 lastCheckedPincode = pincode;
-                showResult(@json(__("Checking...")), 'info');
+                showResult(@json(trans('plugins/shipmozo::shipmozo.checking')), 'info');
                 checkBtn.disabled = true;
 
                 const productId = '{{ isset($product) ? $product->id : "" }}';
@@ -78,7 +78,7 @@
                         }
 
                         lastCheckedPincode = '';
-                        showResult(@json(__("An error occurred. Please try again.")), 'danger');
+                        showResult(@json(trans('plugins/shipmozo::shipmozo.error_occurred')), 'danger');
                     })
                     .finally(() => {
                         checkBtn.disabled = false;

@@ -239,7 +239,7 @@ class HookServiceProvider extends ServiceProvider
                 $warehouses = [];
             }
 
-            $options = ['' => 'Select a Warehouse'];
+            $options = ['' => trans('plugins/shipmozo::shipmozo.select_a_warehouse')];
             foreach (Arr::get($warehouses, 'data', []) as $warehouse) {
                 $options[$warehouse['id']] = Arr::get($warehouse, 'address_title', Arr::get($warehouse, 'name', 'Warehouse'))
                     .' ('.Arr::get($warehouse, 'pincode', '').')';
@@ -252,7 +252,7 @@ class HookServiceProvider extends ServiceProvider
                         <div class="card-header py-2 px-3" style="background: transparent; border-bottom: 1px solid rgba(203, 213, 225, 0.6);">
                             <div class="d-flex align-items-center justify-content-between w-100">
                                 <h4 class="card-title text-dark fw-bold mb-0"><i class="ti ti-building-warehouse text-primary me-1"></i> '.trans('plugins/shipmozo::shipmozo.shipmozo_warehouse').'</h4>
-                                <span class="badge bg-azure-lt text-azure px-2 py-1"><i class="ti ti-truck me-1"></i> Logistics Origin</span>
+                                <span class="badge bg-azure-lt text-azure px-2 py-1"><i class="ti ti-truck me-1"></i> '.trans('plugins/shipmozo::shipmozo.logistics_origin').'</span>
                             </div>
                         </div>
                         <div class="card-body p-3">
@@ -292,7 +292,7 @@ class HookServiceProvider extends ServiceProvider
 
                                     Botble.showSuccess(response.message);
                                     window.location.reload();
-                                }).catch(() => Botble.showError("Unable to create warehouse."));
+                                }).catch(() => Botble.showError("'.trans('plugins/shipmozo::shipmozo.warehouse_create_unable').'"));
                             }
                         });
                     </script>' : ''),

@@ -71,7 +71,7 @@
     </li>
     @empty
     <li class="shipmozo-timeline-item">
-        <div class="shipmozo-timeline-title">No tracking updates available from the carrier yet.</div>
+        <div class="shipmozo-timeline-title">{{ trans('plugins/shipmozo::shipmozo.no_tracking_updates') }}</div>
     </li>
     @endforelse
 </ul>

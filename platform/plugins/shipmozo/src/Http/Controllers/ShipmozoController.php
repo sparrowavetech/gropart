@@ -63,14 +63,14 @@ class ShipmozoController extends BaseController
         $lock = Cache::lock("shipmozo:order:{$shipment->order_id}", 60);
 
         if (! $lock->get()) {
-            return $response->setError()->setMessage('This ShipMozo shipment is already being processed.');
+            return $response->setError()->setMessage(trans('plugins/shipmozo::shipmozo.shipment_processing'));
         }
 
         try {
             $shipment->refresh();
 
             if (! $this->shipmozo->canCreateTransaction($shipment)) {
-                return $response->setError()->setMessage('This shipment has already been pushed to ShipMozo.');
+                return $response->setError()->setMessage(trans('plugins/shipmozo::shipmozo.shipment_already_pushed'));
             }
 
             $order = $shipment->order;
@@ -95,7 +95,7 @@ class ShipmozoController extends BaseController
 
                     ShipmentHistory::query()->create([
                         'action' => 'create_transaction',
-                        'description' => 'Successfully pushed order to ShipMozo. Tracking ID: '.$awb,
+                        'description' => trans('plugins/shipmozo::shipmozo.pushed_success_with_awb', ['awb' => $awb]),
                         'order_id' => $shipment->order_id,
                         'user_id' => $this->userId,
                         'shipment_id' => $shipment->id,
@@ -113,7 +113,7 @@ class ShipmozoController extends BaseController
 
                     $message = trans('plugins/shipmozo::shipmozo.transaction.created_success');
                 } else {
-                    $message = 'Order pushed successfully, but no tracking ID was returned.';
+                    $message = trans('plugins/shipmozo::shipmozo.push_success_no_tracking');
                     $errors[] = $message;
                 }
             } else {
@@ -128,7 +128,7 @@ class ShipmozoController extends BaseController
                 'shipment_id' => $shipment->getKey(),
                 'message' => $exception->getMessage(),
             ]);
-            $message = 'Unable to create the ShipMozo shipment at this time.';
+            $message = trans('plugins/shipmozo::shipmozo.create_shipment_unable');
             $errors[] = $message;
         } finally {
             $lock->release();
@@ -206,7 +206,7 @@ class ShipmozoController extends BaseController
                 'message' => $exception->getMessage(),
             ]);
 
-            return $response->setError()->setMessage('Unable to create the ShipMozo warehouse at this time.');
+            return $response->setError()->setMessage(trans('plugins/shipmozo::shipmozo.warehouse_create_unable'));
         }
 
         if (Arr::get($result, 'result') == 1) {
@@ -216,11 +216,11 @@ class ShipmozoController extends BaseController
 
                 return $response
                     ->setNextUrl(route('marketplace.store.edit', $store->id))
-                    ->setMessage('Warehouse created and linked successfully in ShipMozo.');
+                    ->setMessage(trans('plugins/shipmozo::shipmozo.warehouse_created_success'));
             }
         }
 
-        $error = Arr::get($result, 'message') ?: Arr::get($result, 'data.error', 'Failed to create warehouse in ShipMozo.');
+        $error = Arr::get($result, 'message') ?: Arr::get($result, 'data.error', trans('plugins/shipmozo::shipmozo.warehouse_created_failed'));
 
         return $response
             ->setError()
@@ -255,7 +255,7 @@ class ShipmozoController extends BaseController
                 'message' => $exception->getMessage(),
             ]);
 
-            return $response->setError()->setMessage('Unable to refresh ShipMozo rates.');
+            return $response->setError()->setMessage(trans('plugins/shipmozo::shipmozo.rates_refresh_unable'));
         }
     }
 
@@ -272,7 +272,7 @@ class ShipmozoController extends BaseController
                 && Arr::get($item, 'id') === $validated['shipping_option']);
 
             if (! $rate) {
-                return $response->setError()->setMessage('The selected ShipMozo rate is no longer available.');
+                return $response->setError()->setMessage(trans('plugins/shipmozo::shipmozo.rate_not_available'));
             }
 
             $oldShippingAmount = (float) $order->shipping_amount;
@@ -297,7 +297,7 @@ class ShipmozoController extends BaseController
                 'message' => $exception->getMessage(),
             ]);
 
-            return $response->setError()->setMessage('Unable to update the ShipMozo rate.');
+            return $response->setError()->setMessage(trans('plugins/shipmozo::shipmozo.rate_update_unable'));
         }
     }
 

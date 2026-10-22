@@ -13,7 +13,7 @@
                 const trackingHtml = `
                     <div class="card mb-4 mt-4 border-info">
                         <div class="card-body">
-                            <h5 class="bb-section-title mb-3">Live Tracking (ShipMozo)</h5>
+                            <h5 class="bb-section-title mb-3">{{ trans('plugins/shipmozo::shipmozo.live_tracking') }}</h5>
                             <div class="shipmozo-live-tracking">
                                 ${response.data}
                             </div>
@@ -21,11 +21,11 @@
                     </div>
                 `;
 
-                const shippingSection = document.querySelector('.bb-order-shipping, [data-order-shipping]');
+                const shippingSection = document.querySelector('.bb-order-shipping, [data-order-shipping], .order-detail-shipping, .order-info-shipping');
                 if (shippingSection) {
                     (shippingSection.closest('.card') || shippingSection).insertAdjacentHTML('afterend', trackingHtml);
                 } else {
-                    const wrapper = document.querySelector('.bb-order-detail-wrapper, .order-tracking, main');
+                    const wrapper = document.querySelector('.bb-order-detail-wrapper, .order-tracking, .customer-order-detail, .order-detail, .order-info, main');
                     wrapper?.insertAdjacentHTML('beforeend', trackingHtml);
                 }
             })

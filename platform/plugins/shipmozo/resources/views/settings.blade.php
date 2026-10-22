@@ -16,11 +16,11 @@ $rateAdjustmentValue = setting('shipping_shipmozo_rate_adjustment_value', 0);
                 <x-core::icon name="ti ti-truck-delivery" />
             </x-core::table.body.cell>
             <x-core::table.body.cell style="width: 20%">
-                <h4 class="mb-0 text-primary fw-bold" style="font-size: 20px;">ShipMozo</h4>
+                <h4 class="mb-0 text-primary fw-bold" style="font-size: 20px;">{{ trans('plugins/shipmozo::shipmozo.settings_title') }}</h4>
             </x-core::table.body.cell>
             <x-core::table.body.cell>
-                <a href="https://shipping-api.com" target="_blank" class="fw-semibold">Shipmozo Shipping Service</a>
-                <p class="mb-0">Calculate accurate shipping rates and sync orders using ShipMozo API.</p>
+                <a href="https://shipping-api.com" target="_blank" class="fw-semibold">{{ trans('plugins/shipmozo::shipmozo.settings_service_name') }}</a>
+                <p class="mb-0 text-muted">{{ trans('plugins/shipmozo::shipmozo.settings_service_desc') }}</p>
             </x-core::table.body.cell>
             <x-core::table.body.row class="bg-white">
                 <x-core::table.body.cell colspan="3">
@@ -28,7 +28,7 @@ $rateAdjustmentValue = setting('shipping_shipmozo_rate_adjustment_value', 0);
                         <div>
                             <div @class(['payment-name-label-group', 'd-none'=> ! $status])>
                                 <span class="payment-note v-a-t">{{ trans('plugins/payment::payment.use') }}:</span>
-                                <label class="ws-nm inline-display method-name-label">Shipmozo</label>
+                                <label class="ws-nm inline-display method-name-label">{{ trans('plugins/shipmozo::shipmozo.name') }}</label>
                             </div>
                         </div>
 
@@ -52,90 +52,114 @@ $rateAdjustmentValue = setting('shipping_shipmozo_rate_adjustment_value', 0);
                         <div class="row">
                             <div class="col-sm-6">
                                 <x-core::alert type="info">
-                                    <x-slot:title>Configuration Instructions</x-slot:title>
-                                    <ul class="ps-3">
+                                    <x-slot:title>{{ trans('plugins/shipmozo::shipmozo.configuration_instructions') }}</x-slot:title>
+                                    <ul class="ps-3 mb-0">
                                         <li style="list-style-type: circle;">
-                                            <span>Obtain your <strong>Public Key</strong> and <strong>Private Key</strong> from ShipMozo API account.</span>
+                                            <span>{!! trans('plugins/shipmozo::shipmozo.instruction_1') !!}</span>
                                         </li>
                                         <li style="list-style-type: circle;">
-                                            <span>Enter the keys in the fields on the right.</span>
+                                            <span>{{ trans('plugins/shipmozo::shipmozo.instruction_2') }}</span>
                                         </li>
                                         <li style="list-style-type: circle;">
-                                            <span>Ensure products have length, width, height, and weight values set for accurate rate calculation.</span>
+                                            <span>{{ trans('plugins/shipmozo::shipmozo.instruction_3') }}</span>
                                         </li>
                                     </ul>
                                 </x-core::alert>
 
-                                <h5 class="mt-4">Rate Inflation Settings</h5>
-                                <p class="text-muted text-sm">You can artificially inflate the shipping rates returned by ShipMozo before showing them to customers.</p>
+                                <h5 class="mt-4">{{ trans('plugins/shipmozo::shipmozo.rate_inflation_settings') }}</h5>
+                                <p class="text-muted text-sm">{{ trans('plugins/shipmozo::shipmozo.rate_inflation_desc') }}</p>
 
                                 <x-core::form-group>
-                                    <label class="form-label" for="shipping_shipmozo_rate_adjustment_type">Inflation Type</label>
+                                    <label class="form-label" for="shipping_shipmozo_rate_adjustment_type">{{ trans('plugins/shipmozo::shipmozo.inflation_type') }}</label>
                                     <x-core::form.select
                                         name="shipping_shipmozo_rate_adjustment_type"
                                         id="shipping_shipmozo_rate_adjustment_type"
-                                        :options="['none' => 'None', 'fixed' => 'Fixed Amount', 'percent' => 'Percentage']"
+                                        :options="[
+                                            'none' => trans('plugins/shipmozo::shipmozo.inflation_type_none'),
+                                            'fixed' => trans('plugins/shipmozo::shipmozo.inflation_type_fixed'),
+                                            'percent' => trans('plugins/shipmozo::shipmozo.inflation_type_percent')
+                                        ]"
                                         :value="$rateAdjustmentType" />
                                 </x-core::form-group>
 
                                 <x-core::form-group>
-                                    <label class="form-label" for="shipping_shipmozo_rate_adjustment_value">Inflation Value</label>
+                                    <label class="form-label" for="shipping_shipmozo_rate_adjustment_value">{{ trans('plugins/shipmozo::shipmozo.inflation_value') }}</label>
                                     <x-core::form.text-input
                                         type="number"
                                         step="0.01"
                                         name="shipping_shipmozo_rate_adjustment_value"
                                         id="shipping_shipmozo_rate_adjustment_value"
                                         :value="$rateAdjustmentValue"
-                                        placeholder="e.g. 50 (for Rs 50) or 5 (for 5%)" />
+                                        :placeholder="trans('plugins/shipmozo::shipmozo.inflation_value_placeholder')" />
                                 </x-core::form-group>
 
+                                @if (!empty($logFiles))
+                                    <div class="mt-4">
+                                        <h5>{{ trans('plugins/shipmozo::shipmozo.log_files') }}</h5>
+                                        <ul class="list-unstyled">
+                                            @foreach ($logFiles as $logFile)
+                                                <li>
+                                                    <a href="{{ route('ecommerce.shipments.shipmozo.view-log', $logFile) }}" target="_blank" class="text-primary text-decoration-none">
+                                                        <x-core::icon name="ti ti-file-text" class="me-1" /> {{ $logFile }}
+                                                    </a>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
                             </div>
                             <div class="col-sm-6">
-                                <h5 class="mt-2">API Credentials</h5>
-                                <p class="text-muted">Enter your ShipMozo API keys:</p>
+                                <h5 class="mt-2">{{ trans('plugins/shipmozo::shipmozo.api_credentials') }}</h5>
+                                <p class="text-muted">{{ trans('plugins/shipmozo::shipmozo.api_credentials_desc') }}</p>
 
                                 <x-core::form.text-input
                                     name="shipping_shipmozo_public_key"
-                                    label="Public Key"
-                                    placeholder="Enter Public Key"
+                                    :label="trans('plugins/shipmozo::shipmozo.public_key')"
+                                    :placeholder="trans('plugins/shipmozo::shipmozo.public_key_placeholder')"
                                     :disabled="BaseHelper::hasDemoModeEnabled()"
                                     :value="BaseHelper::hasDemoModeEnabled() ? Str::mask($publicKey, '*', 10) : $publicKey" />
 
                                 <x-core::form.text-input
                                     name="shipping_shipmozo_private_key"
                                     type="password"
-                                    label="Private Key"
-                                    placeholder="Enter Private Key"
+                                    :label="trans('plugins/shipmozo::shipmozo.private_key')"
+                                    :placeholder="trans('plugins/shipmozo::shipmozo.private_key_placeholder')"
                                     :disabled="BaseHelper::hasDemoModeEnabled()"
                                     :value="BaseHelper::hasDemoModeEnabled() ? Str::mask($privateKey, '*', 10) : $privateKey" />
 
                                 <x-core::form.text-input
                                     name="shipping_shipmozo_webhook_secret"
                                     type="password"
-                                    label="Webhook Secret"
-                                    placeholder="Use at least 16 random characters"
+                                    :label="trans('plugins/shipmozo::shipmozo.webhook_secret')"
+                                    :placeholder="trans('plugins/shipmozo::shipmozo.webhook_secret_placeholder')"
                                     :disabled="BaseHelper::hasDemoModeEnabled()"
                                     :value="BaseHelper::hasDemoModeEnabled() ? Str::mask($webhookSecret, '*', 6) : $webhookSecret" />
+
+                                <div class="mb-3">
+                                    <label class="form-label text-muted small">{{ trans('plugins/shipmozo::shipmozo.webhook_url') }}</label>
+                                    <input type="text" readonly class="form-control bg-light" value="{{ route('shipmozo.webhooks') }}">
+                                    <small class="form-hint text-muted">{{ trans('plugins/shipmozo::shipmozo.webhook_url_hint') }}</small>
+                                </div>
 
                                 <x-core::form-group>
                                     <x-core::form.toggle
                                         name="shipping_shipmozo_webhooks"
                                         :checked="$webhooks"
-                                        label="Enable ShipMozo webhooks" />
+                                        :label="trans('plugins/shipmozo::shipmozo.enable_webhooks')" />
                                 </x-core::form-group>
 
                                 <x-core::form-group class="mt-4">
                                     <x-core::form.toggle
                                         name="shipping_shipmozo_status"
                                         :checked="$status"
-                                        label="Activate ShipMozo Shipping plugin" />
+                                        :label="trans('plugins/shipmozo::shipmozo.activate')" />
                                 </x-core::form-group>
 
                                 <x-core::form-group>
                                     <x-core::form.toggle
                                         name="shipping_shipmozo_logging"
                                         :checked="$logging"
-                                        label="Enable Logging (Saves API debug logs to system)" />
+                                        :label="trans('plugins/shipmozo::shipmozo.enable_logging')" />
                                 </x-core::form-group>
 
                                 @env('demo')

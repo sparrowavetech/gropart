@@ -31,6 +31,7 @@ class ShipmozoServiceProvider extends ServiceProvider
         }
 
         $this
+            ->loadAndPublishConfigurations(['permissions'])
             ->loadAndPublishTranslations()
             ->loadAndPublishViews()
             ->loadRoutes()
@@ -97,10 +98,10 @@ class ShipmozoServiceProvider extends ServiceProvider
                 'id' => 'cms-plugins-shipmozo-ndr',
                 'priority' => 10,
                 'parent_id' => 'cms-plugins-ecommerce',
-                'name' => 'ShipMozo NDRs',
+                'name' => 'plugins/shipmozo::shipmozo.ndr.menu_name',
                 'icon' => 'ti ti-truck-return',
                 'url' => route('shipmozo.ndr.index'),
-                'permissions' => ['orders.index'],
+                'permissions' => ['shipmozo.ndr.index'],
             ]);
         });
 

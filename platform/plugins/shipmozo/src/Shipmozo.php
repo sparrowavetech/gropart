@@ -53,7 +53,22 @@ class Shipmozo
 
     public function getRoutePrefixByFactor(): string
     {
-        return is_in_admin(true) ? 'ecommerce.shipments.' : 'marketplace.vendor.orders.';
+        return (is_in_admin(true) || ! is_plugin_active('marketplace')) ? 'ecommerce.shipments.' : 'marketplace.vendor.orders.';
+    }
+
+    public function convertWeightToGrams(float $rawWeight): int
+    {
+        $storeWeightUnit = function_exists('ecommerce_weight_unit') ? ecommerce_weight_unit() : 'g';
+
+        if ($storeWeightUnit === 'kg') {
+            $itemWeightInGrams = (int) round($rawWeight * 1000);
+        } elseif ($storeWeightUnit === 'g') {
+            $itemWeightInGrams = (int) round($rawWeight);
+        } else {
+            $itemWeightInGrams = (int) round($rawWeight < 10 ? ($rawWeight * 1000) : $rawWeight);
+        }
+
+        return $itemWeightInGrams > 0 ? $itemWeightInGrams : 200;
     }
 
     protected function getHeaders(): array
@@ -126,7 +141,7 @@ class Shipmozo
 
         // Get pickup pincode from first vendor, or default store location
         $origin = Arr::get($data, 'origin') ?: EcommerceHelper::getOriginAddress();
-        $pickupPincode = Arr::get($origin, 'zip_code', '');
+        $pickupPincode = Arr::get($origin, 'zip_code') ?: Arr::get($origin, 'zip') ?: Arr::get($origin, 'postal_code', '');
         if (! preg_match('/^[1-9][0-9]{5}$/', (string) $pickupPincode)) {
             return ['shipment' => ['rates' => $this->unavailableRates('pickup')]];
         }
@@ -150,14 +165,8 @@ class Shipmozo
 
             $billableItemCount++;
 
-            // Decimal inputs (e.g. 0.200) mean Kilograms in Botble. ShipMozo expects integer Grams.
             $rawWeight = (float) Arr::get($item, 'weight', 0);
-            $itemWeightInGrams = $rawWeight < 10 ? ($rawWeight * 1000) : $rawWeight;
-
-            // If it evaluates to completely 0, default to 200g
-            if ($itemWeightInGrams <= 0) {
-                $itemWeightInGrams = 200;
-            }
+            $itemWeightInGrams = $this->convertWeightToGrams($rawWeight);
 
             $weight += $itemWeightInGrams * $qty;
             $totalValue += (float) Arr::get($item, 'price', 0) * $qty;
@@ -350,12 +359,7 @@ class Shipmozo
             $itemWidth = (float) ($product ? ($product->wide ?: 10) : 10);
             $itemHeight = (float) ($product ? ($product->height ?: 10) : 10);
             $rawWeight = (float) ($orderProduct->weight ?: ($product ? $product->weight : 0));
-
-            // Weight Conversion logic (Botble kg -> ShipMozo g)
-            $itemWeightInGrams = $rawWeight < 10 ? ($rawWeight * 1000) : $rawWeight;
-            if ($itemWeightInGrams <= 0) {
-                $itemWeightInGrams = 200;
-            }
+            $itemWeightInGrams = $this->convertWeightToGrams($rawWeight);
 
             $totalWeight += $itemWeightInGrams * $orderProduct->qty;
             $maxLength = max($maxLength, $itemLength);
@@ -645,12 +649,7 @@ class Shipmozo
             $itemWidth = (float) ($product ? ($product->wide ?: 10) : 10);
             $itemHeight = (float) ($product ? ($product->height ?: 10) : 10);
             $rawWeight = (float) ($product ? $product->weight : 0);
-
-            // Weight Conversion
-            $itemWeightInGrams = $rawWeight < 10 ? ($rawWeight * 1000) : $rawWeight;
-            if ($itemWeightInGrams <= 0) {
-                $itemWeightInGrams = 200;
-            }
+            $itemWeightInGrams = $this->convertWeightToGrams($rawWeight);
 
             $totalWeight += $itemWeightInGrams * $returnItem->qty;
             $maxLength = max($maxLength, $itemLength);

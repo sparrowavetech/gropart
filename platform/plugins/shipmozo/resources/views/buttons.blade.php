@@ -16,9 +16,9 @@ $url = route(app(\SparroWave\Shipmozo\Shipmozo::class)->getRoutePrefixByFactor()
     data-bs-toggle="modal"
     data-bs-target="#shipmozo-view-n-create-transaction"
     data-url="{{ $url }}"
-    title="Assign the checkout-selected courier and generate the ShipMozo AWB">
-    Assign Courier & Generate AWB
-    <span class="badge bg-white text-primary ms-2">Action required</span>
+    :title="trans('plugins/shipmozo::shipmozo.assign_courier_tooltip')">
+    {{ trans('plugins/shipmozo::shipmozo.assign_courier_btn') }}
+    <span class="badge bg-white text-primary ms-2">{{ trans('plugins/shipmozo::shipmozo.action_required') }}</span>
 </x-core::button>
 
 <div
@@ -38,8 +38,8 @@ $url = route(app(\SparroWave\Shipmozo\Shipmozo::class)->getRoutePrefixByFactor()
                         <h5
                             class="modal-title mb-0"
                             id="shipmozo-view-n-create-transaction-label"
-                        >Confirm ShipMozo Shipment</h5>
-                        <div class="small text-secondary">Courier assignment and AWB generation</div>
+                        >{{ trans('plugins/shipmozo::shipmozo.confirm_shipment_title') }}</h5>
+                        <div class="small text-secondary">{{ trans('plugins/shipmozo::shipmozo.confirm_shipment_subtitle') }}</div>
                     </div>
                 </div>
                 <button

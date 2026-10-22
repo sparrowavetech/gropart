@@ -20,7 +20,7 @@ Route::group(['namespace' => 'SparroWave\Shipmozo\Http\Controllers'], function (
                 Route::post('transactions/create/{id}', [
                     'as' => 'transactions.create',
                     'uses' => 'createTransaction',
-                    'permission' => 'ecommerce.shipments.edit',
+                    'permission' => 'shipmozo.shipments.create',
                 ]);
 
                 Route::get('rates/{id}', [
@@ -31,12 +31,13 @@ Route::group(['namespace' => 'SparroWave\Shipmozo\Http\Controllers'], function (
                 Route::post('update-rate/{id}', [
                     'as' => 'update-rate',
                     'uses' => 'updateRate',
-                    'permission' => 'ecommerce.shipments.edit',
+                    'permission' => 'shipmozo.rates.update',
                 ]);
 
                 Route::get('view-logs/{file}', [
                     'as' => 'view-log',
                     'uses' => 'viewLog',
+                    'permission' => 'shipmozo.settings',
                 ]);
 
                 if (is_plugin_active('marketplace')) {
@@ -53,7 +54,7 @@ Route::group(['namespace' => 'SparroWave\Shipmozo\Http\Controllers'], function (
                     'as' => 'update',
                     'uses' => 'ShipmozoSettingController@update',
                     'middleware' => 'preventDemo',
-                    'permission' => 'shipping_methods.index',
+                    'permission' => 'shipmozo.settings',
                 ]);
             });
         });
@@ -61,11 +62,15 @@ Route::group(['namespace' => 'SparroWave\Shipmozo\Http\Controllers'], function (
         Route::group([
             'prefix' => 'shipmozo/ndr',
             'as' => 'shipmozo.ndr.',
-            'permission' => 'orders.index',
+            'permission' => 'shipmozo.ndr.index',
         ], function (): void {
             Route::controller('ShipmozoNdrController')->group(function (): void {
                 Route::get('/', ['as' => 'index', 'uses' => 'index']);
-                Route::post('{awbNumber}/action', ['as' => 'action', 'uses' => 'action']);
+                Route::post('{awbNumber}/action', [
+                    'as' => 'action',
+                    'uses' => 'action',
+                    'permission' => 'shipmozo.ndr.action',
+                ]);
             });
         });
     });

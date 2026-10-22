@@ -37,7 +37,7 @@
                 <x-core::table.body.cell>
                     <p class="mb-1">{{ trans('plugins/ecommerce::order.shipping_fee') }}</p>
                     <span class="small d-block">{{ $order->shipping_method_name }}</span>
-                    <span class="small d-block">{{ __('Package weight') }}: {{ rtrim(rtrim(number_format((float) $weight, 3, '.', ''), '0'), '.') }} {{ ecommerce_weight_unit() }}</span>
+                    <span class="small d-block">{{ trans('plugins/shipmozo::shipmozo.package_weight') }}: {{ rtrim(rtrim(number_format((float) $weight, 3, '.', ''), '0'), '.') }} {{ ecommerce_weight_unit() }}</span>
                 </x-core::table.body.cell>
                 <x-core::table.body.cell>
                     {{ format_price($order->shipping_amount) }}
