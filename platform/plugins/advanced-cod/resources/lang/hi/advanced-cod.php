@@ -4,6 +4,7 @@ return [
     'name' => 'उन्नत कैश ऑन डिलीवरी',
     'cod_available' => 'सीओडी उपलब्ध',
     'cod_eligible' => 'सीओडी के लिए पात्र',
+    'cod_products' => 'सीओडी उत्पाद (COD Products)',
     'not_eligible_for_cod' => 'सीओडी के लिए पात्र नहीं',
 
     // Product Meta Box

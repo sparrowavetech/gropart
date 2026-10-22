@@ -5,6 +5,7 @@ return [
     'form_field_label' => 'क्या फ्री शिपिंग है?',
     'form_field_help' => 'सक्रिय होने पर, इस उत्पाद की डिलीवरी मुफ्त होगी और इसका वजन कूरियर शिपिंग शुल्क से घटा दिया जाएगा।',
     'free_delivery' => 'मुफ्त डिलीवरी',
+    'free_shipping' => 'फ्री शिपिंग (Free Shipping)',
     'free_shipping_method_title' => 'मुफ्त डिलीवरी',
     'qualifies_for_free_shipping' => 'मुफ्त शिपिंग के लिए योग्य',
     'cart_badge_text' => 'मुफ्त डिलीवरी',

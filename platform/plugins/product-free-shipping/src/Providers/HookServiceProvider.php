@@ -59,6 +59,7 @@ class HookServiceProvider extends ServiceProvider
         // 7. Admin Products DataTable Column & Badges
         add_filter(BASE_FILTER_TABLE_HEADINGS, [$this, 'addTableHeading'], 155, 3);
         add_filter(BASE_FILTER_GET_LIST_DATA, [$this, 'addColumnToProductTable'], 155, 3);
+        add_filter('base_filter_table_filters', [$this, 'addTableFilters'], 120, 2);
 
         // 8. Universal Product Loop / Card Badge Hooks (For all standard Botble themes)
         add_filter('ecommerce_product_item_badges', [$this, 'renderProductCardBadge'], 125, 2);
@@ -131,6 +132,30 @@ class HookServiceProvider extends ServiceProvider
         }
 
         return $data;
+    }
+
+    public function addTableFilters(array $filters, mixed $table): array
+    {
+        if (! ProductFreeShippingHelper::isEnabled()) {
+            return $filters;
+        }
+
+        if (
+            $table instanceof ProductTable ||
+            (is_plugin_active('marketplace') && class_exists(\Botble\Marketplace\Tables\ProductTable::class) && $table instanceof \Botble\Marketplace\Tables\ProductTable)
+        ) {
+            $filters['product_free_shipping'] = [
+                'title' => trans('plugins/product-free-shipping::product-free-shipping.free_shipping'),
+                'type' => 'customSelect',
+                'choices' => [
+                    1 => trans('core/base::base.yes'),
+                    0 => trans('core/base::base.no'),
+                ],
+                'validate' => 'required|in:1,0',
+            ];
+        }
+
+        return $filters;
     }
 
     public function injectProductFormField(FormAbstract $form): void

@@ -4,6 +4,7 @@ return [
     'name' => 'Advanced Cash on Delivery',
     'cod_available' => 'COD Available',
     'cod_eligible' => 'COD Eligible',
+    'cod_products' => 'COD Products',
     'not_eligible_for_cod' => 'Not Eligible for COD',
 
     // Product Meta Box

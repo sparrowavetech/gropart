@@ -107,6 +107,9 @@ class AdvancedCodServiceProvider extends ServiceProvider
             add_filter('ecommerce_product_loop_extra_html', [AdvancedCodHookListener::class, 'addCodLabelToProductCard'], 120, 2);
             add_filter('ecommerce_product_detail_after_cart_actions', [AdvancedCodHookListener::class, 'addCodLabelToProductPage'], 120, 2);
             
+            // Table filters (Admin & Marketplace Vendor)
+            add_filter('base_filter_table_filters', [AdvancedCodHookListener::class, 'addTableFilters'], 120, 2);
+
             // Register COD settings field
             add_filter(PAYMENT_METHOD_SETTINGS_CONTENT, [AdvancedCodHookListener::class, 'addCodSettings'], 120, 2);
 

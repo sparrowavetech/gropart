@@ -85,4 +85,28 @@ class AdvancedCodHookListener
 
         return $settings . view('plugins/advanced-cod::settings', compact('percentage', 'selectedGateway', 'onlineGateways'))->render();
     }
+
+    public static function addTableFilters(array $filters, mixed $table): array
+    {
+        if (! is_plugin_active('payment') || get_payment_setting('status', 'cod') == 0) {
+            return $filters;
+        }
+
+        if (
+            $table instanceof \Botble\Ecommerce\Tables\ProductTable ||
+            (is_plugin_active('marketplace') && class_exists(\Botble\Marketplace\Tables\ProductTable::class) && $table instanceof \Botble\Marketplace\Tables\ProductTable)
+        ) {
+            $filters['is_cod_eligible'] = [
+                'title' => trans('plugins/advanced-cod::advanced-cod.cod_products'),
+                'type' => 'customSelect',
+                'choices' => [
+                    1 => trans('core/base::base.yes'),
+                    0 => trans('core/base::base.no'),
+                ],
+                'validate' => 'required|in:1,0',
+            ];
+        }
+
+        return $filters;
+    }
 }

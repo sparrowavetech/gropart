@@ -96,6 +96,29 @@ class EnquiryProductsServiceProvider extends ServiceProvider
                 shortcode()->setAdminConfig('enquiry-products', fn (array $attributes) => view('plugins/enquiry-products::shortcodes.config', ['attributes' => $attributes, 'categories' => app(Catalog::class)->categories()])->render());
                 add_shortcode('enquiry-categories', __('plugins/enquiry-products::messages.enquiry_categories'), __('plugins/enquiry-products::messages.equipment_category_links'), fn () => view('plugins/enquiry-products::shortcodes.categories', ['categories' => app(Catalog::class)->categories()])->render());
             }
+
+            add_filter('base_filter_table_filters', function (array $filters, mixed $table): array {
+                if (! is_plugin_active('enquiry-products')) {
+                    return $filters;
+                }
+
+                if (
+                    $table instanceof \Botble\Ecommerce\Tables\ProductTable ||
+                    (is_plugin_active('marketplace') && class_exists(\Botble\Marketplace\Tables\ProductTable::class) && $table instanceof \Botble\Marketplace\Tables\ProductTable)
+                ) {
+                    $filters['is_enquiry'] = [
+                        'title' => trans('plugins/enquiry-products::messages.enquiry_products'),
+                        'type' => 'customSelect',
+                        'choices' => [
+                            1 => trans('core/base::base.yes'),
+                            0 => trans('core/base::base.no'),
+                        ],
+                        'validate' => 'required|in:1,0',
+                    ];
+                }
+
+                return $filters;
+            }, 120, 2);
         });
         add_filter(BASE_FILTER_APPEND_MENU_NAME, function (?string $html, string $id): ?string {
             if (! in_array($id, ['sparrowave-product-enquiry', 'sparrowave-enquiry-products'], true)

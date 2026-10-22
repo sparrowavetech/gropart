@@ -5,6 +5,7 @@ return [
     'form_field_label' => 'Is Free Shipping?',
     'form_field_help' => 'When enabled, this product is delivered for free and its weight is deducted from courier shipping charges.',
     'free_delivery' => 'Free Delivery',
+    'free_shipping' => 'Free Shipping',
     'free_shipping_method_title' => 'Free Delivery',
     'qualifies_for_free_shipping' => 'Qualifies for Free Shipping',
     'cart_badge_text' => 'Free Delivery',

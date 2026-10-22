@@ -230,14 +230,31 @@ class HookServiceProvider extends ServiceProvider
         }
 
         if (setting('shipping_shipmozo_status') != 1 || ! $product) {
-            return $html;
+            return (string) $html;
+        }
+
+        // Never render pincode check in card context (related products, grids, carousels, cross-sales, etc.)
+        if (request()->attributes->get('farmart_helper_card_context')
+            || request()->attributes->get('farmart_child_card_context')
+            || request()->attributes->get('is_product_card')
+        ) {
+            return (string) $html;
+        }
+
+        // On product detail route, ensure we only render for the primary product, not related products
+        $routeSlug = request()->route('slug');
+        if ($routeSlug) {
+            $slugValue = is_string($routeSlug) ? $routeSlug : (is_object($routeSlug) ? ($routeSlug->key ?? null) : null);
+            if ($slugValue && ! empty($product->slug) && $slugValue !== $product->slug) {
+                return (string) $html;
+            }
         }
 
         $isValidContext = request()->is('products/*', 'product/*', '*/products/*', '*/product/*', '*quick-view*', 'ajax/quick-view/*')
             || (request()->ajax() && request()->is('*quick*'));
 
         if (! $isValidContext) {
-            return $html;
+            return (string) $html;
         }
 
         return $html.view('plugins/shipmozo::pincode-check', compact('product'))->render();
