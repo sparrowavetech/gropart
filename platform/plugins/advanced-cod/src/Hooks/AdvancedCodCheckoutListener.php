@@ -61,12 +61,19 @@ class AdvancedCodCheckoutListener
         // Scenario 1: Mixed Cart (Conflict) -> Hide Checkout Button & Show Error
         if ($hasCodEligible && $hasNonEligible) {
             $conflictHtml = '
-                <style>
-                    /* Premium Checkout Button & Theme Button Styling */
-                    .payment-checkout-btn, #checkout-button, .btn-checkout, form.checkout-form button[type="submit"], .btn-payment-checkout {
+                <style id="cod-conflict-button-style">
+                    /* Hide checkout submit buttons across themes while conflict is unresolved */
+                    .payment-checkout-btn,
+                    .payment-checkout-btn-step,
+                    #checkout-button,
+                    .btn-checkout,
+                    form.checkout-form button[type="submit"],
+                    .btn-payment-checkout,
+                    .mobile-checkout-btn {
                         display: none !important;
                     }
-                
+                </style>
+                <style id="cod-conflict-ui-styles">
                     /* Existing Conflict Card Styles */
                     .conflict-alert-card {
                         background: #fff;
@@ -253,58 +260,149 @@ class AdvancedCodCheckoutListener
                 </div>
 
                 <script>
-                    document.addEventListener("DOMContentLoaded", function() {
-                        var payBtn = document.getElementById("btn-pay-online-action");
-                        var undoBtn = document.getElementById("btn-undo-cod-conflict");
-                        var alertCard = document.getElementById("cod-conflict-alert");
-                        var minimizedCard = document.getElementById("cod-conflict-minimized");
-                        var checkoutSelector = ".payment-checkout-btn, #checkout-button, .btn-checkout, form.checkout-form button[type=\'submit\'], .btn-payment-checkout";
+                    (function() {
+                        var checkoutSelector = ".payment-checkout-btn, .payment-checkout-btn-step, #checkout-button, .btn-checkout, form.checkout-form button[type=\'submit\'], .btn-payment-checkout, .mobile-checkout-btn";
 
-                        if (payBtn) {
-                            payBtn.addEventListener("click", function(e) {
-                                e.preventDefault();
-                                // Unhide checkout buttons across any theme
-                                var checkoutBtns = document.querySelectorAll(checkoutSelector);
-                                checkoutBtns.forEach(function(el) { el.style.setProperty("display", "", "important"); });
-                                
-                                // Hide conflict alert & Show minimized
-                                if (alertCard) alertCard.style.display = "none";
-                                if (minimizedCard) minimizedCard.style.display = "block";
-                                
-                                // Select first available online method
-                                var onlineInputs = document.querySelectorAll("input[name=\'payment_method\']");
-                                var found = false;
-                                onlineInputs.forEach(function(input) {
-                                    if (input.value !== "cod" && !found) {
-                                        input.click(); 
-                                        input.checked = true;
-                                        found = true;
-                                        input.scrollIntoView({ behavior: "smooth", block: "center" });
+                        function showCheckoutButtons() {
+                            window.codConflictResolved = true;
+
+                            // 1. Remove the button hiding stylesheet completely so CSS rules never override buttons
+                            var styleEl = document.getElementById("cod-conflict-button-style");
+                            if (styleEl) {
+                                styleEl.remove();
+                            }
+
+                            // 2. Unhide all existing checkout buttons
+                            var checkoutBtns = document.querySelectorAll(checkoutSelector);
+                            checkoutBtns.forEach(function(el) {
+                                el.style.removeProperty("display");
+                                if (window.getComputedStyle(el).display === "none") {
+                                    el.style.setProperty("display", "block", "important");
+                                }
+                            });
+
+                            // 3. For mobile checkout footer if present
+                            var mobileFooter = document.querySelector(".mobile-checkout-footer");
+                            if (mobileFooter) {
+                                mobileFooter.style.removeProperty("display");
+                            }
+                        }
+
+                        function hideCheckoutButtons() {
+                            window.codConflictResolved = false;
+
+                            // 1. Re-insert the button hiding stylesheet if not present
+                            if (!document.getElementById("cod-conflict-button-style")) {
+                                var styleEl = document.createElement("style");
+                                styleEl.id = "cod-conflict-button-style";
+                                styleEl.innerHTML = checkoutSelector + " { display: none !important; }";
+                                document.head.appendChild(styleEl);
+                            }
+
+                            // 2. Explicitly hide all buttons
+                            var checkoutBtns = document.querySelectorAll(checkoutSelector);
+                            checkoutBtns.forEach(function(el) {
+                                el.style.setProperty("display", "none", "important");
+                            });
+                        }
+
+                        function initCodConflict() {
+                            var payBtn = document.getElementById("btn-pay-online-action");
+                            var undoBtn = document.getElementById("btn-undo-cod-conflict");
+                            var alertCard = document.getElementById("cod-conflict-alert");
+                            var minimizedCard = document.getElementById("cod-conflict-minimized");
+
+                            if (payBtn) {
+                                payBtn.addEventListener("click", function(e) {
+                                    e.preventDefault();
+
+                                    // 1. Unhide checkout buttons and remove stylesheet block
+                                    showCheckoutButtons();
+
+                                    // 2. Hide conflict alert & Show minimized
+                                    if (alertCard) alertCard.style.display = "none";
+                                    if (minimizedCard) minimizedCard.style.display = "block";
+
+                                    // 3. Select first available online method
+                                    var onlineInputs = document.querySelectorAll("input[name=\'payment_method\']");
+                                    var found = false;
+                                    onlineInputs.forEach(function(input) {
+                                        if (input.value !== "cod" && !found) {
+                                            found = true;
+                                            if (!input.checked) {
+                                                input.checked = true;
+                                                input.dispatchEvent(new Event("change", { bubbles: true }));
+                                            }
+                                        }
+                                    });
+
+                                    if (!found) {
+                                        alert(' . json_encode(trans('plugins/advanced-cod::advanced-cod.no_online_method_found')) . ');
                                     }
+
+                                    // 4. Smooth scroll to the checkout action area so customer immediately sees the payment button
+                                    setTimeout(function() {
+                                        var checkoutBtn = document.querySelector(".payment-checkout-btn, #checkout-button, form.checkout-form button[type=\'submit\']");
+                                        var target = checkoutBtn || minimizedCard;
+                                        if (target) {
+                                            target.scrollIntoView({ behavior: "smooth", block: "center" });
+                                        }
+                                    }, 150);
                                 });
-                                
-                                if (!found) {
-                                    alert(' . json_encode(trans('plugins/advanced-cod::advanced-cod.no_online_method_found')) . ');
+                            }
+
+                            if (undoBtn) {
+                                undoBtn.addEventListener("click", function(e) {
+                                    e.preventDefault();
+
+                                    // 1. Re-hide checkout buttons
+                                    hideCheckoutButtons();
+
+                                    // 2. Show conflict alert & Hide minimized
+                                    if (alertCard) alertCard.style.display = "block";
+                                    if (minimizedCard) minimizedCard.style.display = "none";
+
+                                    // 3. Scroll back to alert
+                                    if (alertCard) alertCard.scrollIntoView({ behavior: "smooth", block: "center" });
+                                });
+                            }
+
+                            // If customer selects an online payment radio directly, also reveal checkout button
+                            var onlineInputs = document.querySelectorAll("input[name=\'payment_method\']");
+                            onlineInputs.forEach(function(input) {
+                                if (input.value !== "cod") {
+                                    input.addEventListener("change", function() {
+                                        if (input.checked && !window.codConflictResolved) {
+                                            showCheckoutButtons();
+                                            if (alertCard) alertCard.style.display = "none";
+                                            if (minimizedCard) minimizedCard.style.display = "block";
+                                        }
+                                    });
                                 }
                             });
                         }
 
-                        if (undoBtn) {
-                            undoBtn.addEventListener("click", function(e) {
-                                e.preventDefault();
-                                // Hide checkout buttons again
-                                var checkoutBtns = document.querySelectorAll(checkoutSelector);
-                                checkoutBtns.forEach(function(el) { el.style.setProperty("display", "none", "important"); });
+                        if (document.readyState === "loading") {
+                            document.addEventListener("DOMContentLoaded", initCodConflict);
+                        } else {
+                            initCodConflict();
+                        }
 
-                                // Show conflict alert & Hide minimized
-                                if (alertCard) alertCard.style.display = "block";
-                                if (minimizedCard) minimizedCard.style.display = "none";
+                        // Maintain button visibility if Botble AJAX replaces the button
+                        document.addEventListener("checkout:init", function() {
+                            if (window.codConflictResolved) {
+                                showCheckoutButtons();
+                            }
+                        });
 
-                                // Scroll back to alert
-                                if (alertCard) alertCard.scrollIntoView({ behavior: "smooth", block: "center" });
+                        if (window.jQuery) {
+                            window.jQuery(document).ajaxComplete(function() {
+                                if (window.codConflictResolved) {
+                                    showCheckoutButtons();
+                                }
                             });
                         }
-                    });
+                    })();
                 </script>
             ';
 
