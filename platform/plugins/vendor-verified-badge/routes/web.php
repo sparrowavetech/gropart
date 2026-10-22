@@ -11,7 +11,7 @@ AdminHelper::registerRoutes(function (): void {
             Route::put('settings', [VendorBadgeSettingController::class, 'update'])->name('settings.update');
         });
 
-        Route::group(['permission' => 'marketplace.store.edit'], function (): void {
+        Route::group(['permission' => 'vendor-verified-badge.verify'], function (): void {
             Route::post('stores/{store}/quick-verify', [VendorBadgeSettingController::class, 'quickVerify'])->name('stores.quick-verify');
             Route::post('stores/{store}/quick-unverify', [VendorBadgeSettingController::class, 'quickUnverify'])->name('stores.quick-unverify');
         });

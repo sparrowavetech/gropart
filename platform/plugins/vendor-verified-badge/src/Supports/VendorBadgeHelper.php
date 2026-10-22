@@ -26,14 +26,14 @@ class VendorBadgeHelper
             return asset('storage/stores/verified.png');
         }
 
-        return asset('themes/gropart/imgs/verified.png');
+        return asset('vendor/core/plugins/vendor-verified-badge/images/verified.png');
     }
 
     public static function getTooltipText(): string
     {
         return (string) setting(
             'vendor_verified_tooltip_text',
-            __('✓ Gropart Verified Seller — Business & GST Authenticated')
+            trans('plugins/vendor-verified-badge::vendor-badge.default_tooltip_text')
         );
     }
 
@@ -41,7 +41,7 @@ class VendorBadgeHelper
     {
         return (string) setting(
             'vendor_verified_application_url',
-            'https://forms.gle/41n8QhD2hA7q3cE38'
+            ''
         );
     }
 
@@ -115,7 +115,7 @@ class VendorBadgeHelper
         );
 
         if (! is_in_admin()) {
-            $label = trim((string) setting('vendor_verified_label', 'Gropart Verified'));
+            $label = trim((string) setting('vendor_verified_label', trans('plugins/vendor-verified-badge::vendor-badge.default_badge_label')));
             if ($label !== '') {
                 // A single tooltip target covers both the icon and its label.
                 $attributes = ' title="' . e($tooltip) . '" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="' . e($tooltip) . '" data-bs-original-title="' . e($tooltip) . '"';

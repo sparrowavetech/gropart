@@ -5,7 +5,7 @@
             {{ trans('plugins/vendor-verified-badge::vendor-badge.shop_type') }}
         </label>
         <select class="form-select form-control" id="vendor-shop-category" name="shop_category">
-            <option value="">{{ __('Select Shop Type') }}</option>
+            <option value="">{{ trans('plugins/vendor-verified-badge::vendor-badge.select_shop_type') }}</option>
             @foreach(\SparroWave\VendorVerifiedBadge\Enums\ShopTypeEnum::labels() as $value => $label)
                 <option value="{{ $value }}" @selected($store->shop_category === $value)>
                     {{ $label }}
@@ -13,7 +13,7 @@
             @endforeach
         </select>
         <div class="form-text text-muted mt-1 small">
-            {{ __('Select the vendor category (Manufacturer, Wholesaler, or Retailer) to show relevant badge on store and products.') }}
+            {{ trans('plugins/vendor-verified-badge::vendor-badge.meta_box.shop_type_help') }}
         </div>
     </div>
 
@@ -40,16 +40,16 @@
         </div>
         
         <div class="form-text text-muted mt-2 small">
-            {{ __('Turn ON to award the official verified seller badge. It will display a green tick with GST/Business authentication tooltip.') }}
+            {{ trans('plugins/vendor-verified-badge::vendor-badge.meta_box.toggle_help') }}
         </div>
 
         @if($store->is_verified && $store->verified_at)
             <div class="alert alert-success d-flex align-items-center py-2 px-3 mt-3 mb-0" style="font-size: 12px; border-radius: 6px;">
                 <x-core::icon name="ti ti-shield-check" class="me-2 text-success" />
                 <div>
-                    <strong>{{ __('Verified on:') }}</strong> {{ $store->verified_at->format('M d, Y H:i') }}
+                    <strong>{{ trans('plugins/vendor-verified-badge::vendor-badge.meta_box.verified_on') }}</strong> {{ $store->verified_at->format('M d, Y H:i') }}
                     @if($store->verifiedBy)
-                        <br><span class="text-muted">{{ __('By:') }} {{ $store->verifiedBy->name }}</span>
+                        <br><span class="text-muted">{{ trans('plugins/vendor-verified-badge::vendor-badge.meta_box.by') }} {{ $store->verifiedBy->name }}</span>
                     @endif
                 </div>
             </div>

@@ -20,36 +20,64 @@
         }
     }
 
+    function getTranslations() {
+        var t = window.vendorBadgeTranslations || {};
+        var types = t.types || {};
+
+        return {
+            areYouA: t.are_you_a || 'Are You A ?',
+            selectShopType: t.select_shop_type || 'Select Shop Type',
+            manufacture: types.manufacture || 'Manufacturer',
+            wholesaler: types.wholesaler || 'Wholesaler',
+            retailer: types.retailer || 'Retailer'
+        };
+    }
+
     function enhanceVendorUI() {
         initTooltips();
 
         // 1. Automatically inject "Are You A? (Shop Type)" into Become Vendor registration forms on any theme
         var $urlWrapper = $('.shop-url-wrapper, #shop-url-register, input[name="shop_url"]');
         if ($urlWrapper.length && !$urlWrapper.closest('form').find('[name="shop_category"]').length) {
+            var trans = getTranslations();
             var shopTypeHtml = `
                 <div class="mb-3 shop-category-wrapper" id="shop-category-wrapper">
-                    <label class="form-label required" for="shop-category-register">Are You A ?</label>
+                    <label class="form-label required" for="shop-category-register">` + escapeHtml(trans.areYouA) + `</label>
                     <select class="form-select form-control" id="shop-category-register" name="shop_category" required>
-                        <option value="">Select Shop Type</option>
-                        <option value="manufacture">Manufacturer</option>
-                        <option value="wholesaler">Wholesaler</option>
-                        <option value="retailer">Retailer</option>
+                        <option value="">` + escapeHtml(trans.selectShopType) + `</option>
+                        <option value="manufacture">` + escapeHtml(trans.manufacture) + `</option>
+                        <option value="wholesaler">` + escapeHtml(trans.wholesaler) + `</option>
+                        <option value="retailer">` + escapeHtml(trans.retailer) + `</option>
                     </select>
                 </div>
             `;
             $urlWrapper.closest('.shop-url-wrapper, .mb-3, .form-group').after(shopTypeHtml);
         }
 
-        // 2. Automatically enhance Vendor Dashboard Sidebar Greeting on Farmart and other themes
-        var $welcomeRight = $('.ps-block--user-wellcome .ps-block__right');
-        if ($welcomeRight.length && !$welcomeRight.find('.vendor-shop-type-badge, .verified-store-badge').length) {
+        // 2. Automatically enhance Vendor Dashboard Sidebar Greeting across themes (Farmart, Nest, Shofy, Martfury)
+        var $welcomeContainer = $([
+            '.ps-block--user-wellcome .ps-block__right', // Farmart / Martfury
+            '.ps-block--user-wellcome',                  // Farmart fallback
+            '.vendor-header .vendor-name',               // Nest
+            '.dashboard-user-name',                      // Shofy / Nest
+            '.user-card-info',                           // Generic
+            '.vendor-profile-info',                      // Generic
+            '.vendor-dashboard-header .vendor-title'     // Generic
+        ].join(', ')).first();
+
+        if ($welcomeContainer.length && !$welcomeContainer.find('.vendor-shop-type-badge, .verified-store-badge').length) {
             var storeData = window.vendorBadgeData || null;
             if (storeData) {
-                if (storeData.isVerified) {
-                    $welcomeRight.find('p:first').append(' ' + storeData.verifiedHtml);
+                if (storeData.isVerified && storeData.verifiedHtml) {
+                    var $firstP = $welcomeContainer.find('p:first, h3:first, h4:first, span:first');
+                    if ($firstP.length) {
+                        $firstP.append(' ' + storeData.verifiedHtml);
+                    } else {
+                        $welcomeContainer.append(' ' + storeData.verifiedHtml);
+                    }
                 }
                 if (storeData.shopTypeHtml) {
-                    $welcomeRight.append(storeData.shopTypeHtml);
+                    $welcomeContainer.append(' ' + storeData.shopTypeHtml);
                 }
             }
         }
@@ -61,6 +89,20 @@
                 $adminStoreLink.after('<div class="mt-1">' + window.adminStoreBadgesHtml + '</div>');
             }
         }
+    }
+
+    function escapeHtml(string) {
+        if (!string) return '';
+        var entityMap = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        };
+        return String(string).replace(/[&<>"']/g, function (s) {
+            return entityMap[s];
+        });
     }
 
     $(document).ready(function () {

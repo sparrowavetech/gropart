@@ -86,7 +86,7 @@ class HookServiceProvider extends ServiceProvider
             if (! $form->has('shop_category')) {
                 $options = SelectFieldOption::make()
                     ->label(trans('plugins/vendor-verified-badge::vendor-badge.shop_type'))
-                    ->choices(['' => __('Select Shop Type')] + ShopTypeEnum::labels())
+                    ->choices(['' => trans('plugins/vendor-verified-badge::vendor-badge.select_shop_type')] + ShopTypeEnum::labels())
                     ->colspan(3);
 
                 if ($form->getModel()?->shop_category) {
@@ -108,7 +108,7 @@ class HookServiceProvider extends ServiceProvider
             if (! $form->has('shop_category')) {
                 $options = SelectFieldOption::make()
                     ->label(trans('plugins/vendor-verified-badge::vendor-badge.shop_type'))
-                    ->choices(['' => __('Select Shop Type')] + ShopTypeEnum::labels())
+                    ->choices(['' => trans('plugins/vendor-verified-badge::vendor-badge.select_shop_type')] + ShopTypeEnum::labels())
                     ->required()
                     ->colspan(6);
 
@@ -129,7 +129,7 @@ class HookServiceProvider extends ServiceProvider
             if (! $form->has('shop_category')) {
                 $options = SelectFieldOption::make()
                     ->label(trans('plugins/vendor-verified-badge::vendor-badge.shop_type'))
-                    ->choices(['' => __('Select Shop Type')] + ShopTypeEnum::labels())
+                    ->choices(['' => trans('plugins/vendor-verified-badge::vendor-badge.select_shop_type')] + ShopTypeEnum::labels())
                     ->required()
                     ->colspan(6);
 

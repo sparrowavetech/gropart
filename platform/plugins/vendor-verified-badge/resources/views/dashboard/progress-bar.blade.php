@@ -10,10 +10,10 @@
 
 @if (!$storeVerified)
     <div class="alert alert-warning bg-light d-flex align-items-center mb-3 p-3 border" role="alert">
-        <img class="verified-store-main me-2" style="max-height: 22px; width: auto;" src="{{ $badgeIconUrl }}" alt="{{ __('Verified') }}">
+        <img class="verified-store-main me-2" style="max-height: 22px; width: auto;" src="{{ $badgeIconUrl }}" alt="{{ trans('plugins/vendor-verified-badge::vendor-badge.verified') }}">
         <h5 class="fw-bold mb-0">
-            <a class="fw-bold text-decoration-underline" href="{{ $appUrl }}" target="_blank">{{ __('Apply for green tick') }}</a>
-            {{ __('verification badge') }}
+            <a class="fw-bold text-decoration-underline" href="{{ $appUrl ?: '#' }}" target="_blank">{{ trans('plugins/vendor-verified-badge::vendor-badge.progress_bar.apply_green_tick') }}</a>
+            {{ trans('plugins/vendor-verified-badge::vendor-badge.progress_bar.verification_badge') }}
         </h5>
     </div>
 @endif
@@ -24,8 +24,8 @@
             <div class="alert alert-success d-flex align-items-center mb-3" role="alert">
                 <i class="icon-check-circle me-2" style="font-size: 20px;"></i>
                 <div>
-                    <h5 class="alert-heading mb-1">{{ __('Congratulations! Your store profile is :score% completed.', ['score' => $profileScore]) }}</h5>
-                    <p class="mb-0 text-muted">{{ __('Your account is fully active. You can now add and manage your products.') }}</p>
+                    <h5 class="alert-heading mb-1">{{ trans('plugins/vendor-verified-badge::vendor-badge.progress_bar.complete_congrats', ['score' => $profileScore]) }}</h5>
+                    <p class="mb-0 text-muted">{{ trans('plugins/vendor-verified-badge::vendor-badge.progress_bar.active_desc') }}</p>
                 </div>
             </div>
             <div class="progress mb-3" style="height: 16px; font-size: 13px; font-weight: 700; border-radius: 8px;">
@@ -37,11 +37,11 @@
             <div class="alert alert-warning d-flex align-items-center mb-3" role="alert">
                 <i class="icon-exclamation me-2" style="font-size: 20px;"></i>
                 <div>
-                    <h5 class="alert-heading mb-1 text-danger">{{ __('Your store profile is only :score% completed!', ['score' => $profileScore]) }}</h5>
+                    <h5 class="alert-heading mb-1 text-danger">{{ trans('plugins/vendor-verified-badge::vendor-badge.progress_bar.incomplete_warning', ['score' => $profileScore]) }}</h5>
                     <p class="mb-0 text-muted">
-                        {{ __('Please complete your business, tax, and address details to unlock all features.') }}
+                        {{ trans('plugins/vendor-verified-badge::vendor-badge.progress_bar.incomplete_desc') }}
                         <a class="fw-bold text-decoration-underline ms-1" href="{{ route('marketplace.vendor.settings') }}">
-                            {{ __('Click Here to complete profile') }} &rarr;
+                            {{ trans('plugins/vendor-verified-badge::vendor-badge.progress_bar.click_here_complete') }} &rarr;
                         </a>
                     </p>
                 </div>

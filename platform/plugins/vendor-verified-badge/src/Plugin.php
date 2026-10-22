@@ -27,6 +27,8 @@ class Plugin extends PluginOperationAbstract
             'vendor_verified_menu_gating_enabled',
             'vendor_verified_completion_threshold',
             'vendor_verified_tooltip_text',
+            'vendor_shop_type_visible',
+            'vendor_verified_label',
         ]);
     }
 }

@@ -3,6 +3,7 @@
 namespace SparroWave\VendorVerifiedBadge\Providers;
 
 use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Facades\MacroableModels;
 use Botble\Base\Facades\PanelSectionManager;
 use Botble\Base\PanelSections\PanelSectionItem;
 use Botble\Base\Supports\ServiceProvider;
@@ -69,15 +70,15 @@ class VendorVerifiedBadgeServiceProvider extends ServiceProvider
 
     protected function registerStoreMacros(): void
     {
-        Store::macro('getBadgeHtmlAttribute', function () {
+        MacroableModels::addMacro(Store::class, 'getBadgeHtmlAttribute', function () {
             return VendorBadgeHelper::renderBadges($this);
         });
 
-        Store::macro('getVerifiedBadgeHtmlAttribute', function () {
+        MacroableModels::addMacro(Store::class, 'getVerifiedBadgeHtmlAttribute', function () {
             return VendorBadgeHelper::renderVerifiedIcon($this);
         });
 
-        Store::macro('getShopTypeBadgeHtmlAttribute', function () {
+        MacroableModels::addMacro(Store::class, 'getShopTypeBadgeHtmlAttribute', function () {
             return VendorBadgeHelper::renderShopTypeBadge($this);
         });
     }
@@ -102,13 +103,25 @@ class VendorVerifiedBadgeServiceProvider extends ServiceProvider
         });
 
         add_filter('theme_front_footer', function ($html) {
+            $translations = [
+                'are_you_a' => trans('plugins/vendor-verified-badge::vendor-badge.are_you_a'),
+                'select_shop_type' => trans('plugins/vendor-verified-badge::vendor-badge.select_shop_type'),
+                'types' => [
+                    'manufacture' => trans('plugins/vendor-verified-badge::vendor-badge.types.manufacture'),
+                    'wholesaler' => trans('plugins/vendor-verified-badge::vendor-badge.types.wholesaler'),
+                    'retailer' => trans('plugins/vendor-verified-badge::vendor-badge.types.retailer'),
+                ],
+            ];
+            $jsTranslations = json_encode($translations);
+            $html .= "<script>window.vendorBadgeTranslations = $jsTranslations;</script>";
+
             if (auth('customer')->check() && auth('customer')->user()->is_vendor) {
                 $store = auth('customer')->user()->store;
                 if ($store && $store->id) {
                     $jsData = json_encode([
                         'isVerified' => (bool) $store->is_verified,
-                        'verifiedHtml' => VendorBadgeHelper::renderVerifiedIcon($store),
-                        'shopTypeHtml' => VendorBadgeHelper::renderShopTypeBadge($store),
+                        'verifiedHtml' => (string) VendorBadgeHelper::renderVerifiedIcon($store),
+                        'shopTypeHtml' => (string) VendorBadgeHelper::renderShopTypeBadge($store),
                     ]);
                     $html .= "<script>window.vendorBadgeData = $jsData;</script>";
                 }

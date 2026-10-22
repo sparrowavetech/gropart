@@ -35,17 +35,17 @@ class VendorBadgeSettingForm extends SettingForm
                 'vendor_shop_type_visible',
                 OnOffCheckboxField::class,
                 OnOffFieldOption::make()
-                    ->label('Show shop type labels on the website')
-                    ->helperText('Show Retailer, Manufacturer and Wholesaler badges. Admin records and vendor category selection remain available.')
+                    ->label(trans('plugins/vendor-verified-badge::vendor-badge.settings.shop_type_visible'))
+                    ->helperText(trans('plugins/vendor-verified-badge::vendor-badge.settings.shop_type_visible_helper'))
                     ->value(setting('vendor_shop_type_visible', true))
             )
             ->add(
                 'vendor_verified_label',
                 TextField::class,
                 TextFieldOption::make()
-                    ->label('Verified badge label')
-                    ->helperText('Text beside the verified icon on the website. Leave blank for icon only.')
-                    ->value(setting('vendor_verified_label', 'Gropart Verified'))
+                    ->label(trans('plugins/vendor-verified-badge::vendor-badge.settings.verified_label'))
+                    ->helperText(trans('plugins/vendor-verified-badge::vendor-badge.settings.verified_label_helper'))
+                    ->value(setting('vendor_verified_label', trans('plugins/vendor-verified-badge::vendor-badge.default_badge_label')))
             )
             ->add(
                 'vendor_verified_tooltip_text',
@@ -53,7 +53,7 @@ class VendorBadgeSettingForm extends SettingForm
                 TextFieldOption::make()
                     ->label(trans('plugins/vendor-verified-badge::vendor-badge.settings.tooltip_text'))
                     ->helperText(trans('plugins/vendor-verified-badge::vendor-badge.settings.tooltip_text_helper'))
-                    ->value(setting('vendor_verified_tooltip_text', '✓ Gropart Verified Seller — Business & GST Authenticated'))
+                    ->value(setting('vendor_verified_tooltip_text', trans('plugins/vendor-verified-badge::vendor-badge.default_tooltip_text')))
             )
             ->add(
                 'vendor_verified_application_url',
@@ -61,7 +61,7 @@ class VendorBadgeSettingForm extends SettingForm
                 TextFieldOption::make()
                     ->label(trans('plugins/vendor-verified-badge::vendor-badge.settings.application_url'))
                     ->helperText(trans('plugins/vendor-verified-badge::vendor-badge.settings.application_url_helper'))
-                    ->value(setting('vendor_verified_application_url', 'https://forms.gle/41n8QhD2hA7q3cE38'))
+                    ->value(setting('vendor_verified_application_url', ''))
             )
             ->add(
                 'vendor_verified_menu_gating_enabled',
