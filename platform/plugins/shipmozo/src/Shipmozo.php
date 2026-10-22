@@ -2,6 +2,7 @@
 
 namespace SparroWave\Shipmozo;
 
+use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Ecommerce\Models\Order;
 use Botble\Ecommerce\Models\OrderReturn;
@@ -46,9 +47,17 @@ class Shipmozo
 
     public function isShipmozoOrder(Order $order): bool
     {
-        $method = $order->shipping_method->getValue();
+        $method = $order->shipping_method?->getValue();
 
-        return $method === SHIPMOZO_SHIPPING_METHOD_NAME;
+        if ($method === SHIPMOZO_SHIPPING_METHOD_NAME) {
+            return true;
+        }
+
+        if ($method === ShippingMethodEnum::DEFAULT && $order->shipping_option === 'free_shipping') {
+            return (bool) setting('shipping_shipmozo_status');
+        }
+
+        return false;
     }
 
     public function getRoutePrefixByFactor(): string

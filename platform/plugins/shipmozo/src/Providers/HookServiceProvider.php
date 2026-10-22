@@ -176,16 +176,31 @@ class HookServiceProvider extends ServiceProvider
         }
 
         if ($freeDelivery) {
-            foreach ($rates as &$rate) {
-                if (empty($rate['disabled'])) {
-                    $rate['price'] = 0;
-                }
+            $hasActiveRates = collect($rates)->contains(fn ($rate) => is_array($rate) && empty($rate['disabled']));
+
+            // If the destination pincode is unserviceable, block with no_service
+            if (! $hasActiveRates) {
+                unset($result[ShippingMethodEnum::DEFAULT]);
+                $result[SHIPMOZO_SHIPPING_METHOD_NAME] = $rates;
+
+                return $result;
             }
-            unset($rate);
+
+            // Pincode is serviceable! Check if admin configured to hide other methods
+            $hideOtherMethods = (bool) get_ecommerce_setting('hide_other_shipping_options_if_it_has_free_shipping', false)
+                || (bool) setting('product_free_shipping_hide_other_methods', true);
+
+            if ($hideOtherMethods) {
+                // Keep ONLY the clean, direct Free Delivery option
+                return $result;
+            }
+
+            // Otherwise, keep Free Delivery as the primary default option, and include carrier rates with their actual prices
+            $result[SHIPMOZO_SHIPPING_METHOD_NAME] = $rates;
+
+            return $result;
         }
 
-        // Never silently substitute an unverified flat/free rate for this carrier.
-        // Other explicitly installed carrier methods remain independent alternatives.
         unset($result[ShippingMethodEnum::DEFAULT]);
         $result[SHIPMOZO_SHIPPING_METHOD_NAME] = $rates;
 
