@@ -34,7 +34,7 @@ class ProductFreeShippingSettingForm extends SettingForm
                 TextFieldOption::make()
                     ->label(trans('plugins/product-free-shipping::product-free-shipping.settings.badge_text'))
                     ->helperText(trans('plugins/product-free-shipping::product-free-shipping.settings.badge_text_help'))
-                    ->value(setting('product_free_shipping_badge_text', 'Free Delivery'))
+                    ->value(setting('product_free_shipping_badge_text', trans('plugins/product-free-shipping::product-free-shipping.free_delivery')))
                     ->toArray()
             )
             ->add(
@@ -43,7 +43,7 @@ class ProductFreeShippingSettingForm extends SettingForm
                 TextFieldOption::make()
                     ->label(trans('plugins/product-free-shipping::product-free-shipping.settings.method_title'))
                     ->helperText(trans('plugins/product-free-shipping::product-free-shipping.settings.method_title_help'))
-                    ->value(setting('product_free_shipping_method_title', 'Free Delivery'))
+                    ->value(setting('product_free_shipping_method_title', trans('plugins/product-free-shipping::product-free-shipping.free_shipping_method_title')))
                     ->toArray()
             )
             ->add(

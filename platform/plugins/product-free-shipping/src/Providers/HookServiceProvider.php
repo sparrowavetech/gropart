@@ -26,7 +26,7 @@ class HookServiceProvider extends ServiceProvider
         add_filter('ecommerce_product_has_free_shipping', fn ($free, $product) => $free || ProductFreeShippingHelper::isProductFreeShipping($product), 20, 2);
         add_filter('ecommerce_order_product_item_extra_info', function ($html, $item, $order) {
             if (!\Botble\Base\Facades\AdminHelper::isInAdmin()) return $html;
-            return $html . $this->renderProductDetailBadge('', $item->product?->original_product);
+            return $html . $this->renderProductDetailBadge('', $item->product?->original_product ?: $item->product);
         }, 191, 3);
         // 1. Form Injections (Admin & Marketplace Vendor)
         ProductForm::extend(function (ProductForm $form) {
@@ -69,6 +69,10 @@ class HookServiceProvider extends ServiceProvider
     public function renderProductCardBadge(?string $html, mixed $product = null): ?string
     {
         if (! ProductFreeShippingHelper::isEnabled() || ! $product) {
+            return $html;
+        }
+
+        if ($html && (str_contains($html, 'product-free-shipping-badge') || str_contains($html, 'free-shipping-shimmer-badge'))) {
             return $html;
         }
 
@@ -164,7 +168,7 @@ class HookServiceProvider extends ServiceProvider
         $request = $event->request;
 
         if ($request->has('product_free_shipping')) {
-            $model->product_free_shipping = (bool) $request->input('product_free_shipping');
+            $model->product_free_shipping = $request->boolean('product_free_shipping');
             $model->saveQuietly();
         }
     }
@@ -216,6 +220,10 @@ class HookServiceProvider extends ServiceProvider
             return $html;
         }
 
+        if ($html && (str_contains($html, 'product-free-shipping-badge') || str_contains($html, 'free-shipping-shimmer-badge'))) {
+            return $html;
+        }
+
         if (! ProductFreeShippingHelper::isProductFreeShipping($product)) {
             return $html;
         }
@@ -233,7 +241,7 @@ class HookServiceProvider extends ServiceProvider
             return str_replace('</div>', ' ' . $badgeHtml . '</div>', $html);
         }
 
-        return '<div class="product-cod-label mt-2 mb-2">' . $badgeHtml . '</div>' . ($html ?? '');
+        return '<div class="product-free-shipping-detail-badge mt-2 mb-2">' . $badgeHtml . '</div>' . ($html ?? '');
     }
 
     public function renderCartItemBadge(?string $html, mixed $cartItem = null): ?string
@@ -242,10 +250,17 @@ class HookServiceProvider extends ServiceProvider
             return $html;
         }
 
-        $isFree = (bool) Arr::get($cartItem->options, 'product_free_shipping', false);
-        if (! $isFree && isset($cartItem->id)) {
-            $product = Product::find($cartItem->id);
-            $isFree = ProductFreeShippingHelper::isProductFreeShipping($product);
+        if ($html && str_contains($html, 'ec-cart-item-free-shipping-wrap')) {
+            return $html;
+        }
+
+        $isFree = (bool) data_get($cartItem, 'options.product_free_shipping', false);
+        if (! $isFree) {
+            $productId = data_get($cartItem, 'id') ?: data_get($cartItem, 'product_id');
+            if ($productId) {
+                $product = Product::find($productId);
+                $isFree = $product ? ProductFreeShippingHelper::isProductFreeShipping($product) : false;
+            }
         }
 
         if (! $isFree) {

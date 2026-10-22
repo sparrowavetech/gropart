@@ -22,7 +22,7 @@ class ProductFreeShippingHelper
 
         if (is_numeric($product)) {
             $p = Product::find((int) $product);
-            return $p ? (bool) $p->product_free_shipping : false;
+            return $p ? self::isProductFreeShipping($p) : false;
         }
 
         if (is_array($product)) {
@@ -40,13 +40,43 @@ class ProductFreeShippingHelper
         }
 
         if (is_object($product)) {
-            if (isset($product->product_free_shipping)) {
-                return (bool) $product->product_free_shipping;
+            if ($product instanceof Product) {
+                if ($product->product_free_shipping) {
+                    return true;
+                }
+
+                if ($product->is_variation) {
+                    $parent = null;
+                    if ($product->relationLoaded('original_product')) {
+                        $parent = $product->getRelation('original_product');
+                    }
+                    if (! $parent) {
+                        try {
+                            $parent = $product->original_product;
+                        } catch (\Throwable $e) {
+                            $parent = null;
+                        }
+                    }
+
+                    if ($parent && $parent !== $product && $parent instanceof Product) {
+                        return (bool) $parent->product_free_shipping;
+                    }
+                }
+
+                return false;
             }
 
-            if (isset($product->id)) {
-                $p = Product::find($product->id);
-                return $p ? (bool) $p->product_free_shipping : false;
+            if (isset($product->product_free_shipping)) {
+                $isFree = (bool) $product->product_free_shipping;
+                if ($isFree) {
+                    return true;
+                }
+            }
+
+            $productId = data_get($product, 'id') ?: data_get($product, 'product_id');
+            if ($productId) {
+                $p = Product::find($productId);
+                return $p ? self::isProductFreeShipping($p) : false;
             }
         }
 
@@ -55,12 +85,16 @@ class ProductFreeShippingHelper
 
     public static function getBadgeText(): string
     {
-        return (string) setting('product_free_shipping_badge_text', 'Free Delivery');
+        $text = (string) setting('product_free_shipping_badge_text');
+
+        return ! empty(trim($text)) ? $text : trans('plugins/product-free-shipping::product-free-shipping.free_delivery');
     }
 
     public static function getFreeShippingMethodTitle(): string
     {
-        return (string) setting('product_free_shipping_method_title', 'Free Delivery');
+        $title = (string) setting('product_free_shipping_method_title');
+
+        return ! empty(trim($title)) ? $title : trans('plugins/product-free-shipping::product-free-shipping.free_shipping_method_title');
     }
 
     public static function shouldHideOtherShippingMethods(): bool
@@ -109,19 +143,21 @@ class ProductFreeShippingHelper
                 continue;
             }
 
-            $productId = Arr::get($item, 'id') ?: Arr::get($item, 'product_id') ?: (is_numeric($key) ? (int) $key : null);
-            $isFree = (bool) Arr::get($item, 'product_free_shipping', false);
+            $isFree = (bool) data_get($item, 'product_free_shipping', false);
 
-            if (! $isFree && $productId) {
-                $product = Product::find($productId);
-                if ($product && self::isProductFreeShipping($product)) {
-                    $isFree = true;
+            if (! $isFree) {
+                $productId = data_get($item, 'id') ?: data_get($item, 'product_id') ?: (is_numeric($key) ? (int) $key : null);
+                if ($productId) {
+                    $product = Product::find($productId);
+                    if ($product && self::isProductFreeShipping($product)) {
+                        $isFree = true;
+                    }
                 }
             }
 
             if (! $isFree) {
-                $weight = (float) Arr::get($item, 'weight', 0);
-                $qty = (int) Arr::get($item, 'qty', 1);
+                $weight = (float) data_get($item, 'weight', 0);
+                $qty = (int) data_get($item, 'qty', 1);
                 $billableWeight += ($weight * $qty);
             }
         }
@@ -140,13 +176,15 @@ class ProductFreeShippingHelper
                 continue;
             }
 
-            $productId = Arr::get($item, 'id') ?: Arr::get($item, 'product_id') ?: (is_numeric($key) ? (int) $key : null);
-            $isFree = (bool) Arr::get($item, 'product_free_shipping', false);
+            $isFree = (bool) data_get($item, 'product_free_shipping', false);
 
-            if (! $isFree && $productId) {
-                $product = Product::find($productId);
-                if ($product && self::isProductFreeShipping($product)) {
-                    $isFree = true;
+            if (! $isFree) {
+                $productId = data_get($item, 'id') ?: data_get($item, 'product_id') ?: (is_numeric($key) ? (int) $key : null);
+                if ($productId) {
+                    $product = Product::find($productId);
+                    if ($product && self::isProductFreeShipping($product)) {
+                        $isFree = true;
+                    }
                 }
             }
 

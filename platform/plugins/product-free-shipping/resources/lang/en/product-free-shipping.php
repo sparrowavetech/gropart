@@ -6,6 +6,12 @@ return [
     'form_field_help' => 'When enabled, this product is delivered for free and its weight is deducted from courier shipping charges.',
     'free_delivery' => 'Free Delivery',
     'free_shipping_method_title' => 'Free Delivery',
+    'qualifies_for_free_shipping' => 'Qualifies for Free Shipping',
+    'cart_badge_text' => 'Free Delivery',
+    'order_item_badge' => 'Free Delivery',
+    'permissions' => [
+        'settings' => 'Product Free Shipping Settings',
+    ],
     'settings' => [
         'title' => 'Product Free Shipping Settings',
         'description' => 'Configure product-level free shipping behavior, badge text, and courier weight calculations.',

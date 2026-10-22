@@ -76,6 +76,13 @@
 }
 
 /* 3. Product Detail Badge */
+.product-free-shipping-detail-badge {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+
 .product-free-shipping-badge--large {
     padding: 4px 9px !important;
     font-size: 11px !important;
