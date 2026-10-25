@@ -5,6 +5,7 @@ namespace SparroWave\Shipmozo\Http\Controllers;
 use Botble\Base\Facades\PageTitle;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Base\Supports\Breadcrumb;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use SparroWave\Shipmozo\Shipmozo;
@@ -12,6 +13,13 @@ use Throwable;
 
 class ShipmozoNdrController extends BaseController
 {
+    protected function breadcrumb(): Breadcrumb
+    {
+        return parent::breadcrumb()
+            ->add(trans('plugins/ecommerce::order.menu'), route('orders.index'))
+            ->add(trans('plugins/shipmozo::shipmozo.ndr.management_title'), route('shipmozo.ndr.index'));
+    }
+
     public function __construct(protected Shipmozo $shipmozo) {}
 
     public function index()

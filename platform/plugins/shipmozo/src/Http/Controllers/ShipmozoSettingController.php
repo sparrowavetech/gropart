@@ -22,7 +22,10 @@ class ShipmozoSettingController extends BaseController
             'shipping_shipmozo_webhooks' => ['nullable', 'boolean'],
             'shipping_shipmozo_rate_adjustment_type' => ['required', 'in:none,fixed,percent'],
             'shipping_shipmozo_rate_adjustment_value' => ['required', 'numeric', 'min:0', 'max:100000'],
+            'shipping_shipmozo_scope' => ['nullable', 'string', 'in:all,individual'],
         ]);
+
+        $data['shipping_shipmozo_scope'] = $request->input('shipping_shipmozo_scope', 'all');
 
         foreach (['shipping_shipmozo_status', 'shipping_shipmozo_logging', 'shipping_shipmozo_webhooks'] as $key) {
             $data[$key] = $request->boolean($key);

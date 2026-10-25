@@ -3,8 +3,10 @@
 namespace SparroWave\Shipmozo\Providers;
 
 use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Facades\MacroableModels;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Botble\Ecommerce\Events\OrderConfirmedEvent;
+use Botble\Ecommerce\Models\Product;
 use Botble\Theme\Facades\Theme;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\ServiceProvider;
@@ -103,7 +105,41 @@ class ShipmozoServiceProvider extends ServiceProvider
                 'url' => route('shipmozo.ndr.index'),
                 'permissions' => ['shipmozo.ndr.index'],
             ]);
+
+            if (is_plugin_active('marketplace')) {
+                DashboardMenu::registerItem([
+                    'id' => 'cms-plugins-shipmozo-warehouses',
+                    'priority' => 30,
+                    'parent_id' => 'cms-plugins-marketplace',
+                    'name' => 'plugins/shipmozo::shipmozo.warehouses.menu_name',
+                    'icon' => 'ti ti-building-warehouse',
+                    'url' => fn () => route('marketplace.shipmozo-warehouses.index'),
+                    'permissions' => ['shipmozo.warehouses.index'],
+                ]);
+            }
         });
+
+        if (class_exists(Product::class)) {
+            MacroableModels::addMacro(
+                Product::class,
+                'isShipmozoShippingEnabled',
+                function () {
+                    /** @var Product $this */
+                    if (setting('shipping_shipmozo_scope', 'all') === 'all') {
+                        return true;
+                    }
+
+                    if ($this->is_variation) {
+                        $parent = $this->original_product;
+                        if ($parent) {
+                            return (bool) ($this->enable_shipmozo_shipping ?? $parent->enable_shipmozo_shipping);
+                        }
+                    }
+
+                    return (bool) $this->enable_shipmozo_shipping;
+                }
+            );
+        }
 
         $config = $this->app['config'];
         if (! $config->has('logging.channels.shipmozo')) {

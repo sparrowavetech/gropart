@@ -47,14 +47,47 @@ class Shipmozo
 
     public function isShipmozoOrder(Order $order): bool
     {
-        $method = $order->shipping_method?->getValue();
+        if (is_plugin_active('marketplace') && $order->store_id) {
+            $store = $order->store ?: (class_exists(\Botble\Marketplace\Models\Store::class) ? \Botble\Marketplace\Models\Store::find($order->store_id) : null);
+            if ($store && (bool) $store->vendor_managed_shipping) {
+                return false;
+            }
+        }
+
+        $method = $order->shipping_method;
+        if (is_object($method) && method_exists($method, 'getValue')) {
+            $method = $method->getValue();
+        } elseif (is_object($method) && isset($method->value)) {
+            $method = $method->value;
+        } elseif (! is_object($method)) {
+            $method = (string) $method;
+        } else {
+            $method = '';
+        }
 
         if ($method === SHIPMOZO_SHIPPING_METHOD_NAME) {
             return true;
         }
 
         if ($method === ShippingMethodEnum::DEFAULT && $order->shipping_option === 'free_shipping') {
-            return (bool) setting('shipping_shipmozo_status');
+            if (! setting('shipping_shipmozo_status')) {
+                return false;
+            }
+
+            if (setting('shipping_shipmozo_scope', 'all') === 'individual') {
+                $hasEnabled = false;
+                foreach ($order->products as $orderProduct) {
+                    $prod = $orderProduct->product;
+                    if ($prod && method_exists($prod, 'isShipmozoShippingEnabled') && $prod->isShipmozoShippingEnabled()) {
+                        $hasEnabled = true;
+                        break;
+                    }
+                }
+
+                return $hasEnabled;
+            }
+
+            return true;
         }
 
         return false;
@@ -360,8 +393,14 @@ class Shipmozo
         $maxWidth = 0;
         $maxHeight = 0;
 
+        $isIndividualScope = setting('shipping_shipmozo_scope', 'all') === 'individual';
+
         foreach ($order->products as $orderProduct) {
             $product = $orderProduct->product;
+
+            if ($isIndividualScope && $product && method_exists($product, 'isShipmozoShippingEnabled') && ! $product->isShipmozoShippingEnabled()) {
+                continue;
+            }
 
             // Dynamic Dimensions & Weight
             $itemLength = (float) ($product ? ($product->length ?: 10) : 10);
@@ -415,6 +454,13 @@ class Shipmozo
                 'discount' => (float) $discount,
                 'product_category' => $cleanCategory,
                 'hsn' => $hsnCode,
+            ];
+        }
+
+        if (empty($items)) {
+            return [
+                'result' => 0,
+                'message' => 'No ShipMozo-eligible items found in this order for shipment booking.',
             ];
         }
 

@@ -36,8 +36,8 @@ Route::group(['namespace' => 'SparroWave\Shipmozo\Http\Controllers'], function (
 
                 Route::get('view-logs/{file}', [
                     'as' => 'view-log',
-                    'uses' => 'viewLog',
-                    'permission' => 'shipmozo.settings',
+                    'uses' => 'ShipmozoLogController@show',
+                    'permission' => 'shipmozo.logs.show',
                 ]);
 
                 if (is_plugin_active('marketplace')) {
@@ -49,6 +49,15 @@ Route::group(['namespace' => 'SparroWave\Shipmozo\Http\Controllers'], function (
                 }
             });
 
+            Route::group(['prefix' => 'logs', 'as' => 'logs.', 'permission' => 'shipmozo.logs.index'], function (): void {
+                Route::controller('ShipmozoLogController')->group(function (): void {
+                    Route::get('/', ['as' => 'index', 'uses' => 'index']);
+                    Route::get('{file}', ['as' => 'show', 'uses' => 'show', 'permission' => 'shipmozo.logs.show']);
+                    Route::get('{file}/download', ['as' => 'download', 'uses' => 'download', 'permission' => 'shipmozo.logs.show']);
+                    Route::delete('{file}', ['as' => 'destroy', 'uses' => 'destroy', 'permission' => 'shipmozo.logs.destroy']);
+                });
+            });
+
             Route::group(['prefix' => 'settings', 'as' => 'settings.'], function (): void {
                 Route::post('update', [
                     'as' => 'update',
@@ -58,6 +67,22 @@ Route::group(['namespace' => 'SparroWave\Shipmozo\Http\Controllers'], function (
                 ]);
             });
         });
+
+        if (is_plugin_active('marketplace')) {
+            Route::group([
+                'prefix' => 'marketplace/shipmozo-warehouses',
+                'as' => 'marketplace.shipmozo-warehouses.',
+                'permission' => 'shipmozo.warehouses.index',
+            ], function (): void {
+                Route::controller('ShipmozoWarehouseController')->group(function (): void {
+                    Route::get('/', ['as' => 'index', 'uses' => 'index']);
+                    Route::get('{storeId}/edit', ['as' => 'edit', 'uses' => 'edit', 'permission' => 'shipmozo.warehouses.edit']);
+                    Route::match(['PUT', 'POST'], '{storeId}', ['as' => 'update', 'uses' => 'update', 'permission' => 'shipmozo.warehouses.edit']);
+                    Route::delete('{storeId}', ['as' => 'destroy', 'uses' => 'destroy', 'permission' => 'shipmozo.warehouses.destroy']);
+                    Route::post('sync-all', ['as' => 'sync-all', 'uses' => 'syncAll', 'permission' => 'shipmozo.warehouses.edit']);
+                });
+            });
+        }
 
         Route::group([
             'prefix' => 'shipmozo/ndr',

@@ -7,6 +7,7 @@ $webhooks = setting('shipping_shipmozo_webhooks', 0);
 $webhookSecret = setting('shipping_shipmozo_webhook_secret') ?: '';
 $rateAdjustmentType = setting('shipping_shipmozo_rate_adjustment_type', 'none');
 $rateAdjustmentValue = setting('shipping_shipmozo_rate_adjustment_value', 0);
+$scope = setting('shipping_shipmozo_scope', 'all');
 @endphp
 
 <x-core::card>
@@ -66,6 +67,22 @@ $rateAdjustmentValue = setting('shipping_shipmozo_rate_adjustment_value', 0);
                                     </ul>
                                 </x-core::alert>
 
+                                <h5 class="mt-4">{{ trans('plugins/shipmozo::shipmozo.scope_settings') }}</h5>
+                                <p class="text-muted text-sm">{{ trans('plugins/shipmozo::shipmozo.scope_settings_desc') }}</p>
+
+                                <x-core::form-group>
+                                    <label class="form-label" for="shipping_shipmozo_scope">{{ trans('plugins/shipmozo::shipmozo.scope_label') }}</label>
+                                    <x-core::form.select
+                                        name="shipping_shipmozo_scope"
+                                        id="shipping_shipmozo_scope"
+                                        :options="[
+                                            'all' => trans('plugins/shipmozo::shipmozo.scope_all'),
+                                            'individual' => trans('plugins/shipmozo::shipmozo.scope_individual'),
+                                        ]"
+                                        :value="$scope" />
+                                    <small class="form-hint text-muted mt-1 d-block">{{ trans('plugins/shipmozo::shipmozo.scope_hint') }}</small>
+                                </x-core::form-group>
+
                                 <h5 class="mt-4">{{ trans('plugins/shipmozo::shipmozo.rate_inflation_settings') }}</h5>
                                 <p class="text-muted text-sm">{{ trans('plugins/shipmozo::shipmozo.rate_inflation_desc') }}</p>
 
@@ -95,12 +112,19 @@ $rateAdjustmentValue = setting('shipping_shipmozo_rate_adjustment_value', 0);
 
                                 @if (!empty($logFiles))
                                     <div class="mt-4">
-                                        <h5>{{ trans('plugins/shipmozo::shipmozo.log_files') }}</h5>
-                                        <ul class="list-unstyled">
-                                            @foreach ($logFiles as $logFile)
-                                                <li>
-                                                    <a href="{{ route('ecommerce.shipments.shipmozo.view-log', $logFile) }}" target="_blank" class="text-primary text-decoration-none">
-                                                        <x-core::icon name="ti ti-file-text" class="me-1" /> {{ $logFile }}
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h5 class="mb-0">{{ trans('plugins/shipmozo::shipmozo.log_files') }} ({{ count($logFiles) }})</h5>
+                                            <a href="{{ route('ecommerce.shipments.shipmozo.logs.index') }}" class="btn btn-sm btn-outline-primary">
+                                                <x-core::icon name="ti ti-list" class="me-1" />
+                                                {{ trans('plugins/shipmozo::shipmozo.view_all_logs') }}
+                                            </a>
+                                        </div>
+                                        <ul class="list-unstyled mb-0">
+                                            @foreach (array_slice($logFiles, 0, 10) as $logFile)
+                                                <li class="py-1">
+                                                    <a href="{{ route('ecommerce.shipments.shipmozo.logs.show', $logFile) }}" target="_blank" class="text-primary text-decoration-none d-flex align-items-center">
+                                                        <x-core::icon name="ti ti-file-text" class="me-2 text-secondary" />
+                                                        <span class="font-monospace text-sm">{{ $logFile }}</span>
                                                     </a>
                                                 </li>
                                             @endforeach
