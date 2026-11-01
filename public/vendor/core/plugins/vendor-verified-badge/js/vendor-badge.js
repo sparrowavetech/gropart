@@ -36,22 +36,25 @@
     function enhanceVendorUI() {
         initTooltips();
 
-        // 1. Automatically inject "Are You A? (Shop Type)" into Become Vendor registration forms on any theme
-        var $urlWrapper = $('.shop-url-wrapper, #shop-url-register, input[name="shop_url"]');
-        if ($urlWrapper.length && !$urlWrapper.closest('form').find('[name="shop_category"]').length) {
-            var trans = getTranslations();
-            var shopTypeHtml = `
-                <div class="mb-3 shop-category-wrapper" id="shop-category-wrapper">
-                    <label class="form-label required" for="shop-category-register">` + escapeHtml(trans.areYouA) + `</label>
-                    <select class="form-select form-control" id="shop-category-register" name="shop_category" required>
-                        <option value="">` + escapeHtml(trans.selectShopType) + `</option>
-                        <option value="manufacture">` + escapeHtml(trans.manufacture) + `</option>
-                        <option value="wholesaler">` + escapeHtml(trans.wholesaler) + `</option>
-                        <option value="retailer">` + escapeHtml(trans.retailer) + `</option>
-                    </select>
-                </div>
-            `;
-            $urlWrapper.closest('.shop-url-wrapper, .mb-3, .form-group').after(shopTypeHtml);
+        // 1. Automatically inject "Are You A? (Shop Type)" into Become Vendor registration forms on any theme (Storefront only)
+        var isAdminPage = $('body').hasClass('navbar-vertical') || $('body').hasClass('admin-body') || $('.page-wrapper .page-body').length > 0 || window.location.pathname.indexOf('/admin') !== -1;
+        if (!isAdminPage) {
+            var $urlWrapper = $('.shop-url-wrapper, #shop-url-register, input[name="shop_url"]');
+            if ($urlWrapper.length && !$urlWrapper.closest('form').find('[name="shop_category"]').length) {
+                var trans = getTranslations();
+                var shopTypeHtml = `
+                    <div class="mb-3 shop-category-wrapper" id="shop-category-wrapper">
+                        <label class="form-label required" for="shop-category-register">` + escapeHtml(trans.areYouA) + `</label>
+                        <select class="form-select form-control" id="shop-category-register" name="shop_category" required>
+                            <option value="">` + escapeHtml(trans.selectShopType) + `</option>
+                            <option value="manufacture">` + escapeHtml(trans.manufacture) + `</option>
+                            <option value="wholesaler">` + escapeHtml(trans.wholesaler) + `</option>
+                            <option value="retailer">` + escapeHtml(trans.retailer) + `</option>
+                        </select>
+                    </div>
+                `;
+                $urlWrapper.closest('.shop-url-wrapper, .mb-3, .form-group').after(shopTypeHtml);
+            }
         }
 
         // 2. Automatically enhance Vendor Dashboard Sidebar Greeting across themes (Farmart, Nest, Shofy, Martfury)

@@ -130,7 +130,8 @@ class VendorBadgeHelper
 
     public static function renderShopTypeBadge(mixed $store, array $options = []): string|HtmlString
     {
-        if (! is_in_admin() && ! (bool) setting('vendor_shop_type_visible', true)) {
+        $isInAdmin = (bool) (\Illuminate\Support\Arr::get($options, 'is_admin') ?? (function_exists('is_in_admin') && is_in_admin(true)));
+        if (! $isInAdmin && ! (bool) setting('vendor_shop_type_visible', true)) {
             return '';
         }
 

@@ -44,6 +44,7 @@ class HookServiceProvider extends ServiceProvider
             ? ''
             : (VendorBadgeHelper::getShopType($store)?->label() ?? $label), 20, 2);
         $this->extendCustomerForm();
+        $this->extendStoreForm();
         $this->extendVendorStoreForm();
         $this->extendBecomeVendorForm();
         $this->extendRegisterForm();
@@ -75,6 +76,44 @@ class HookServiceProvider extends ServiceProvider
                         'priority' => 1,
                     ],
                 ]);
+            }
+        });
+    }
+
+    protected function extendStoreForm(): void
+    {
+        // Admin Store Form (/admin/marketplaces/stores/edit/{id} & create)
+        StoreForm::extend(function (StoreForm $form): void {
+            if (! $form->has('shop_category')) {
+                $options = SelectFieldOption::make()
+                    ->label(trans('plugins/vendor-verified-badge::vendor-badge.shop_type'))
+                    ->choices(['' => trans('plugins/vendor-verified-badge::vendor-badge.select_shop_type')] + ShopTypeEnum::labels())
+                    ->helperText(trans('plugins/vendor-verified-badge::vendor-badge.meta_box.shop_type_help'))
+                    ->colspan(6);
+
+                if ($form->getModel()?->shop_category) {
+                    $options->selected($form->getModel()->shop_category);
+                }
+
+                if ($form->has('phone')) {
+                    $form->addAfter('phone', 'shop_category', SelectField::class, $options);
+                } else {
+                    $form->add('shop_category', SelectField::class, $options);
+                }
+            }
+        });
+
+        StoreForm::afterSaving(function (StoreForm $form): void {
+            $request = request();
+            if ($request->has('shop_category')) {
+                $category = $request->input('shop_category');
+                if (ShopTypeEnum::isValid($category) || empty($category)) {
+                    $store = $form->getModel();
+                    if ($store instanceof Store) {
+                        $store->shop_category = $category ?: null;
+                        $store->save();
+                    }
+                }
             }
         });
     }
@@ -305,6 +344,57 @@ class HookServiceProvider extends ServiceProvider
 
             return $data;
         }, 130, 3);
+
+        // 4. Add Shop Type filter to CustomerTable, VendorTable & StoreTable
+        $filterShopTypeQuery = function ($query, $key, $operator, $value) {
+            if ($key === 'shop_type' || $key === 'shop_category') {
+                if (! $value) {
+                    return $query;
+                }
+
+                if ($operator === '!=') {
+                    return $query->whereDoesntHave('store', fn ($q) => $q->where('shop_category', $value));
+                }
+
+                return $query->whereHas('store', fn ($q) => $q->where('shop_category', $value));
+            }
+
+            return false;
+        };
+
+        $this->app->resolving(CustomerTable::class, function (CustomerTable $table) use ($filterShopTypeQuery): void {
+            $table->onFilterQuery($filterShopTypeQuery);
+        });
+
+        if (class_exists(VendorTable::class)) {
+            $this->app->resolving(VendorTable::class, function (VendorTable $table) use ($filterShopTypeQuery): void {
+                $table->onFilterQuery($filterShopTypeQuery);
+            });
+        }
+
+        add_filter('base_filter_table_filters', function (array $filters, TableAbstract $table) use ($filterShopTypeQuery): array {
+            if ($table instanceof CustomerTable || (class_exists(VendorTable::class) && $table instanceof VendorTable)) {
+                $table->onFilterQuery($filterShopTypeQuery);
+
+                $filters['shop_type'] = [
+                    'title' => trans('plugins/vendor-verified-badge::vendor-badge.shop_type'),
+                    'type' => 'select-search',
+                    'choices' => ShopTypeEnum::labels(),
+                    'validate' => 'required|in:' . implode(',', ShopTypeEnum::values()),
+                ];
+            }
+
+            if ($table instanceof StoreTable) {
+                $filters['shop_category'] = [
+                    'title' => trans('plugins/vendor-verified-badge::vendor-badge.shop_type'),
+                    'type' => 'select-search',
+                    'choices' => ShopTypeEnum::labels(),
+                    'validate' => 'required|in:' . implode(',', ShopTypeEnum::values()),
+                ];
+            }
+
+            return $filters;
+        }, 125, 2);
     }
 
     protected function hookAdminStoreViewPage(): void
@@ -324,7 +414,7 @@ class HookServiceProvider extends ServiceProvider
     {
         add_filter('ecommerce_order_detail_extra_info', function (string $html, $order): string {
             if ($order && $order->store && $order->store->name) {
-                $badges = VendorBadgeHelper::renderBadges($order->store);
+                $badges = VendorBadgeHelper::renderBadges($order->store, ['is_admin' => true]);
                 $storeName = preg_quote(e($order->store->name), '/');
                 $pattern = '/(<a[^>]*>' . $storeName . '<\/a>)/i';
                 if (preg_match($pattern, $html)) {
@@ -342,7 +432,7 @@ class HookServiceProvider extends ServiceProvider
             }
 
             if ($store && $store->name) {
-                $badges = VendorBadgeHelper::renderBadges($store);
+                $badges = VendorBadgeHelper::renderBadges($store, ['is_admin' => true]);
                 $storeName = preg_quote(e($store->name), '/');
                 $pattern = '/(<a[^>]*>' . $storeName . '<\/a>)/i';
                 if (preg_match($pattern, $html)) {
