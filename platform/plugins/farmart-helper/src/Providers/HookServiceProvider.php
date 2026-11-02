@@ -9,12 +9,37 @@ use Botble\Ecommerce\Forms\Fronts\OrderTrackingForm;
 use Botble\Ecommerce\Forms\Settings\GeneralSettingForm;
 use Botble\Ecommerce\Forms\Settings\InvoiceSettingForm;
 use Botble\Ecommerce\Forms\StoreLocatorForm;
+use Botble\Ecommerce\Facades\EcommerceHelper;
 use Botble\Marketplace\Forms\StoreForm;
 
 class HookServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        add_filter(PROCESS_CHECKOUT_RULES_REQUEST_ECOMMERCE, function (array $rules): array {
+            foreach (['address', 'billing_address'] as $group) {
+                if (! isset($rules["$group.address"])) {
+                    continue;
+                }
+
+                $country = request()->input("$group.country") ?: EcommerceHelper::getDefaultCountryId();
+                if (strtoupper(trim((string) $country)) === 'IN') {
+                    $rules["$group.zip_code"] = ['required', 'regex:/^[1-9][0-9]{5}$/'];
+                }
+            }
+
+            return $rules;
+        }, 200);
+
+        add_filter(PROCESS_CHECKOUT_MESSAGES_REQUEST_ECOMMERCE, function (array $messages): array {
+            foreach (['address', 'billing_address'] as $group) {
+                $messages["$group.zip_code.regex"] = trans('plugins/farmart-helper::pincode.invalid');
+                $messages["$group.zip_code.required"] = trans('plugins/farmart-helper::pincode.invalid');
+            }
+
+            return $messages;
+        }, 200);
+
         // 1. Marketplace Store Form Extension (Admin & Vendor)
         if (class_exists(StoreForm::class)) {
             StoreForm::extend(function (StoreForm $form) {
