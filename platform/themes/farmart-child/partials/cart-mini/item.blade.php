@@ -27,7 +27,9 @@
                     <a class="text-primary ms-1 d-inline" href="{{ $store->url }}">
                         {{ $store->name }}
                     </a>
+                    @if (is_plugin_active('vendor-verified-badge'))
                     @vendorBadges($store)
+                    @endif
                 </div>
             @endif
             <span class="quantity">

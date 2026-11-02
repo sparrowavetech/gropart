@@ -76,9 +76,11 @@
                 <div class="wrapper-content bg-gray-white mb20">
                     <div class="pd-all-20">
                         <div class="p-b10">
-                            <strong>{{ trans('plugins/marketplace::store.store') }}  @vendorVerified($enquiry->product->store)</strong>
-                           
+                            <strong>{{ trans('plugins/marketplace::store.store') }} @if (is_plugin_active('vendor-verified-badge')) @vendorVerified($enquiry->product->store) @endif</strong>
+
+                                @if (is_plugin_active('vendor-verified-badge'))
                                 @vendorShopType($enquiry->product->store)
+                                @endif
                             <ul class="p-sm-r mb-0">
                                 <li class="ws-nm">
                                     <a href="{{ $enquiry->product->store->url }}" class="ww-bw text-no-bold" target="_blank">{{ $enquiry->product->store->name }}</a>

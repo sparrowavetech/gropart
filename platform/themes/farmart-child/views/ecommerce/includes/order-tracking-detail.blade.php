@@ -112,7 +112,9 @@
                                                     <small class="text-muted">{{ __('Sold by') }}: <a
                                                             href="{{ $product->original_product->store->url }}"
                                                             class="text-primary fw-medium">{{ $product->original_product->store->name }}</a>
+                                                            @if (is_plugin_active('vendor-verified-badge'))
                                                             @vendorBadges($product->original_product->store)
+                                                            @endif
                                                     </small>
                                                 </p>
                                             @endif

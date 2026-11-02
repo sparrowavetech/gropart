@@ -60,7 +60,9 @@
                                                 <span class="text-secondary">{{ __('Vendor') }}: </span>
                                                 <span class="text-primary ms-1">
                                                     <a href="{{ $store->url }}">{{ $store->name }}</a>
+                                                    @if (is_plugin_active('vendor-verified-badge'))
                                                     @vendorBadges($store)
+                                                    @endif
                                                 </span>
                                             </div>
                                         @endif

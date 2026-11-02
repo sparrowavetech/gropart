@@ -44,13 +44,15 @@
                         />
                     </div>
                     <div class="ps-block__right">
-                        <p>{{ __('Hello') }}, {{ auth('customer')->user()->name }} @vendorVerified(auth('customer')->user()->store)</p>
+                        <p>{{ __('Hello') }}, {{ auth('customer')->user()->name }} @if (is_plugin_active('vendor-verified-badge')) @vendorVerified(auth('customer')->user()->store) @endif</p>
                         <small>{{ __('Joined on :date', ['date' => auth('customer')->user()->created_at->translatedFormat('M d, Y')]) }}</small>
                         <br>
                         @if(auth('customer')->user()->store->is_verified)
                             <span style="position: absolute;"><small class="badge bg-success">{{ __('You are verified now') }}</small></span>
                         @endif
+                        @if (is_plugin_active('vendor-verified-badge'))
                         @vendorShopType(auth('customer')->user()->store)
+                        @endif
                     </div>
                     <div class="ps-block__action"><a href="{{ route('customer.logout') }}"><i class="icon-exit"></i></a></div>
                 </div>

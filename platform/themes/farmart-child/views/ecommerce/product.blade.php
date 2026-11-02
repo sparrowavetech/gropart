@@ -50,7 +50,9 @@
                                 <a href="{{ $product->store->url }}">
                                     {{ $product->store->name }}
                                 </a>
+                                @if (is_plugin_active('vendor-verified-badge'))
                                 @vendorBadges($product->store)
+                                @endif
                             </div>
                         @endif
 

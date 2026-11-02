@@ -23,7 +23,9 @@
                                 <div class="store-title d-flex align-items-center">
                                     <h2 class="h5 mb-0">
                                         <a href="{{ $store->url }}">{{ $store->name }}</a>
+                                        @if (is_plugin_active('vendor-verified-badge'))
                                         @vendorBadges($store)
+                                        @endif
                                     </h2>
                                 </div>
                                 @if (method_exists($store, 'isOnVacation') && $store->isOnVacation())

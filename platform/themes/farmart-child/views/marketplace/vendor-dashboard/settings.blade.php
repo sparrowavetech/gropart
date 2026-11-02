@@ -158,11 +158,12 @@
                                     >{{ route('public.store', old('slug', $store->slug ?: 'store')) }}</small></span>
                             </div>
                         </div>
+                        @if (is_plugin_active('vendor-verified-badge'))
                         <div class="col-sm-6">
                             <div class="form-group">
-                                <label class="required" for="shop-category">{{ __('Shop Type') }}</label>
+                                <label class="required" for="shop-category">{{ trans('plugins/vendor-verified-badge::vendor-badge.shop_type') }}</label>
                                 <select class="form-control form-select" id="shop-category" name="shop_category" required>
-                                    <option value="">{{ __('Select Shop Type') }}</option>
+                                    <option value="">{{ trans('plugins/vendor-verified-badge::vendor-badge.select_shop_type') }}</option>
                                     @foreach(\SparroWave\VendorVerifiedBadge\Enums\ShopTypeEnum::labels() as $categoryValue => $categoryLabel)
                                         <option value="{{ $categoryValue }}" @selected(old('shop_category', $store->shop_category) === $categoryValue)>{{ $categoryLabel }}</option>
                                     @endforeach
@@ -172,6 +173,7 @@
                                 @endif
                             </div>
                         </div>
+                        @endif
                     </div>
 
                     <div class="row">

@@ -69,7 +69,9 @@ $slick =
                                         @if (is_plugin_active('marketplace') && $product->store->id)
                                             <div class="sold-by-meta">
                                                 <a href="{{ $product->store->url }}" tabindex="0">{{ $product->store->name }}</a>
+                                                @if (is_plugin_active('vendor-verified-badge'))
                                                 @vendorBadges($product->store)
+                                                @endif
                                             </div>
                                         @endif
                                         <h3 class="product__title">
@@ -108,7 +110,9 @@ $slick =
                                             @if (is_plugin_active('marketplace') && $product->store->id)
                                                 <div class="sold-by-meta">
                                                     <a href="{{ $product->store->url }}" tabindex="0">{{ $product->store->name }}</a>
+                                                    @if (is_plugin_active('vendor-verified-badge'))
                                                     @vendorBadges($product->store)
+                                                    @endif
                                                 </div>
                                             @endif
                                             <h3 class="product__title">

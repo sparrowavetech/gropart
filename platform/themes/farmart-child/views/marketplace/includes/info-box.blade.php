@@ -25,7 +25,9 @@
                                     </div>
                                     <div class="vendor-store-info col">
                                         <h4 class="vendor-name d-inline">{{ $store->name }}</h4>
+                                        @if (is_plugin_active('vendor-verified-badge'))
                                         @vendorBadges($store)
+                                        @endif
                                         @includeIf(MarketplaceHelper::viewPath('includes.vacation-notice'), ['store' => $store])
                                         @if (EcommerceHelper::isReviewEnabled())
                                             <div class="vendor-store-rating mb-3">
