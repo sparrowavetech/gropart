@@ -60,6 +60,8 @@ return [
     'remaining_cod_delivery' => 'डिलीवरी पर शेष राशि (सीओडी)',
     'actual_received_net' => 'वास्तविक प्राप्त अग्रिम राशि',
     'customer_outstanding' => 'ग्राहक पर बकाया राशि',
+    'invoice_payment_summary' => 'सीओडी भुगतान सारांश',
+    'invoice_total_received' => 'कुल प्राप्त राशि',
     'confirmation_method' => 'पुष्टि करने की विधि',
     'use_verified_online' => 'मौजूदा सत्यापित ऑनलाइन अग्रिम का उपयोग करें',
     'manual_advance_received' => 'मैन्युअल रूप से प्राप्त अग्रिम (नकद / बैंक / यूपीआई)',

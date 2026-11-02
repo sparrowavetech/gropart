@@ -35,8 +35,8 @@ class SettlementServiceProvider extends ServiceProvider
             add_filter('invoice_payment_info_filter', function ($html,$invoice) {
                 $order=$this->order($invoice);
                 if (!$order) return $html;
-                return $html.view('plugins/advanced-cod::settlement.summary',[
-                    'order'=>$order,'s'=>Settlement::summary($order),'internal'=>false,
+                return $html.view('plugins/advanced-cod::settlement.invoice-summary',[
+                    's'=>Settlement::summary($order),
                 ])->render();
             },200,2);
             add_filter('ecommerce_invoice_variables', function ($data,$invoice) {

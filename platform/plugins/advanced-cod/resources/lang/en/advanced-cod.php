@@ -60,6 +60,8 @@ return [
     'remaining_cod_delivery' => 'Remaining Balance on Delivery (COD)',
     'actual_received_net' => 'Actual Advance Received',
     'customer_outstanding' => 'Customer Outstanding',
+    'invoice_payment_summary' => 'COD payment summary',
+    'invoice_total_received' => 'Total received',
     'confirmation_method' => 'Confirmation Method',
     'use_verified_online' => 'Use Existing Verified Online Advance',
     'manual_advance_received' => 'Advance Manually Received (Cash / Bank / UPI)',
