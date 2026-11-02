@@ -38,6 +38,24 @@ class ProductFreeShippingSettingForm extends SettingForm
                     ->toArray()
             )
             ->add(
+                'product_free_shipping_show_detail_badge',
+                OnOffCheckboxField::class,
+                CheckboxFieldOption::make()
+                    ->label(trans('plugins/product-free-shipping::product-free-shipping.settings.show_detail_badge'))
+                    ->helperText(trans('plugins/product-free-shipping::product-free-shipping.settings.show_detail_badge_help'))
+                    ->value((bool) setting('product_free_shipping_show_detail_badge', true))
+                    ->toArray()
+            )
+            ->add(
+                'product_free_shipping_show_card_badge',
+                OnOffCheckboxField::class,
+                CheckboxFieldOption::make()
+                    ->label(trans('plugins/product-free-shipping::product-free-shipping.settings.show_card_badge'))
+                    ->helperText(trans('plugins/product-free-shipping::product-free-shipping.settings.show_card_badge_help'))
+                    ->value((bool) setting('product_free_shipping_show_card_badge', false))
+                    ->toArray()
+            )
+            ->add(
                 'product_free_shipping_method_title',
                 TextField::class,
                 TextFieldOption::make()

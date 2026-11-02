@@ -42,6 +42,10 @@ return [
     'admin_override' => 'Allow authorized admins to place full COD without advance',
     'admin_override_help' => 'Applies only to unpaid incomplete orders without a locked payment attempt. Customer checkout advance requirements stay unchanged.',
     'admin_override_details' => 'Separate override permission and reason required',
+    'show_detail_badge' => 'Show COD Available on product detail',
+    'show_detail_badge_help' => 'Display the COD badge on eligible product detail pages.',
+    'show_card_badge' => 'Show COD Available on product cards',
+    'show_card_badge_help' => 'Display the COD badge on eligible products in listings and sliders.',
 
     // Settlements & Admin Confirmation
     'settlement_title' => 'Advanced COD Settlement',

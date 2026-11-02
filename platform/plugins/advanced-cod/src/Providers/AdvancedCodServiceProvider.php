@@ -106,6 +106,33 @@ class AdvancedCodServiceProvider extends ServiceProvider
             add_filter('ecommerce_product_item_badges', [AdvancedCodHookListener::class, 'addCodLabelToProductCard'], 120, 2);
             add_filter('ecommerce_product_loop_extra_html', [AdvancedCodHookListener::class, 'addCodLabelToProductCard'], 120, 2);
             add_filter('ecommerce_product_detail_after_cart_actions', [AdvancedCodHookListener::class, 'addCodLabelToProductPage'], 120, 2);
+
+            // Use the standard Ecommerce form hook when a theme card has no badge slot of its own.
+            $this->app['view']->composer('theme.*::partials.ecommerce.product-cart-form', function ($view): void {
+                $data = $view->getData();
+                $product = $data['product'] ?? null;
+                $isCard = $product && ! array_key_exists('withVariations', $data)
+                    && ! array_key_exists('withProductOptions', $data)
+                    && ! array_key_exists('isQuickShop', $data)
+                    && ! array_key_exists('withBuyNow', $data);
+
+                request()->attributes->set('advanced_cod_card_context', $isCard ? (string) ($product->id ?? '') : null);
+            });
+            add_filter(ECOMMERCE_PRODUCT_DETAIL_EXTRA_HTML, static function (mixed $html, mixed $product = null): mixed {
+                $id = is_object($product) ? (string) ($product->id ?? '') : '';
+                if ($id === '' || request()->attributes->get('advanced_cod_card_context') !== $id
+                    || request()->attributes->get('advanced_cod_native_card_badge') === $id) {
+                    return $html;
+                }
+
+                return AdvancedCodHookListener::addCodLabelToProductCard((string) $html, $product);
+            }, 120, 2);
+            add_filter(ECOMMERCE_PRODUCT_DETAIL_EXTRA_HTML, static function (mixed $html): mixed {
+                request()->attributes->remove('advanced_cod_card_context');
+                request()->attributes->remove('advanced_cod_native_card_badge');
+
+                return $html;
+            }, 250);
             
             // Table filters (Admin & Marketplace Vendor)
             add_filter('base_filter_table_filters', [AdvancedCodHookListener::class, 'addTableFilters'], 120, 2);

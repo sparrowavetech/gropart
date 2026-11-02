@@ -58,9 +58,6 @@
             {!! Theme::partial('star-rating', ['avg' => $product->reviews_avg, 'count' => $product->reviews_count]) !!}
         @endif
         {!! Theme::partial('ecommerce.product-price', compact('product')) !!}
-        <div class="product-item-badges d-flex flex-wrap align-items-center gap-1 mt-1" style="min-height: 20px;">
-            {!! apply_filters('ecommerce_after_product_price', null, $product) !!}
-        </div>
         @if (!empty($isFlashSale))
             <div class="deal-sold row mt-2">
                 @if (Botble\Ecommerce\Facades\FlashSale::isShowSaleCountLeft())

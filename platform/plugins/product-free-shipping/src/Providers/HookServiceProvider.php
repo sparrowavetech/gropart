@@ -26,7 +26,7 @@ class HookServiceProvider extends ServiceProvider
         add_filter('ecommerce_product_has_free_shipping', fn ($free, $product) => $free || ProductFreeShippingHelper::isProductFreeShipping($product), 20, 2);
         add_filter('ecommerce_order_product_item_extra_info', function ($html, $item, $order) {
             if (!\Botble\Base\Facades\AdminHelper::isInAdmin()) return $html;
-            return $html . $this->renderProductDetailBadge('', $item->product?->original_product ?: $item->product);
+            return $html . $this->renderProductDetailBadge('', $item->product?->original_product ?: $item->product, true);
         }, 191, 3);
         // 1. Form Injections (Admin & Marketplace Vendor)
         ProductForm::extend(function (ProductForm $form) {
@@ -65,11 +65,38 @@ class HookServiceProvider extends ServiceProvider
         add_filter('ecommerce_product_item_badges', [$this, 'renderProductCardBadge'], 125, 2);
         add_filter('ecommerce_after_product_price', [$this, 'renderProductCardBadge'], 125, 2);
         add_filter('ecommerce_product_loop_extra_html', [$this, 'renderProductCardBadge'], 125, 2);
+
+        // Standard Ecommerce card forms expose this hook even when their card view has no badge slot.
+        $this->app['view']->composer('theme.*::partials.ecommerce.product-cart-form', function ($view): void {
+            $data = $view->getData();
+            $product = $data['product'] ?? null;
+            $isCard = $product && ! array_key_exists('withVariations', $data)
+                && ! array_key_exists('withProductOptions', $data)
+                && ! array_key_exists('isQuickShop', $data)
+                && ! array_key_exists('withBuyNow', $data);
+
+            request()->attributes->set('product_free_shipping_card_context', $isCard ? (string) ($product->id ?? '') : null);
+        });
+        add_filter(ECOMMERCE_PRODUCT_DETAIL_EXTRA_HTML, function (mixed $html, mixed $product = null): mixed {
+            $id = is_object($product) ? (string) ($product->id ?? '') : '';
+            if ($id === '' || request()->attributes->get('product_free_shipping_card_context') !== $id
+                || request()->attributes->get('product_free_shipping_native_card_badge') === $id) {
+                return $html;
+            }
+
+            return $this->renderProductCardBadge((string) $html, $product);
+        }, 125, 2);
+        add_filter(ECOMMERCE_PRODUCT_DETAIL_EXTRA_HTML, static function (mixed $html): mixed {
+            request()->attributes->remove('product_free_shipping_card_context');
+            request()->attributes->remove('product_free_shipping_native_card_badge');
+
+            return $html;
+        }, 250);
     }
 
     public function renderProductCardBadge(?string $html, mixed $product = null): ?string
     {
-        if (! ProductFreeShippingHelper::isEnabled() || ! $product) {
+        if (! ProductFreeShippingHelper::isEnabled() || ! setting('product_free_shipping_show_card_badge', false) || ! $product) {
             return $html;
         }
 
@@ -89,6 +116,10 @@ class HookServiceProvider extends ServiceProvider
             . '</svg>'
             . '<span>' . e($badgeText) . '</span>'
             . '</span>';
+
+        if (is_object($product) && isset($product->id)) {
+            request()->attributes->set('product_free_shipping_native_card_badge', (string) $product->id);
+        }
 
         return ($html ?? '') . $badgeHtml;
     }
@@ -239,9 +270,9 @@ class HookServiceProvider extends ServiceProvider
         return ProductFreeShippingHelper::calculateShippingRates($rates, $products, $shippingData);
     }
 
-    public function renderProductDetailBadge(?string $html, mixed $product = null): ?string
+    public function renderProductDetailBadge(?string $html, mixed $product = null, bool $forAdminOrder = false): ?string
     {
-        if (! ProductFreeShippingHelper::isEnabled() || ! $product) {
+        if (! ProductFreeShippingHelper::isEnabled() || (! $forAdminOrder && ! setting('product_free_shipping_show_detail_badge', true)) || ! $product) {
             return $html;
         }
 
@@ -255,18 +286,14 @@ class HookServiceProvider extends ServiceProvider
 
         $badgeText = ProductFreeShippingHelper::getBadgeText();
 
-        $badgeHtml = '<span class="badge bg-success ms-1" style="background-color: #28a745 !important; color: white !important; padding: 5px 10px; font-size: 11px; border-radius: 4px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; vertical-align: middle;">'
+        $badgeHtml = '<span class="badge bg-success" style="background-color: #28a745 !important; color: white !important; padding: 5px 9px; font-size: 11px; border-radius: 4px; font-weight: 500; line-height: 1.2; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">'
             . '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width: 13px !important; height: 13px !important; max-width: 13px !important; max-height: 13px !important; display: inline-block; vertical-align: middle; flex-shrink: 0;">'
             . '<rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle>'
             . '</svg>'
             . '<span>' . e($badgeText) . '</span>'
             . '</span>';
 
-        if ($html && str_contains($html, 'product-cod-label')) {
-            return str_replace('</div>', ' ' . $badgeHtml . '</div>', $html);
-        }
-
-        return '<div class="product-free-shipping-detail-badge mt-2 mb-2">' . $badgeHtml . '</div>' . ($html ?? '');
+        return ($html ?? '') . '<span class="product-free-shipping-detail-badge" style="display: inline-flex; vertical-align: middle; margin: 6px 6px 6px 0;">' . $badgeHtml . '</span>';
     }
 
     public function renderCartItemBadge(?string $html, mixed $cartItem = null): ?string

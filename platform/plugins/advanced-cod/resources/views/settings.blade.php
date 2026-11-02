@@ -38,3 +38,21 @@
     </select>
     <p class="help-block">{{ trans('plugins/advanced-cod::advanced-cod.admin_override_help') }}</p>
 </div>
+
+<div class="form-group mb-3">
+    <label for="payment_cod_show_detail_badge" class="control-label">{{ trans('plugins/advanced-cod::advanced-cod.show_detail_badge') }}</label>
+    <select class="form-select" name="payment_cod_show_detail_badge" id="payment_cod_show_detail_badge">
+        <option value="1" @selected(get_payment_setting('show_detail_badge', 'cod', 1))>{{ trans('core/base::base.yes') }}</option>
+        <option value="0" @selected(! get_payment_setting('show_detail_badge', 'cod', 1))>{{ trans('core/base::base.no') }}</option>
+    </select>
+    <p class="help-block">{{ trans('plugins/advanced-cod::advanced-cod.show_detail_badge_help') }}</p>
+</div>
+
+<div class="form-group mb-3">
+    <label for="payment_cod_show_card_badge" class="control-label">{{ trans('plugins/advanced-cod::advanced-cod.show_card_badge') }}</label>
+    <select class="form-select" name="payment_cod_show_card_badge" id="payment_cod_show_card_badge">
+        <option value="1" @selected(get_payment_setting('show_card_badge', 'cod', 0))>{{ trans('core/base::base.yes') }}</option>
+        <option value="0" @selected(! get_payment_setting('show_card_badge', 'cod', 0))>{{ trans('core/base::base.no') }}</option>
+    </select>
+    <p class="help-block">{{ trans('plugins/advanced-cod::advanced-cod.show_card_badge_help') }}</p>
+</div>

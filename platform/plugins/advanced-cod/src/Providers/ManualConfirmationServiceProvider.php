@@ -22,7 +22,7 @@ class ManualConfirmationServiceProvider extends ServiceProvider
                 if (!\Botble\Base\Facades\AdminHelper::isInAdmin()) return $html;
                 $product = $item->product?->original_product;
                 if (!$product?->id) return $html;
-                $badges = app(\SparroWave\AdvancedCod\Hooks\AdvancedCodHookListener::class)->addCodLabelToProductCard('', $product);
+                $badges = app(\SparroWave\AdvancedCod\Hooks\AdvancedCodHookListener::class)->addCodLabelToProductCard('', $product, true);
                 return $html . ($badges ? '<div class="mt-1 order-product-delivery-labels">' . $badges . '</div>' : '');
             }, 190, 3);
 

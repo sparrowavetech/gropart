@@ -12,6 +12,8 @@ class ProductFreeShippingSettingRequest extends Request
         return [
             'product_free_shipping_enabled' => [new OnOffRule()],
             'product_free_shipping_badge_text' => ['nullable', 'string', 'max:120'],
+            'product_free_shipping_show_detail_badge' => [new OnOffRule()],
+            'product_free_shipping_show_card_badge' => [new OnOffRule()],
             'product_free_shipping_method_title' => ['nullable', 'string', 'max:120'],
             'product_free_shipping_hide_other_methods' => [new OnOffRule()],
         ];
