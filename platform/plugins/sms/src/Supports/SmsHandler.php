@@ -286,7 +286,13 @@ class SmsHandler
                 'response' => SmsGatewayLog::responseSummary($payload),
             ]);
 
-            $this->rememberLastSendResponse($payload, (string) $to, $content);
+            try {
+                $this->rememberLastSendResponse($payload, (string) $to, $content);
+            } catch (Throwable $exception) {
+                SmsGatewayLog::warning('SMS accepted but local delivery log could not be saved.', [
+                    'type' => get_class($exception),
+                ]);
+            }
 
             return true;
         } catch (Exception $exception) {
@@ -492,7 +498,13 @@ class SmsHandler
 
                 $body = $response->json();
                 if (is_array($body)) {
-                    $this->syncDeliveryReport($jobId, $body);
+                    try {
+                        $this->syncDeliveryReport($jobId, $body);
+                    } catch (Throwable $exception) {
+                        SmsGatewayLog::warning('SMS delivery report received but local log could not be updated.', [
+                            'type' => get_class($exception),
+                        ]);
+                    }
                 }
 
                 if ($response->successful()) {
@@ -542,10 +554,14 @@ class SmsHandler
                 continue;
             }
 
+            $status = $this->storedStatus(Arr::get($report, 'DeliveryStatus', $log->status));
+
             $log->fill([
                 'message_id' => $messageId ?: $log->message_id,
-                'status' => (string) Arr::get($report, 'DeliveryStatus', $log->status),
-                'delivered_at' => Arr::get($report, 'DeliveryDate') ?: $log->delivered_at,
+                'status' => $status,
+                'delivered_at' => in_array(mb_strtolower($status), ['delivered', 'delivrd'], true)
+                    ? (Arr::get($report, 'DeliveryDate') ?: $log->delivered_at)
+                    : null,
                 'delivery_error_code' => Arr::get($report, 'ErrorCode') ?: null,
                 'cost' => $this->firstReportValue($report, ['Cost', 'cost', 'SMSCost', 'SmsCost', 'Credit', 'Credits']) ?? $log->cost,
                 'op_cr' => $this->firstReportValue($report, ['OPCR', 'OP/CR', 'OperatorCircle', 'Operator', 'Circle', 'Network']) ?? $log->op_cr,
@@ -565,6 +581,13 @@ class SmsHandler
         }
 
         return null;
+    }
+
+    private function storedStatus(mixed $value): string
+    {
+        $status = trim(is_scalar($value) ? (string) $value : '');
+
+        return mb_substr($status !== '' ? $status : 'Unknown', 0, 60);
     }
 
     public function getDeliveryReportUrl(?string $jobId = null): string
@@ -761,7 +784,8 @@ class SmsHandler
 
         $jobId = (string) Arr::get($payload, 'JobId', '');
         $messageId = (string) Arr::get($payload, 'MessageData.0.MessageId', '');
-        $status = in_array((string) Arr::get($payload, 'ErrorCode'), ['000', '0'], true) ? 'Submitted' : (string) Arr::get($payload, 'ErrorMessage', 'Failed');
+        // send() only reaches this point after the gateway response was accepted.
+        $status = 'Submitted';
 
         if ($jobId === '') {
             return;
@@ -787,7 +811,7 @@ class SmsHandler
                 \Botble\Sms\Enums\SmsEnum::LOGIN_OTP,
                 \Botble\Sms\Enums\SmsEnum::PASSWORD_RESET_OTP,
                 \Botble\Sms\Enums\SmsEnum::CHECKOUT_OTP,
-            ], true) ? '[redacted]' : $content,
+            ], true) ? SmsGatewayLog::storeOtpMessage($content) : $content,
             'status' => $status,
             'sent_at' => now(),
             'response_payload' => ['JobId' => $jobId, 'MessageId' => $messageId, 'status' => $status],

@@ -4,6 +4,7 @@ namespace Botble\Sms\Tables;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Sms\Models\SmsLog;
+use Botble\Sms\Supports\SmsGatewayLog;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\BulkChanges\DateBulkChange;
 use Botble\Table\BulkChanges\TextBulkChange;
@@ -27,7 +28,10 @@ class SmsDeliveryReportTable extends TableAbstract
             ->eloquent($this->query())
             ->editColumn('sent_at', fn (SmsLog $item) => BaseHelper::formatDateTime($item->sent_at))
             ->editColumn('delivered_at', fn (SmsLog $item) => $item->delivered_at ? BaseHelper::formatDateTime($item->delivered_at) : '-')
-            ->editColumn('message', fn (SmsLog $item) => BaseHelper::clean($item->message))
+            ->editColumn('message', fn (SmsLog $item) => BaseHelper::clean(
+                SmsGatewayLog::displayMessage((string) $item->message)
+                    ?? trans('plugins/sms::sms.delivery_report.message_unavailable')
+            ))
             ->editColumn('job_id', fn (SmsLog $item) => BaseHelper::clean((string) $item->job_id))
             ->editColumn('dlt_param', function (SmsLog $item) {
                 return sprintf(

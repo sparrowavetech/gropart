@@ -145,6 +145,7 @@ return [
         'sent_date' => 'Sent Date',
         'number' => 'Number',
         'sms' => 'SMS',
+        'message_unavailable' => 'Message unavailable',
         'status' => 'Status',
         'delivered_date' => 'Delivered Date',
         'cost' => 'Cost',

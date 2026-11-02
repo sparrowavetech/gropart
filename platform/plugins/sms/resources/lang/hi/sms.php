@@ -145,6 +145,7 @@ return [
         'sent_date' => 'भेजने की तारीख',
         'number' => 'नंबर',
         'sms' => 'SMS',
+        'message_unavailable' => 'संदेश उपलब्ध नहीं है',
         'status' => 'स्थिति',
         'delivered_date' => 'डिलीवरी की तारीख',
         'cost' => 'लागत',

@@ -224,9 +224,7 @@ class SmsController extends BaseController
 
         SmsLog::query()
             ->whereNotNull('job_id')
-            ->where(function ($query) {
-                $query->whereNull('delivered_at')->orWhere('status', 'Submitted');
-            })
+            ->whereIn('status', ['Submitted', 'Pending', 'Queued', 'Processing'])
             ->latest('id')
             ->limit(20)
             ->pluck('job_id')
