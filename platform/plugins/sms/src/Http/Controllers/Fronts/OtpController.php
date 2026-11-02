@@ -5,9 +5,12 @@ namespace Botble\Sms\Http\Controllers\Fronts;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Ecommerce\Models\Customer;
+use Botble\Ecommerce\Enums\CustomerStatusEnum;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Theme\Facades\Theme;
 use Botble\Sms\Supports\SmsHandler;
+use Botble\Sms\Supports\SmsGatewayLog;
+use Botble\Sms\Supports\OtpChallenge;
 use Botble\Sms\Enums\SmsEnum;
 use Botble\Sms\Http\Requests\OtpVerifyRequest;
 use Botble\Sms\Http\Requests\OtpChangePhoneRequest;
@@ -19,16 +22,17 @@ class OtpController extends BaseController
     /**
      * Show OTP verification screen.
      */
-    public function otp($customer_id)
+    public function otp()
     {
-        SeoHelper::setTitle(__('OTP Verification'));
-        $customer = Customer::query()->find($customer_id);
+        $customer = Customer::query()->find(app(OtpChallenge::class)->customerId('registration'));
 
         if (!$customer) {
             abort(404, 'Customer not found.');
         }
+        abort_unless(app(OtpChallenge::class)->belongs('registration', $customer), 404);
+        SeoHelper::setTitle(trans('plugins/sms::sms.otp_page_title'));
 
-        Theme::breadcrumb()->add(__('Home'), route('public.index'))->add(__('OTP Verify'), route('customer.register'));
+        Theme::breadcrumb()->add(trans('plugins/sms::sms.home'), route('public.index'))->add(trans('plugins/sms::sms.otp_verify_breadcrumb'), route('customer.register'));
 
         if (!session()->has('url.intended')) {
             if (!in_array(url()->previous(), [route('customer.login'), route('customer.register')])) {
@@ -36,7 +40,7 @@ class OtpController extends BaseController
             }
         }
 
-        return Theme::scope('ecommerce.customers.otp', compact('customer_id', 'customer'), 'plugins/sms::themes.customers.otp')
+        return Theme::of('plugins/sms::themes.customers.otp', compact('customer'))
             ->render();
     }
 
@@ -45,10 +49,15 @@ class OtpController extends BaseController
      */
     public function verifyotp(OtpVerifyRequest $request, BaseHttpResponse $response)
     {
-        $customer = Customer::query()->find($request->customer_id);
+        $customer = Customer::query()->find(app(OtpChallenge::class)->customerId('registration'));
 
-        if ($customer && $customer->otp == $request->otp) {
-            $customer->confirmed_at = Carbon::now();
+        if ($customer
+            && $customer->status->getValue() === CustomerStatusEnum::ACTIVATED
+            && app(OtpChallenge::class)->verify('registration', $customer, (string) $request->otp)) {
+            if (! \Botble\Ecommerce\Facades\EcommerceHelper::isEnableEmailVerification()) {
+                $customer->confirmed_at = Carbon::now();
+            }
+            $customer->sms_otp_verified_at = Carbon::now();
             $customer->otp = null; // Clear OTP upon successful verification
             $customer->save();
 
@@ -65,13 +74,25 @@ class OtpController extends BaseController
                         $sms->sendUsingTemplate(SmsEnum::WELCOME(), $customer->phone);
                     }
                 } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error('Failed to send welcome SMS: ' . $e->getMessage());
+                    SmsGatewayLog::error('Failed to send welcome SMS.');
                 }
             }
 
+            if (! \Botble\Ecommerce\Facades\EcommerceHelper::isEnableEmailVerification() || $customer->confirmed_at) {
+                session()->forget('sms.registration.email_pending_customer_id');
+                auth('customer')->login($customer);
+                $request->session()->regenerate();
+
+                return $response
+                    ->setNextUrl(route('customer.overview'))
+                    ->setMessage(trans('plugins/sms::sms.otp_verify_success'));
+            }
+
+            session(['sms.registration.email_pending_customer_id' => $customer->getKey()]);
+
             return $response
-                ->setNextUrl(route('customer.login'))
-                ->setMessage(trans('plugins/sms::sms.otp_verify_success'));
+                ->setNextUrl(route('customer.register.email-pending'))
+                ->setMessage(trans('plugins/sms::sms.otp_verified_check_email'));
         } else {
             throw ValidationException::withMessages([
                 'confirmation' => trans('plugins/sms::sms.otp_verify_error'),
@@ -82,19 +103,20 @@ class OtpController extends BaseController
     /**
      * Resend verification OTP code.
      */
-    public function resend(BaseHttpResponse $response, $id)
+    public function resend(BaseHttpResponse $response)
     {
-        $customer = Customer::query()->find($id);
+        $customer = Customer::query()->find(app(OtpChallenge::class)->customerId('registration'));
 
         if (!$customer) {
             abort(404, 'Customer not found.');
         }
+        abort_unless(app(OtpChallenge::class)->belongs('registration', $customer), 404);
 
         if (is_plugin_active('sms') && setting('sms_registration_otp_enabled', setting('sms_otp_enabled'))) {
-            $otp = mt_rand(100000, 999999);
-            $customer->otp = $otp;
-            $customer->save();
-
+            $otp = (string) random_int(100000, 999999);
+            $challenge = app(OtpChallenge::class);
+            $previous = session('sms.otp.registration');
+            $challenge->begin('registration', $customer, $otp);
             try {
                 $sms = new SmsHandler();
                 $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
@@ -104,18 +126,25 @@ class OtpController extends BaseController
                         'customer_phone' => $customer->phone,
                         'otp'           => $otp,
                     ]);
-                    $sms->sendUsingTemplate(SmsEnum::OTP(), $customer->phone);
+                    $sent = $sms->sendUsingTemplate(SmsEnum::OTP(), $customer->phone);
+                } else {
+                    $sent = false;
                 }
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('Failed to send resend OTP SMS: ' . $e->getMessage());
+                SmsGatewayLog::error('Failed to send resend OTP SMS.');
+                $sent = false;
+            }
+            if (! $sent) {
+                $challenge->restore('registration', $previous);
             }
 
             return $response
-                ->setNextUrl(route('customer.otp', $customer->id))
-                ->setMessage(__('We have resent you a new OTP.'));
+                ->setNextUrl(route('customer.otp'))
+                ->setError(! $sent)
+                ->setMessage($sent ? trans('plugins/sms::sms.resend_success') : trans('plugins/sms::sms.otp_send_failed'));
         }
 
-        return $response->setMessage(__('SMS OTP is not enabled.'));
+        return $response->setMessage(trans('plugins/sms::sms.otp_disabled'));
     }
 
     /**
@@ -123,17 +152,20 @@ class OtpController extends BaseController
      */
     public function changePhone(OtpChangePhoneRequest $request, BaseHttpResponse $response)
     {
-        $customer = Customer::query()->find($request->customer_id);
+        $customer = Customer::query()->find(app(OtpChallenge::class)->customerId('registration'));
 
         if (!$customer) {
             abort(404, 'Customer not found.');
         }
+        abort_unless(app(OtpChallenge::class)->belongs('registration', $customer), 404);
 
-        $customer->phone = $request->phone;
-        
         if (is_plugin_active('sms') && setting('sms_registration_otp_enabled', setting('sms_otp_enabled'))) {
-            $otp = mt_rand(100000, 999999);
-            $customer->otp = $otp;
+            $otp = (string) random_int(100000, 999999);
+            $challenge = app(OtpChallenge::class);
+            $previous = session('sms.otp.registration');
+            $challenge->begin('registration', $customer, $otp);
+            $oldPhone = $customer->phone;
+            $customer->phone = $request->phone;
             $customer->save();
 
             try {
@@ -145,18 +177,26 @@ class OtpController extends BaseController
                         'customer_phone' => $customer->phone,
                         'otp'           => $otp,
                     ]);
-                    $sms->sendUsingTemplate(SmsEnum::OTP(), $customer->phone);
+                    $sent = $sms->sendUsingTemplate(SmsEnum::OTP(), $customer->phone);
+                } else {
+                    $sent = false;
                 }
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('Failed to send new phone OTP SMS: ' . $e->getMessage());
+                SmsGatewayLog::error('Failed to send new phone OTP SMS.');
+                $sent = false;
+            }
+            if (! $sent) {
+                $customer->phone = $oldPhone;
+                $customer->save();
+                $challenge->restore('registration', $previous);
             }
 
             return $response
-                ->setNextUrl(route('customer.otp', $customer->id))
-                ->setMessage(__('Phone number changed and new OTP sent.'));
+                ->setNextUrl(route('customer.otp'))
+                ->setError(! $sent)
+                ->setMessage($sent ? trans('plugins/sms::sms.phone_changed_otp_sent') : trans('plugins/sms::sms.otp_send_failed'));
         }
 
-        $customer->save();
-        return $response->setMessage(__('Phone number updated successfully.'));
+        abort(404);
     }
 }

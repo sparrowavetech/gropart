@@ -252,6 +252,7 @@ class SmsController extends BaseController
             'sms_route' => setting('sms_route') ?: ($query['route'] ?? ''),
             'sms_dlt_template_id' => setting('sms_dlt_template_id') ?: ($query['DLTTemplateId'] ?? '{{template_id}}'),
             'sms_peid' => setting('sms_peid') ?: ($query['PEID'] ?? ''),
+            'sms_default_country_code' => setting('sms_default_country_code', ''),
             'sms_delivery_api_call' => setting('sms_delivery_api_call') ?: ($delivery['api_call'] ?: 'GetDelivery'),
             'sms_balance_api_call' => setting('sms_balance_api_call') ?: ($balance['api_call'] ?: 'GetBalance'),
         ];

@@ -18,5 +18,17 @@ class Plugin extends PluginOperationAbstract
                 $table->dropColumn('otp');
             });
         }
+
+        if (Schema::hasTable('ec_customers') && Schema::hasColumn('ec_customers', 'sms_otp_verified_at')) {
+            Schema::table('ec_customers', function ($table): void {
+                $table->dropColumn('sms_otp_verified_at');
+            });
+        }
+
+        if (Schema::hasTable('ec_customers') && Schema::hasColumn('ec_customers', 'sms_otp_required_at')) {
+            Schema::table('ec_customers', function ($table): void {
+                $table->dropColumn('sms_otp_required_at');
+            });
+        }
     }
 }

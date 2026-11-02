@@ -25,6 +25,7 @@ class UpdateSettingsRequest extends Request
             'sms_balance_api_call' => 'required|string',
             'sms_login_otp_enabled' => 'nullable|boolean',
             'sms_registration_otp_enabled' => 'nullable|boolean',
+            'sms_default_country_code' => 'nullable|regex:/^[0-9]{1,4}$/',
         ];
     }
 }

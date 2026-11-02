@@ -28,10 +28,10 @@ class SmsTable extends TableAbstract
     {
         $this
             ->model(Sms::class)
-            ->addHeaderAction(CreateHeaderAction::make()->route('sms.create'))
+            ->addHeaderAction(CreateHeaderAction::make()->route('sms.create')->permission('sms.create'))
             ->addActions([
-                EditAction::make()->route('sms.edit'),
-                DeleteAction::make()->route('sms.destroy'),
+                EditAction::make()->route('sms.edit')->permission('sms.edit'),
+                DeleteAction::make()->route('sms.destroy')->permission('sms.destroy'),
             ])
             ->addColumns([
                 IdColumn::make(),
@@ -45,7 +45,7 @@ class SmsTable extends TableAbstract
                 StatusBulkChange::make(),
                 CreatedAtBulkChange::make(),
             ])
-            ->addBulkAction(DeleteBulkAction::make())
+            ->addBulkAction(DeleteBulkAction::make()->permission('sms.destroy'))
             ->queryUsing(fn (Builder $query) => $query->select([
                 'id',
                 'name',

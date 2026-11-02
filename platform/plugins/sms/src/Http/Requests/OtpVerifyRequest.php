@@ -9,8 +9,16 @@ class OtpVerifyRequest extends Request
     public function rules(): array
     {
         return [
-            'otp'         => 'required|numeric|digits:6',
-            'customer_id' => 'required|numeric',
+            'otp'         => ['required', 'string', 'regex:/^[0-9]{6}$/'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'otp.required' => trans('plugins/sms::sms.otp_six_digits_required'),
+            'otp.string' => trans('plugins/sms::sms.otp_six_digits_required'),
+            'otp.regex' => trans('plugins/sms::sms.otp_six_digits_required'),
         ];
     }
 }

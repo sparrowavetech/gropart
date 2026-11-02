@@ -12,8 +12,8 @@ use Botble\Ecommerce\Events\ShippingStatusChanged;
 use Botble\Ecommerce\Models\Order;
 use Botble\Base\Facades\BaseHelper;
 use Botble\Sms\Supports\SmsHandler;
+use Botble\Sms\Supports\SmsGatewayLog;
 use Botble\Sms\Enums\SmsEnum;
-use Illuminate\Support\Facades\Log;
 
 class OrderSmsListener
 {
@@ -125,7 +125,7 @@ class OrderSmsListener
                 $sms->sendUsingTemplate($template, $phone);
             }
         } catch (\Exception $e) {
-            Log::error('Failed to send Order SMS template ' . $template . ': ' . $e->getMessage());
+            SmsGatewayLog::error('Failed to send Order SMS template.', ['template' => (string) $template]);
         }
     }
 

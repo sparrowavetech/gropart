@@ -11,7 +11,6 @@ use Exception;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 use Botble\Base\Supports\EmailHandler;
@@ -253,6 +252,7 @@ class SmsHandler
             $url = $this->getUrl($to, $content);
 
             if ($url === '') {
+                SmsGatewayLog::warning('SMS send configuration unavailable.');
                 return false;
             }
 
@@ -260,18 +260,33 @@ class SmsHandler
                 ->retry((int) setting('sms_http_retries', 1), 300)
                 ->get($url);
 
-            event(new SendSmsEvent($url, $args, $debug));
+            event(new SendSmsEvent('sms.sent', $args, $debug));
 
             if (! $response->successful()) {
-                Log::warning('SMS API request failed.', [
-                    'status' => $response->status(),
-                    'body' => $response->body(),
+                SmsGatewayLog::warning('SMS API request failed.', [
+                    'http_status' => $response->status(),
+                    'response' => SmsGatewayLog::responseSummary($response->json()),
                 ]);
 
                 return false;
             }
 
-            $this->rememberLastSendResponse($response->json(), (string) $to, $content);
+            $payload = $response->json();
+            if (is_array($payload) && array_key_exists('ErrorCode', $payload) && ! in_array((string) $payload['ErrorCode'], ['000', '0'], true)) {
+                SmsGatewayLog::warning('SMS gateway rejected the request.', [
+                    'http_status' => $response->status(),
+                    'response' => SmsGatewayLog::responseSummary($payload),
+                ]);
+
+                return false;
+            }
+
+            SmsGatewayLog::info('SMS gateway accepted the request.', [
+                'http_status' => $response->status(),
+                'response' => SmsGatewayLog::responseSummary($payload),
+            ]);
+
+            $this->rememberLastSendResponse($payload, (string) $to, $content);
 
             return true;
         } catch (Exception $exception) {
@@ -279,7 +294,7 @@ class SmsHandler
                 throw $exception;
             }
 
-            Log::error('SMS API request exception: ' . $exception->getMessage());
+            SmsGatewayLog::error('SMS API request exception.', ['type' => get_class($exception)]);
 
             return false;
         }
@@ -476,29 +491,35 @@ class SmsHandler
                     ->get($url);
 
                 $body = $response->json();
-                setting()->set('sms_last_delivery_report', json_encode($body ?: $response->body()));
-                setting()->save();
-
                 if (is_array($body)) {
                     $this->syncDeliveryReport($jobId, $body);
                 }
 
                 if ($response->successful()) {
+                    SmsGatewayLog::info('SMS delivery report response.', [
+                        'http_status' => $response->status(),
+                        'report_count' => is_array($body) ? count((array) Arr::get($body, 'DeliveryReports', [])) : 0,
+                        'response' => SmsGatewayLog::responseSummary($body),
+                    ]);
                     return [
                         'success' => true,
                         'message' => 'Delivery report updated.',
                         'response' => $body ?: $response->body(),
                     ];
                 }
+                SmsGatewayLog::warning('SMS delivery report request rejected.', [
+                    'http_status' => $response->status(),
+                    'response' => SmsGatewayLog::responseSummary($body),
+                ]);
             } catch (Exception $exception) {
                 $lastException = $exception;
-                Log::warning('SMS delivery report exception: ' . $exception->getMessage());
+                SmsGatewayLog::warning('SMS delivery report request failed.', ['type' => get_class($exception)]);
             }
         }
 
         return [
             'success' => false,
-            'message' => $lastException?->getMessage() ?: 'Delivery report request failed.',
+            'message' => 'Delivery report request failed.',
             'response' => null,
         ];
     }
@@ -528,7 +549,7 @@ class SmsHandler
                 'delivery_error_code' => Arr::get($report, 'ErrorCode') ?: null,
                 'cost' => $this->firstReportValue($report, ['Cost', 'cost', 'SMSCost', 'SmsCost', 'Credit', 'Credits']) ?? $log->cost,
                 'op_cr' => $this->firstReportValue($report, ['OPCR', 'OP/CR', 'OperatorCircle', 'Operator', 'Circle', 'Network']) ?? $log->op_cr,
-                'delivery_payload' => $report,
+                'delivery_payload' => Arr::only($report, ['MessageId', 'DeliveryStatus', 'DeliveryDate', 'ErrorCode', 'Cost', 'OPCR']),
             ])->save();
         }
     }
@@ -617,11 +638,15 @@ class SmsHandler
                 $success = $response->successful() && Arr::get($body, 'ErrorCode') === '0';
 
                 if (is_array($body)) {
-                    setting()->set('sms_last_balance_response', json_encode($body));
+                    setting()->set('sms_last_balance_response', json_encode(Arr::only($body, ['Balance', 'ErrorCode'])));
                     setting()->save();
                 }
 
                 if ($success) {
+                    SmsGatewayLog::info('SMS balance response.', [
+                        'http_status' => $response->status(),
+                        'response' => SmsGatewayLog::responseSummary($body),
+                    ]);
                     return [
                         'success' => true,
                         'message' => (string) Arr::get($body, 'ErrorMessage', 'Done'),
@@ -629,9 +654,13 @@ class SmsHandler
                         'response' => $body ?: $response->body(),
                     ];
                 }
+                SmsGatewayLog::warning('SMS balance request rejected.', [
+                    'http_status' => $response->status(),
+                    'response' => SmsGatewayLog::responseSummary($body),
+                ]);
             } catch (Exception $exception) {
                 $lastException = $exception;
-                Log::warning('SMS balance request exception: ' . $exception->getMessage());
+                SmsGatewayLog::warning('SMS balance request failed.', ['type' => get_class($exception)]);
             }
         }
 
@@ -639,7 +668,7 @@ class SmsHandler
 
         return [
             'success' => false,
-            'message' => $lastException?->getMessage() ?: 'Balance request failed.',
+            'message' => 'Balance request failed.',
             'balance' => is_array($cached) ? $this->parseBalance((string) Arr::get($cached, 'Balance', '')) : [],
             'response' => $cached,
         ];
@@ -732,14 +761,14 @@ class SmsHandler
 
         $jobId = (string) Arr::get($payload, 'JobId', '');
         $messageId = (string) Arr::get($payload, 'MessageData.0.MessageId', '');
-        $status = Arr::get($payload, 'ErrorCode') === '000' ? 'Submitted' : (string) Arr::get($payload, 'ErrorMessage', 'Failed');
+        $status = in_array((string) Arr::get($payload, 'ErrorCode'), ['000', '0'], true) ? 'Submitted' : (string) Arr::get($payload, 'ErrorMessage', 'Failed');
 
         if ($jobId === '') {
             return;
         }
 
         setting()->set('sms_last_job_id', $jobId);
-        setting()->set('sms_last_response', json_encode($payload));
+        setting()->set('sms_last_response', json_encode(['JobId' => $jobId, 'status' => $status]));
         setting()->save();
 
         if (! Schema::hasTable('sms_logs')) {
@@ -752,10 +781,16 @@ class SmsHandler
             'template' => $this->template,
             'template_id' => (string) $this->templateId,
             'recipient' => preg_replace('/\D+/', '', $to) ?: $to,
-            'message' => $content,
+            'message' => in_array($this->template, [
+                \Botble\Sms\Enums\SmsEnum::OTP,
+                \Botble\Sms\Enums\SmsEnum::REGISTRATION_OTP,
+                \Botble\Sms\Enums\SmsEnum::LOGIN_OTP,
+                \Botble\Sms\Enums\SmsEnum::PASSWORD_RESET_OTP,
+                \Botble\Sms\Enums\SmsEnum::CHECKOUT_OTP,
+            ], true) ? '[redacted]' : $content,
             'status' => $status,
             'sent_at' => now(),
-            'response_payload' => $payload,
+            'response_payload' => ['JobId' => $jobId, 'MessageId' => $messageId, 'status' => $status],
         ]);
     }
 
@@ -779,8 +814,9 @@ class SmsHandler
     {
         $mobile = preg_replace('/\D+/', '', $mobile) ?: '';
 
-        if (preg_match('/91\s*\{\{\s*mobile\s*\}\}/', $url) && strlen($mobile) === 12 && str_starts_with($mobile, '91')) {
-            return substr($mobile, 2);
+        if (preg_match('/=([0-9]{1,4})\s*\{\{\s*mobile\s*\}\}/', $url, $matches)
+            && str_starts_with($mobile, $matches[1]) && strlen($mobile) > strlen($matches[1])) {
+            return substr($mobile, strlen($matches[1]));
         }
 
         return $mobile;

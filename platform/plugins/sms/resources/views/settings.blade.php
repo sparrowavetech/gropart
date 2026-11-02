@@ -48,6 +48,11 @@
                     </div>
                 </div>
 
+                <div class="mb-3">
+                    <label class="text-title-field" for="sms_default_country_code">{{ trans('plugins/sms::sms.settings.default_country_code') }}</label>
+                    <input type="text" class="{{ $fieldClass }}" name="sms_default_country_code" id="sms_default_country_code" value="{{ $smsConfig['sms_default_country_code'] }}" inputmode="numeric" maxlength="4">
+                </div>
+
                 <div class="row g-3 mb-3">
                     <div class="col-md-3">
                         <label class="text-title-field" for="sms_flashsms">{{ trans('plugins/sms::sms.settings.flashsms') }}</label>
@@ -75,9 +80,9 @@
                 <div class="text-muted">
                     <strong>{{ trans('plugins/sms::sms.settings.supported_placeholders') }}</strong>
                     <ul class="ps-3 mb-0">
-                        <li><code>@{{mobile}}</code> - {{ __('Recipient mobile number') }}</li>
-                        <li><code>@{{message}}</code> - {{ __('SMS content message text') }}</li>
-                        <li><code>@{{template_id}}</code> - {{ __('DLT Template ID') }}</li>
+                        <li><code>@{{mobile}}</code> - {{ trans('plugins/sms::sms.recipient_mobile') }}</li>
+                        <li><code>@{{message}}</code> - {{ trans('plugins/sms::sms.message_text') }}</li>
+                        <li><code>@{{template_id}}</code> - {{ trans('plugins/sms::sms.settings.dlt_template_id') }}</li>
                     </ul>
                 </div>
             </div>
@@ -100,9 +105,9 @@
                 <div class="text-muted">
                     <strong>{{ trans('plugins/sms::sms.settings.supported_placeholders') }}</strong>
                     <ul class="ps-3 mb-0">
-                        <li><code>Jobid=@{{job_id}}</code> - {{ __('Last sent SMS Job ID') }}</li>
-                        <li><code>User=@{{user}}</code> - {{ __('From base configuration') }}</li>
-                        <li><code>Password=@{{password}}</code> - {{ __('From base configuration') }}</li>
+                        <li><code>Jobid=@{{job_id}}</code> - {{ trans('plugins/sms::sms.last_job_id') }}</li>
+                        <li><code>User=@{{user}}</code> - {{ trans('plugins/sms::sms.from_base_configuration') }}</li>
+                        <li><code>Password=@{{password}}</code> - {{ trans('plugins/sms::sms.from_base_configuration') }}</li>
                     </ul>
                 </div>
             </div>
@@ -125,8 +130,8 @@
                 <div class="text-muted">
                     <strong>{{ trans('plugins/sms::sms.settings.supported_placeholders') }}</strong>
                     <ul class="ps-3 mb-0">
-                        <li><code>User=@{{user}}</code> - {{ __('From base configuration') }}</li>
-                        <li><code>Password=@{{password}}</code> - {{ __('From base configuration') }}</li>
+                        <li><code>User=@{{user}}</code> - {{ trans('plugins/sms::sms.from_base_configuration') }}</li>
+                        <li><code>Password=@{{password}}</code> - {{ trans('plugins/sms::sms.from_base_configuration') }}</li>
                     </ul>
                 </div>
             </div>

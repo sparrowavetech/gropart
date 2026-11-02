@@ -5,10 +5,15 @@ namespace Botble\Sms\Http\Controllers\Fronts;
 use Botble\Ecommerce\Http\Controllers\Customers\RegisterController as BaseRegisterController;
 use Botble\Ecommerce\Http\Requests\RegisterRequest;
 use Botble\Ecommerce\Facades\EcommerceHelper;
-use Botble\Sms\Supports\SmsHandler;
-use Botble\Sms\Enums\SmsEnum;
+use Botble\Ecommerce\Events\CustomerEmailVerified;
+use Botble\Ecommerce\Models\Customer;
+use Botble\Sms\Supports\RegistrationOtpSender;
+use Botble\SeoHelper\Facades\SeoHelper;
+use Botble\Theme\Facades\Theme;
 use Carbon\Carbon;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 
 class SmsOtpRegisterController extends BaseRegisterController
 {
@@ -23,37 +28,24 @@ class SmsOtpRegisterController extends BaseRegisterController
 
         $customer = $this->create($request->input());
 
+        $otpRequired = is_plugin_active('sms') && setting('sms_registration_otp_enabled', setting('sms_otp_enabled'));
+        if ($otpRequired) {
+            $customer->sms_otp_required_at = Carbon::now();
+            $customer->save();
+        }
+
         event(new Registered($customer));
 
-        if (is_plugin_active('sms') && setting('sms_registration_otp_enabled', setting('sms_otp_enabled'))) {
-            $otp = mt_rand(100000, 999999);
-            $customer->otp = $otp;
-            $customer->save();
-            
-            try {
-                $sms = new SmsHandler();
-                $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
-                if ($sms->templateEnabled(SmsEnum::OTP())) {
-                    $sms->setVariableValues([
-                        'customer_name' => $customer->name,
-                        'customer_phone' => $customer->phone,
-                        'otp'           => $otp,
-                    ]);
-                    $sms->sendUsingTemplate(
-                        SmsEnum::OTP(),
-                        $customer->phone
-                    );
-                }
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('Failed to send registration OTP: ' . $e->getMessage());
-            }
+        if ($otpRequired) {
+            $sent = app(RegistrationOtpSender::class)->send($customer);
 
             $this->registered($request, $customer);
 
             return $this
                 ->httpResponse()
-                ->setNextUrl(route('customer.otp', $customer->id))
-                ->setMessage(__('We have sent you an OTP to verify your mobile. Please check and confirm your mobile No!'));
+                ->setNextUrl(route('customer.otp'))
+                ->setError(! $sent)
+                ->setMessage($sent ? trans('plugins/sms::sms.registration_otp_sent') : trans('plugins/sms::sms.otp_send_failed'));
         }
 
         if (
@@ -64,7 +56,7 @@ class SmsOtpRegisterController extends BaseRegisterController
 
             session()->flash('ecommerce_customer_registered', true);
 
-            $message = __('We have sent you an email to verify your email. Please check and confirm your email address!');
+            $message = trans('plugins/sms::sms.verify_email_sent');
 
             return $this
                 ->httpResponse()
@@ -83,6 +75,48 @@ class SmsOtpRegisterController extends BaseRegisterController
         return $this
             ->httpResponse()
             ->setNextUrl($this->redirectPath())
-            ->setMessage(__('Registered successfully!'));
+            ->setMessage(trans('plugins/sms::sms.registered_successfully'));
+    }
+
+    public function confirm(int|string $id, Request $request)
+    {
+        if (! URL::hasValidSignature($request)) {
+            return parent::confirm($id, $request);
+        }
+
+        $customer = Customer::query()->findOrFail($id);
+
+        if ($customer->sms_otp_required_at && ! $customer->sms_otp_verified_at) {
+            if (! $customer->confirmed_at) {
+                $customer->confirmed_at = Carbon::now();
+                $customer->save();
+                CustomerEmailVerified::dispatch($customer);
+            }
+
+            $sent = app(RegistrationOtpSender::class)->send($customer);
+
+            return redirect()->route('customer.otp')->with(
+                $sent ? 'success_msg' : 'error_msg',
+                trans($sent ? 'plugins/sms::sms.registration_otp_sent' : 'plugins/sms::sms.otp_send_failed')
+            );
+        }
+
+        session()->forget('sms.registration.email_pending_customer_id');
+
+        return parent::confirm($id, $request);
+    }
+
+    public function showEmailPending()
+    {
+        $customerId = session('sms.registration.email_pending_customer_id');
+        abort_unless($customerId && Customer::query()
+            ->whereKey($customerId)
+            ->whereNotNull('sms_otp_verified_at')
+            ->whereNull('confirmed_at')
+            ->exists(), 404);
+
+        SeoHelper::setTitle(trans('plugins/sms::sms.email_pending_title'));
+
+        return Theme::of('plugins/sms::themes.customers.email-verification-pending')->render();
     }
 }

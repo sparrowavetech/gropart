@@ -4,7 +4,7 @@ namespace Botble\Sms\Listeners;
 
 use Botble\Sms\Events\SendSmsEvent;
 use Exception;
-use Log;
+use Botble\Sms\Supports\SmsGatewayLog;
 
 class SendSmsListener
 {
@@ -31,7 +31,7 @@ class SendSmsListener
             if ($event->debug) {
                 throw $exception;
             }
-            Log::error($exception->getMessage());
+            SmsGatewayLog::error('SMS event listener failed.', ['type' => get_class($exception)]);
         }
     }
 }

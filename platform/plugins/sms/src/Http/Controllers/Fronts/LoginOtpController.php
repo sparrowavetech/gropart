@@ -8,10 +8,11 @@ use Botble\Ecommerce\Models\Customer;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Sms\Enums\SmsEnum;
 use Botble\Sms\Supports\SmsHandler;
+use Botble\Sms\Supports\OtpChallenge;
 use Botble\Theme\Facades\Theme;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use Botble\Sms\Supports\SmsGatewayLog;
 use Illuminate\Validation\ValidationException;
 
 class LoginOtpController extends BaseController
@@ -20,10 +21,10 @@ class LoginOtpController extends BaseController
     {
         abort_unless(setting('sms_login_otp_enabled'), 404);
 
-        SeoHelper::setTitle(__('Login with OTP'));
-        Theme::breadcrumb()->add(__('Home'), route('public.index'))->add(__('Login with OTP'), route('customer.login.otp'));
+        SeoHelper::setTitle(trans('plugins/sms::sms.login_otp_title'));
+        Theme::breadcrumb()->add(trans('plugins/sms::sms.home'), route('public.index'))->add(trans('plugins/sms::sms.login_otp_title'), route('customer.login.otp'));
 
-        return Theme::scope('ecommerce.customers.login-otp', [], 'plugins/sms::themes.customers.login-otp')->render();
+        return Theme::of('plugins/sms::themes.customers.login-otp')->render();
     }
 
     public function sendOtp(Request $request)
@@ -40,23 +41,24 @@ class LoginOtpController extends BaseController
 
         if ($phoneInput === '') {
             throw ValidationException::withMessages([
-                'phone' => __('Please enter your mobile number.'),
+                'phone' => trans('plugins/sms::sms.mobile_required'),
             ]);
         }
 
-        $phone = $this->normalizePhone($phoneInput, (string) $request->input('country_code', '91'));
-        $customer = $this->findCustomerByPhone($phone);
+        $countryCode = (string) $request->input('country_code', setting('sms_default_country_code', ''));
+        $phone = $this->normalizePhone($phoneInput, $countryCode);
+        $customer = $this->findCustomerByPhone($phone, $countryCode);
 
         if (! $customer || $customer->status->getValue() !== CustomerStatusEnum::ACTIVATED) {
             throw ValidationException::withMessages([
-                'phone' => __('No active customer account was found for this phone number.'),
+                'phone' => trans('plugins/sms::sms.account_not_found'),
             ]);
         }
 
         $otp = (string) random_int(100000, 999999);
-        $customer->otp = $otp;
-        $customer->save();
-
+        $challenge = app(OtpChallenge::class);
+        $previous = session('sms.otp.login');
+        $challenge->begin('login', $customer, $otp);
         try {
             $sms = new SmsHandler();
             $sms->setModule(ECOMMERCE_MODULE_SCREEN_NAME);
@@ -66,26 +68,34 @@ class LoginOtpController extends BaseController
                 'otp' => $otp,
             ]);
 
-            $sms->sendUsingTemplate(SmsEnum::OTP(), $phone);
+            if (! $sms->templateEnabled(SmsEnum::OTP()) || ! $sms->sendUsingTemplate(SmsEnum::OTP(), $phone)) {
+                $challenge->restore('login', $previous);
+                throw ValidationException::withMessages(['phone' => trans('plugins/sms::sms.otp_send_failed')]);
+            }
+        } catch (ValidationException $exception) {
+            throw $exception;
         } catch (\Throwable $exception) {
-            Log::error('Failed to send login OTP: ' . $exception->getMessage());
+            $challenge->restore('login', $previous);
+            SmsGatewayLog::error('Failed to send login OTP.');
+            throw ValidationException::withMessages(['phone' => trans('plugins/sms::sms.otp_send_failed')]);
         }
 
         return redirect()
-            ->route('customer.login.otp.verify', $customer->getKey())
-            ->with('success_msg', __('We have sent you an OTP to login.'));
+            ->route('customer.login.otp.verify')
+            ->with('success_msg', trans('plugins/sms::sms.login_otp_sent'));
     }
 
-    public function showVerifyForm(int|string $id)
+    public function showVerifyForm()
     {
         abort_unless(setting('sms_login_otp_enabled'), 404);
 
-        $customer = Customer::query()->findOrFail($id);
+        $customer = Customer::query()->find(app(OtpChallenge::class)->customerId('login'));
+        abort_unless($customer && app(OtpChallenge::class)->belongs('login', $customer), 404);
 
-        SeoHelper::setTitle(__('Verify Login OTP'));
-        Theme::breadcrumb()->add(__('Home'), route('public.index'))->add(__('Verify Login OTP'), route('customer.login.otp.verify', $customer->getKey()));
+        SeoHelper::setTitle(trans('plugins/sms::sms.verify_login_otp'));
+        Theme::breadcrumb()->add(trans('plugins/sms::sms.home'), route('public.index'))->add(trans('plugins/sms::sms.verify_login_otp'), route('customer.login.otp.verify'));
 
-        return Theme::scope('ecommerce.customers.login-otp-verify', compact('customer'), 'plugins/sms::themes.customers.login-otp-verify')->render();
+        return Theme::of('plugins/sms::themes.customers.login-otp-verify', compact('customer'))->render();
     }
 
     public function verify(Request $request)
@@ -93,21 +103,35 @@ class LoginOtpController extends BaseController
         abort_unless(setting('sms_login_otp_enabled'), 404);
 
         $request->validate([
-            'customer_id' => ['required', 'numeric'],
-            'otp' => ['required', 'numeric', 'digits:6'],
+            'otp' => ['required', 'string', 'regex:/^[0-9]{6}$/'],
+        ], [
+            'otp.required' => trans('plugins/sms::sms.otp_six_digits_required'),
+            'otp.string' => trans('plugins/sms::sms.otp_six_digits_required'),
+            'otp.regex' => trans('plugins/sms::sms.otp_six_digits_required'),
         ]);
 
-        $customer = Customer::query()->find($request->input('customer_id'));
+        $customer = Customer::query()->find(app(OtpChallenge::class)->customerId('login'));
 
-        if (! $customer || $customer->otp !== $request->input('otp')) {
+        if (! $customer || $customer->status->getValue() !== CustomerStatusEnum::ACTIVATED
+            || ! app(OtpChallenge::class)->verify('login', $customer, (string) $request->input('otp'))) {
             throw ValidationException::withMessages([
-                'confirmation' => __('Invalid OTP. Please try again.'),
+                'confirmation' => trans('plugins/sms::sms.otp_verify_error'),
             ]);
         }
 
         $customer->otp = null;
-        $customer->confirmed_at = $customer->confirmed_at ?: Carbon::now();
+        if (! \Botble\Ecommerce\Facades\EcommerceHelper::isEnableEmailVerification()) {
+            $customer->confirmed_at = $customer->confirmed_at ?: Carbon::now();
+        }
+        $customer->sms_otp_verified_at = Carbon::now();
         $customer->save();
+
+        if (\Botble\Ecommerce\Facades\EcommerceHelper::isEnableEmailVerification() && ! $customer->confirmed_at) {
+            return redirect()->route('customer.login')->with(
+                'auth_warning_message',
+                trans('plugins/sms::sms.otp_verified_check_email')
+            );
+        }
 
         auth('customer')->login($customer);
 
@@ -117,7 +141,11 @@ class LoginOtpController extends BaseController
     private function normalizePhone(string $phone, string $countryCode): string
     {
         $phone = preg_replace('/\D+/', '', $phone) ?: $phone;
-        $countryCode = preg_replace('/\D+/', '', $countryCode) ?: '91';
+        $countryCode = preg_replace('/\D+/', '', $countryCode) ?: '';
+
+        if ($countryCode === '') {
+            return $phone;
+        }
 
         if (str_starts_with($phone, $countryCode)) {
             return $phone;
@@ -126,15 +154,18 @@ class LoginOtpController extends BaseController
         return $countryCode . ltrim($phone, '0');
     }
 
-    private function findCustomerByPhone(string $phone): ?Customer
+    private function findCustomerByPhone(string $phone, string $countryCode): ?Customer
     {
         $phone = preg_replace('/\D+/', '', $phone) ?: $phone;
-        $candidates = array_filter(array_unique([
-            $phone,
-            strlen($phone) === 12 && str_starts_with($phone, '91') ? substr($phone, 2) : null,
-            strlen($phone) === 10 ? '91' . $phone : null,
-        ]));
+        $countryCode = preg_replace('/\D+/', '', $countryCode) ?: '';
+        $fullPhone = $countryCode !== '' && ! str_starts_with($phone, $countryCode)
+            ? $countryCode . ltrim($phone, '0')
+            : $phone;
 
-        return Customer::query()->whereIn('phone', $candidates)->first();
+        // Registration stores international values such as +91..., while form input may omit +.
+        // Use Ecommerce's phone matching rule and reject ambiguous suffix matches.
+        $matches = Customer::query()->wherePhone($fullPhone)->limit(2)->get();
+
+        return $matches->count() === 1 ? $matches->first() : null;
     }
 }
