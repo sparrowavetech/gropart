@@ -52,18 +52,18 @@ class TaxSlabProductsTable extends TableAbstract
                     ->title(trans('plugins/ecommerce::products.sku'))
                     ->alignStart(),
                 Column::make('hsn_code')
-                    ->title(__('HSN / SAC'))
+                    ->title(trans('plugins/indian-gst::indian-gst.product.hsn_label'))
                     ->alignCenter(),
                 Column::make('price')
-                    ->title(__('MRP (Incl. Tax)'))
+                    ->title(trans('plugins/indian-gst::indian-gst.slabs.product_price'))
                     ->alignEnd(),
                 Column::make('base_price')
-                    ->title(__('Base Price'))
+                    ->title(trans('plugins/indian-gst::indian-gst.slabs.base_price'))
                     ->orderable(false)
                     ->searchable(false)
                     ->alignEnd(),
                 Column::make('tax_amount')
-                    ->title(__('GST Amount'))
+                    ->title(trans('plugins/indian-gst::indian-gst.slabs.gst_amount'))
                     ->orderable(false)
                     ->searchable(false)
                     ->alignEnd(),
@@ -86,6 +86,7 @@ class TaxSlabProductsTable extends TableAbstract
                 'ec_products.sku',
                 'ec_products.hsn_code',
                 'ec_products.price',
+                'ec_products.price_includes_tax',
                 'ec_products.status',
                 'ec_products.created_at',
             ])
@@ -104,7 +105,7 @@ class TaxSlabProductsTable extends TableAbstract
     {
         $taxId = (int) ($this->taxId ?: request()->route('id'));
         $tax = $this->taxModel ?: Tax::query()->find($taxId);
-        $taxPct = (float) ($tax?->percentage ?? 18);
+        $taxPct = (float) ($tax?->percentage ?? 0);
 
         $data = $this->table
             ->eloquent($this->query())
@@ -124,12 +125,12 @@ class TaxSlabProductsTable extends TableAbstract
                 return format_price($item->price);
             })
             ->addColumn('base_price', function (Product $item) use ($taxPct) {
-                $calc = IndianGstHelper::calculateReverseTax((float) $item->price, $taxPct);
+                $calc = $this->calculateProductTax($item, $taxPct);
 
                 return format_price($calc['base_price']);
             })
             ->addColumn('tax_amount', function (Product $item) use ($taxPct) {
-                $calc = IndianGstHelper::calculateReverseTax((float) $item->price, $taxPct);
+                $calc = $this->calculateProductTax($item, $taxPct);
 
                 return '<span class="text-success fw-bold">' . format_price($calc['tax_amount']) . ' (' . $taxPct . '%)</span>';
             })
@@ -138,5 +139,19 @@ class TaxSlabProductsTable extends TableAbstract
             });
 
         return $this->toJson($data);
+    }
+
+    private function calculateProductTax(Product $item, float $taxPct): array
+    {
+        $price = (float) $item->price;
+        if (! IndianGstHelper::isEnabled() || ! \Botble\Ecommerce\Facades\EcommerceHelper::isTaxEnabled() || $taxPct <= 0) {
+            return ['base_price' => $price, 'tax_amount' => 0.0];
+        }
+
+        if ($item->price_includes_tax) {
+            return IndianGstHelper::calculateReverseTax($price, $taxPct);
+        }
+
+        return ['base_price' => $price, 'tax_amount' => round($price * $taxPct / 100, 2)];
     }
 }

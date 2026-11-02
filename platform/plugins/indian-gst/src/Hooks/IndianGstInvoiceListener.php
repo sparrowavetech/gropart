@@ -22,16 +22,26 @@ class IndianGstInvoiceListener
         $store = ($order instanceof Order && is_plugin_active('marketplace')) ? $order->store : null;
 
         // Determine Seller State and Customer State
-        $sellerState = $store?->state ?: IndianGstHelper::getCompanyState();
-        $customerState = $order?->address?->state_name ?: ($order?->address?->state ?: ($invoice->customer_state ?? ''));
+        // Ecommerce's LocationTrait resolves stored Location IDs to names when that
+        // integration is enabled. Never compare a raw Location ID with a GST code.
+        $storeTaxId = (string) ($store?->gstin ?: $store?->tax_id ?: '');
+        $sellerGstin = $store ? (preg_match('/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][0-9A-Z]Z[0-9A-Z]$/i', $storeTaxId) ? $storeTaxId : '') : IndianGstHelper::getCompanyGstin();
+        $sellerState = IndianGstHelper::getStateNameFromGstin($sellerGstin)
+            ?: ($store ? ($store->state_name ?: '') : IndianGstHelper::getCompanyState());
+        $address = $order?->address;
+        if ($order && \Botble\Ecommerce\Facades\EcommerceHelper::isBillingAddressEnabled() && $order->billingAddress?->id) {
+            $address = $order->billingAddress;
+        }
+        $customerState = $address?->state_name ?: ($invoice->customer_state ?? '');
 
-        $isIgst = IndianGstHelper::isInterState($sellerState, $customerState);
+        $jurisdictionKnown = IndianGstHelper::normalizeState($sellerState) !== ''
+            && IndianGstHelper::normalizeState($customerState) !== '';
+        $isIgst = $jurisdictionKnown && IndianGstHelper::isInterState($sellerState, $customerState);
 
-        $sellerGstin = $store?->gstin ?: IndianGstHelper::getCompanyGstin();
-        $sellerName = $store?->name ?: setting('ecommerce_store_name', 'Gropart Bharat');
-        $sellerAddress = $store?->full_address ?: setting('ecommerce_store_address', 'Gol Chauraha, Jhala Manna Circle, Bus Stand, Badi Sadri, Rajasthan, Chittorgarh, 312403');
-        $sellerPhone = $store?->phone ?: setting('ecommerce_store_phone', '9887972821');
-        $sellerEmail = $store?->email ?: setting('ecommerce_store_email', 'contact@gropart.com');
+        $sellerName = $store ? $store->name : get_ecommerce_setting('company_name_for_invoicing', get_ecommerce_setting('store_name', ''));
+        $sellerAddress = $store ? $store->full_address : get_ecommerce_setting('company_address_for_invoicing', get_ecommerce_setting('store_address', ''));
+        $sellerPhone = $store ? $store->phone : get_ecommerce_setting('company_phone_for_invoicing', get_ecommerce_setting('store_phone', ''));
+        $sellerEmail = $store ? $store->email : get_ecommerce_setting('company_email_for_invoicing', get_ecommerce_setting('store_email', ''));
 
         $sellerLogo = null;
         if ($store && $store->logo) {
@@ -46,8 +56,7 @@ class IndianGstInvoiceListener
             if ($isIgst) {
                 $totalIgst = (float) $invoice->tax_amount;
             } else {
-                $totalCgst = round((float) $invoice->tax_amount / 2, 2);
-                $totalSgst = round((float) $invoice->tax_amount / 2, 2);
+                [$totalCgst, $totalSgst] = IndianGstHelper::splitTax((float) $invoice->tax_amount);
             }
         }
 
@@ -74,17 +83,18 @@ class IndianGstInvoiceListener
             }
 
             $itemArr['options'] = $options;
+            [$itemArr['cgst_amount'], $itemArr['sgst_amount']] = IndianGstHelper::splitTax((float) ($itemArr['tax_amount'] ?? 0));
             $itemsArray[] = $itemArr;
 
             $totalQuantity += (int) ($itemArr['qty'] ?? 1);
             $totalPrice += (float) ($itemArr['price'] ?? 0);
         }
 
-        // Base Gropart Logo
-        $mainLogo = theme_option('logo_in_invoices') ?: (theme_option('logo') ?: Theme::getLogo());
+        $mainLogo = get_ecommerce_setting('company_logo_for_invoicing')
+            ?: (theme_option('logo_in_invoices') ?: (theme_option('logo') ?: Theme::getLogo()));
         $mainLogoPath = ($mainLogo && file_exists(RvMedia::getRealPath($mainLogo))) 
             ? RvMedia::getRealPath($mainLogo) 
-            : RvMedia::getRealPath('logo-and-icons/admin-logo-1.png');
+            : null;
 
         // Vendor/Company Logo
         $companyLogoPath = ($sellerLogo && file_exists(RvMedia::getRealPath($sellerLogo)))
@@ -96,6 +106,7 @@ class IndianGstInvoiceListener
 
         $variables['invoice'] = $invoiceData;
         $variables['isIgst'] = $isIgst;
+        $variables['gst_jurisdiction_known'] = $jurisdictionKnown;
         $variables['company_name'] = $sellerName;
         $variables['company_address'] = $sellerAddress;
         $variables['company_tax_id'] = $sellerGstin;

@@ -78,10 +78,10 @@
         {{ invoice_body_filter | raw }}
         <div class="invoice-header">
             <div class="text-left">
-                <h3 class="mb-20 mt-20">Tax Invoice</h3>
+                <h3 class="mb-20 mt-20">{{ 'plugins/indian-gst::indian-gst.invoice.title'|trans }}</h3>
             </div>
             <div class="text-right">
-                <img src="{{ logo_full_path }}" style="max-height:60px;" class="mt-10" alt="{{ site_title }}">
+                {% if logo_full_path %}<img src="{{ logo_full_path }}" style="max-height:60px;" class="mt-10" alt="{{ site_title }}">{% endif %}
             </div>
         </div>
         <hr />
@@ -94,10 +94,10 @@
             </div>
             <div>
                 {% if company_name %}
-                <p><strong>Sold By: </strong>{{ company_name }}</p>
+                <p><strong>{{ 'plugins/indian-gst::indian-gst.invoice.sold_by'|trans }}</strong>: {{ company_name }}</p>
                 {% endif %}
                 {% if company_address %}
-                    <p><strong>Address: </strong>{{ company_address }}
+                    <p><strong>{{ 'plugins/indian-gst::indian-gst.invoice.address'|trans }}</strong>: {{ company_address }}
                     {% if company_state %}
                     , {{ company_state }},
                     {% endif %}
@@ -109,66 +109,68 @@
                     {% endif %}
                 {% endif %}
                 {% if company_tax_id %}
-                <p><strong>Seller GSTIN: </strong>{{ company_tax_id }}</p>
+                <p><strong>{{ 'plugins/indian-gst::indian-gst.invoice.seller_gstin'|trans }}</strong>: {{ company_tax_id }}</p>
                 {% endif %}
             </div>
         </div>
         <hr/>
         <!-- Customer Details -->
-        <h4 class="mb-10 setionheading">Customer Billing Address:</h4>
+        <h4 class="mb-10 setionheading">{{ 'plugins/indian-gst::indian-gst.invoice.billing_address'|trans }}</h4>
         <div class="invoice-details">
             <div>
                 {% if invoice.customer_name %}
-                <p><strong>Customer Name:</strong> {{ invoice.customer_name }}</p>
+                <p><strong>{{ 'plugins/indian-gst::indian-gst.invoice.customer_name'|trans }}</strong>: {{ invoice.customer_name }}</p>
                 {% endif %}
                 {% if invoice.customer_address %}
-                <p><strong>Customer Address:</strong> {{ invoice.customer_address }}</p>
+                <p><strong>{{ 'plugins/indian-gst::indian-gst.invoice.customer_address'|trans }}</strong>: {{ invoice.customer_address }}</p>
                 {% endif %}
             </div>
             <div>
                 {% if invoice.customer_phone %}
-                <p><strong>Phone:</strong> {{ invoice.customer_phone }}</p>
+                <p><strong>{{ 'plugins/indian-gst::indian-gst.invoice.phone'|trans }}</strong>: {{ invoice.customer_phone }}</p>
                 {% endif %}
                 {% if invoice.customer_email %}
-                <p><strong>Email:</strong> {{ invoice.customer_email }}</p>
+                <p><strong>{{ 'plugins/indian-gst::indian-gst.invoice.email'|trans }}</strong>: {{ invoice.customer_email }}</p>
                 {% endif %}
             </div>
         </div>
         <hr/>
         <!-- Invoice Details -->
-        <h4 class="mb-10 setionheading">Order Information:</h4>
+        <h4 class="mb-10 setionheading">{{ 'plugins/indian-gst::indian-gst.invoice.order_information'|trans }}</h4>
         <div class="invoice-details">
             <div>
-                <p class="orderId"><strong>Order ID: </strong> {{ invoice.reference.code }}</p>
+                <p class="orderId"><strong>{{ 'plugins/indian-gst::indian-gst.invoice.order_id'|trans }}</strong>: {{ invoice.reference.code }}</p>
                 {% if invoice.created_at %}
-                <p><strong>Invoice Date:</strong> {{ invoice.created_at|date('F d, Y') }}</p>
+                <p><strong>{{ 'plugins/indian-gst::indian-gst.invoice.invoice_date'|trans }}</strong>: {{ invoice.created_at|date('F d, Y') }}</p>
                 {% endif %}
             </div>
             <div>
                 {% if customer_tax_id %}
-                <p><strong>Customer GSTIN:</strong> {{ customer_tax_id }}</p>
+                <p><strong>{{ 'plugins/indian-gst::indian-gst.invoice.customer_gstin'|trans }}</strong>: {{ customer_tax_id }}</p>
                 {% endif %}
-                <p><strong>Invoice Code: </strong> {{ invoice.code }}</p>
+                <p><strong>{{ 'plugins/indian-gst::indian-gst.invoice.invoice_code'|trans }}</strong>: {{ invoice.code }}</p>
             </div>
         </div>
 
         <table class="item-table">
             <thead>
                 <tr>
-                    <th class="product-name">Product</th>
+                    <th class="product-name">{{ 'plugins/indian-gst::indian-gst.invoice.product'|trans }}</th>
 
-                    <th>Quantity</th>
+                    <th>{{ 'plugins/indian-gst::indian-gst.invoice.quantity'|trans }}</th>
 
-                    <th>Price</th>
+                    <th>{{ 'plugins/indian-gst::indian-gst.invoice.price'|trans }}</th>
 
-                    {% if isIgst %}
+                    {% if not gst_jurisdiction_known %}
+                        <th>{{ 'plugins/indian-gst::indian-gst.invoice.tax'|trans }}</th>
+                    {% elseif isIgst %}
                         <th>IGST</th>
                     {% else %}
                         <th>CGST</th>
                         <th>SGST</th>
                     {% endif %}
 
-                    <th>Total</th>
+                    <th>{{ 'plugins/indian-gst::indian-gst.invoice.total'|trans }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -177,10 +179,10 @@
                         <td>{{ item.name }}<br>
                             {% if item.options %}
                                 {% if item.options.sku %}
-                                    <div><small><strong>SKU:</strong> {{ item.options.sku }}</small></div>
+                                    <div><small><strong>{{ 'plugins/indian-gst::indian-gst.invoice.sku'|trans }}</strong> {{ item.options.sku }}</small></div>
                                 {% endif %}
                                 {% if item.options.barcode %}
-                                    <div><small><strong>Product HSN Code/Barcode:</strong> {{ item.options.barcode }}</small></div>
+                                    <div><small><strong>{{ 'plugins/indian-gst::indian-gst.invoice.hsn'|trans }}</strong> {{ item.options.barcode }}</small></div>
                                 {% endif %}
                                 {% if item.options.attributes %}
                                     <div><small>Attributes: {{ item.options.attributes }}</small></div>
@@ -198,11 +200,13 @@
 
                         <td>{{ item.price|price_format }}</td>
 
-                        {% if isIgst %}
+                        {% if not gst_jurisdiction_known %}
+                            <td class="right">{{ item.tax_amount|price_format }}</td>
+                        {% elseif isIgst %}
                             <td class="right">{{ item.tax_amount|price_format }}</td>
                         {% else %}
-                            <td class="right">{{ (item.tax_amount/2)|price_format }}</td>
-                            <td class="right">{{ (item.tax_amount/2)|price_format }}</td>
+                            <td class="right">{{ item.cgst_amount|price_format }}</td>
+                            <td class="right">{{ item.sgst_amount|price_format }}</td>
                         {% endif %}
 
                         <td>{{ item.amount|price_format }}</td>
@@ -211,17 +215,19 @@
             </tbody>
             <tfoot>
                  <tr>
-                    <th class="text-right">Totals</th>
+                    <th class="text-right">{{ 'plugins/indian-gst::indian-gst.invoice.totals'|trans }}</th>
 
                     <th>{{ total_quantity|number_format }}</th>
 
                     <th>{{ total_price|price_format }}</th>
 
-                    {% if isIgst %}
+                    {% if not gst_jurisdiction_known %}
+                        <th>{{ total_tax|price_format }}</th>
+                    {% elseif isIgst %}
                         <th>{{ total_tax|price_format }}</th>
                     {% else %}
-                        <th>{{ (total_tax/2)|price_format }}</th>
-                        <th>{{ (total_tax/2)|price_format }}</th>
+                        <th>{{ total_cgst|price_format }}</th>
+                        <th>{{ total_sgst|price_format }}</th>
                     {% endif %}
 
                     <th>{{ (invoice.sub_total + invoice.tax_amount)|price_format }}</th>
@@ -233,36 +239,36 @@
             <div>
                 {% if payment_method %}
                 <p>
-                    Payment method: <strong>{{ payment_method }}</strong>
+                    {{ 'plugins/indian-gst::indian-gst.invoice.payment_method'|trans }}: <strong>{{ payment_method }}</strong>
                 </p>
                 {% endif %}
 
                 {% if payment_status %}
                     <p>
-                        Payment status: <strong>{{ payment_status_label }}</strong>
+                        {{ 'plugins/indian-gst::indian-gst.invoice.payment_status'|trans }}: <strong>{{ payment_status_label }}</strong>
                     </p>
                 {% endif %}
 
                 {% if invoice.paid_at %}
                     <p>
-                        Paid Time: <strong>{{ invoice.paid_at|date('Y-m-d h:i:s A') }}</strong>
+                        {{ 'plugins/indian-gst::indian-gst.invoice.paid_time'|trans }}: <strong>{{ invoice.paid_at|date('Y-m-d h:i:s A') }}</strong>
                     </p>
                 {% endif %}
 
                 {% if payment_description %}
                     <p>
-                        Payment info: <strong>{{ payment_description | raw }}</strong>
+                        {{ 'plugins/indian-gst::indian-gst.invoice.payment_info'|trans }}: <strong>{{ payment_description | raw }}</strong>
                     </p>
                 {% endif %}
                 {% if invoice.description %}
                     <hr>
-                        <p class="m-0">Note: {{ invoice.description }}</p>
+                        <p class="m-0">{{ 'plugins/indian-gst::indian-gst.invoice.note'|trans }}: {{ invoice.description }}</p>
                     <hr>
                 {% endif %}
 
                 {% if company_signature_image %}
                     <hr>
-                    <p><strong>Seller Signature</strong></p>
+                    <p><strong>{{ 'plugins/indian-gst::indian-gst.invoice.seller_signature'|trans }}</strong></p>
                     <img src="{{ company_signature_image }}" style="max-width:80px;" />
                 {% endif %}
 
@@ -287,52 +293,54 @@
                     <tbody>
                         {% if invoice.tax_amount > 0 %}
                             <tr>
-                                <th class="large total">Subtotal</th>
+                                <th class="large total">{{ 'plugins/indian-gst::indian-gst.invoice.subtotal'|trans }}</th>
                                 <th class="large total">{{ invoice.sub_total|price_format }}</th>
                             </tr>
-                            {% if isIgst %}
+                            {% if not gst_jurisdiction_known %}
+                                <tr><td>{{ 'plugins/indian-gst::indian-gst.invoice.total_tax'|trans }}</td><td>{{ invoice.tax_amount|price_format }}</td></tr>
+                            {% elseif isIgst %}
                                 <tr>
-                                    <td>Total IGST</td>
+                                    <td>{{ 'plugins/indian-gst::indian-gst.invoice.total_igst'|trans }}</td>
                                     <td>{{ invoice.tax_amount|price_format }}</td>
                                 </tr>
                             {% else %}
                                 <tr>
-                                    <td>Total CGST</td>
-                                    <td>{{ (invoice.tax_amount/2)|price_format }}</td>
+                                    <td>{{ 'plugins/indian-gst::indian-gst.invoice.total_cgst'|trans }}</td>
+                                    <td>{{ total_cgst|price_format }}</td>
                                 </tr>
                                 <tr>
-                                    <td>Total SGST</td>
-                                    <td>{{ (invoice.tax_amount/2)|price_format }}</td>
+                                    <td>{{ 'plugins/indian-gst::indian-gst.invoice.total_sgst'|trans }}</td>
+                                    <td>{{ total_sgst|price_format }}</td>
                                 </tr>
                             {% endif %}
                             <tr>
-                                <th class="large total">Total</th>
+                                <th class="large total">{{ 'plugins/indian-gst::indian-gst.invoice.total'|trans }}</th>
                                 <th class="large total">{{ (invoice.sub_total + invoice.tax_amount)|price_format }}</th>
                             </tr>
                         {% endif %}
                         {% if invoice.coupon_code %}
                         <tr>
-                            <td>Coupon Code</td>
-                            <td>{{ invoice.coupon_code | raw }}</td>
+                            <td>{{ 'plugins/indian-gst::indian-gst.invoice.coupon_code'|trans }}</td>
+                            <td>{{ invoice.coupon_code }}</td>
                         </tr>
                         {% endif %}
 
                         {% if invoice.discount_amount > 0 %}
                         <tr>
-                            <td>Discount</td>
+                            <td>{{ 'plugins/indian-gst::indian-gst.invoice.discount'|trans }}</td>
                             <td>{{ invoice.discount_amount|price_format }}</td>
                         </tr>
                         {% endif %}
 
                         {% if invoice.shipping_amount > 0 %}
                         <tr>
-                            <td>Shipping fee</td>
+                            <td>{{ 'plugins/indian-gst::indian-gst.invoice.shipping_fee'|trans }}</td>
                             <td>{{ invoice.shipping_amount|price_format }}</td>
                         </tr>
                         {% endif %}
 
                         <tr>
-                            <th class="large total">Grand Total</th>
+                            <th class="large total">{{ 'plugins/indian-gst::indian-gst.invoice.grand_total'|trans }}</th>
                             <th class="large total">{{ invoice.amount|price_format }}</th>
                         </tr>
                     </tbody>

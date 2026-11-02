@@ -12,13 +12,13 @@
                         value="1"
                         {{ $vendorShippingValue ? 'checked' : '' }}
                     >
-                    <span class="form-check-label fw-bold text-dark fs-5">{{ __('Vendor Managed Shipping') }}</span>
+                    <span class="form-check-label fw-bold text-dark fs-5">{{ trans('plugins/indian-gst::indian-gst.store.managed_shipping') }}</span>
                 </label>
             </div>
-            <span class="badge bg-success-lt text-success px-2 py-1"><i class="ti ti-truck-delivery me-1"></i> Self Fulfillment</span>
+            <span class="badge bg-success-lt text-success px-2 py-1"><i class="ti ti-truck-delivery me-1"></i> {{ trans('plugins/indian-gst::indian-gst.store.self_fulfillment') }}</span>
         </div>
         <small class="form-hint text-muted d-block" style="font-size: 12px; font-weight: normal; line-height: 1.5;">
-            {{ __('If enabled, this vendor will manually fulfill orders using flat system shipping rates, and Gropart will settle funds after deducting marketplace commission only.') }}
+            {{ trans('plugins/indian-gst::indian-gst.store.managed_shipping_help') }}
         </small>
     </div>
 </div>

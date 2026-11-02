@@ -12,7 +12,7 @@ class IndianGstSlabController extends BaseController
 {
     public function index()
     {
-        PageTitle::setTitle(__('Indian GST Tax Slabs & Mapped Products'));
+        PageTitle::setTitle(trans('plugins/indian-gst::indian-gst.slabs.page_title'));
 
         $taxes = Tax::query()
             ->orderBy('priority')
@@ -40,7 +40,7 @@ class IndianGstSlabController extends BaseController
         $tax = Tax::query()->findOrFail($taxId);
         $count = \DB::table('ec_tax_products')->where('tax_id', $tax->id)->count();
 
-        PageTitle::setTitle(__('Products in :tax Slab (:rate%) - :count Products', [
+        PageTitle::setTitle(trans('plugins/indian-gst::indian-gst.slabs.products_title', [
             'tax' => $tax->title,
             'rate' => $tax->percentage,
             'count' => number_format($count),

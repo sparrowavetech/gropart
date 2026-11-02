@@ -28,8 +28,8 @@ class MarketplaceGstHookListener
             'gstin',
             TextField::class,
             TextFieldOption::make()
-                ->label(__('Seller GSTIN'))
-                ->placeholder(__('Enter Seller GSTIN (e.g. 08ADEPA5871A1Z0)'))
+                ->label(trans('plugins/indian-gst::indian-gst.store.gstin'))
+                ->placeholder(trans('plugins/indian-gst::indian-gst.store.gstin_placeholder'))
                 ->value($data->gstin ?: $data->tax_id)
                 ->colspan(3)
                 ->toArray()
@@ -112,7 +112,20 @@ class MarketplaceGstHookListener
         }
 
         if ($request->has('gstin')) {
-            $model->gstin = trim((string) $request->input('gstin'));
+            $gstin = strtoupper(trim((string) $request->input('gstin')));
+            if ($gstin !== '' && ! preg_match('/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][0-9A-Z]Z[0-9A-Z]$/', $gstin)) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'gstin' => trans('plugins/indian-gst::indian-gst.store.invalid_gstin'),
+                ]);
+            }
+            $gstinState = \SparroWave\IndianGst\Supports\IndianGstHelper::getStateNameFromGstin($gstin);
+            if ($gstinState && $model->state_name && \SparroWave\IndianGst\Supports\IndianGstHelper::normalizeState($gstinState)
+                !== \SparroWave\IndianGst\Supports\IndianGstHelper::normalizeState($model->state_name)) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'gstin' => trans('plugins/indian-gst::indian-gst.store.gstin_state_mismatch'),
+                ]);
+            }
+            $model->gstin = $gstin ?: null;
         }
 
         if ($request->has('vendor_managed_shipping')) {

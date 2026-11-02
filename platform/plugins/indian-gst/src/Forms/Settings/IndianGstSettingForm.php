@@ -34,21 +34,12 @@ class IndianGstSettingForm extends SettingForm
                     ->toArray()
             )
             ->add(
-                'indian_gst_display_inclusive_price',
-                OnOffCheckboxField::class,
-                CheckboxFieldOption::make()
-                    ->label(trans('plugins/indian-gst::indian-gst.settings.inclusive_price'))
-                    ->helperText(trans('plugins/indian-gst::indian-gst.settings.inclusive_price_helper'))
-                    ->value((bool) setting('indian_gst_display_inclusive_price', true))
-                    ->toArray()
-            )
-            ->add(
                 'indian_gst_default_company_state',
                 SelectField::class,
                 SelectFieldOption::make()
                     ->label(trans('plugins/indian-gst::indian-gst.settings.company_state'))
                     ->choices($states)
-                    ->selected(setting('indian_gst_default_company_state', 'Rajasthan'))
+                    ->selected(IndianGstHelper::getCompanyStateCode())
                     ->toArray()
             )
             ->add(
@@ -56,8 +47,8 @@ class IndianGstSettingForm extends SettingForm
                 TextField::class,
                 TextFieldOption::make()
                     ->label(trans('plugins/indian-gst::indian-gst.settings.company_gstin'))
-                    ->placeholder('e.g. 08AUBPA5903F1Z5')
-                    ->value(setting('indian_gst_default_company_gstin', '08AUBPA5903F1Z5'))
+                    ->placeholder(trans('plugins/indian-gst::indian-gst.settings.gstin_placeholder'))
+                    ->value(IndianGstHelper::getCompanyGstin())
                     ->toArray()
             );
     }

@@ -3,12 +3,6 @@
 namespace SparroWave\IndianGst\Supports;
 
 use Botble\Base\Facades\BaseHelper;
-use Botble\Ecommerce\Models\Invoice;
-use Botble\Ecommerce\Models\Order;
-use Botble\Ecommerce\Models\Product;
-use Botble\Marketplace\Models\Store;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 
 class IndianGstHelper
 {
@@ -58,7 +52,12 @@ class IndianGstHelper
 
     public static function getCompanyStateName(): string
     {
-        $val = (string) setting('indian_gst_default_company_state', '08');
+        $configured = (string) setting('indian_gst_default_company_state', '');
+        $val = $configured ?: (string) get_ecommerce_setting('company_state_for_invoicing', get_ecommerce_setting('store_state', ''));
+        if (! $configured && is_numeric($val) && is_plugin_active('location')
+            && \Botble\Ecommerce\Facades\EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
+            $val = \Botble\Location\Models\State::query()->find($val)?->name ?: $val;
+        }
         $states = self::getIndianStates();
 
         if (isset($states[$val])) {
@@ -72,7 +71,7 @@ class IndianGstHelper
             }
         }
 
-        return $val ?: 'Rajasthan';
+        return $val;
     }
 
     public static function getStateCode(mixed $state): ?string
@@ -98,9 +97,9 @@ class IndianGstHelper
         return null;
     }
 
-    public static function getCompanyStateCode(): string
+    public static function getCompanyStateCode(): ?string
     {
-        $val = (string) setting('indian_gst_default_company_state', '08');
+        $val = self::getCompanyStateName();
         $states = self::getIndianStates();
 
         if (isset($states[$val])) {
@@ -109,12 +108,23 @@ class IndianGstHelper
 
         $code = self::getStateCode($val);
 
-        return $code ?: '08';
+        return $code;
     }
 
     public static function getCompanyGstin(): string
     {
-        return (string) setting('indian_gst_default_company_gstin', '08AUBPA5903F1Z5');
+        return (string) (setting('indian_gst_default_company_gstin')
+            ?: get_ecommerce_setting('company_tax_id_for_invoicing', get_ecommerce_setting('store_vat_number', '')));
+    }
+
+    public static function getStateNameFromGstin(mixed $gstin): ?string
+    {
+        $gstin = strtoupper(trim((string) $gstin));
+        if (! preg_match('/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][0-9A-Z]Z[0-9A-Z]$/', $gstin)) {
+            return null;
+        }
+
+        return self::getIndianStates()[substr($gstin, 0, 2)] ?? null;
     }
 
     /**
@@ -148,7 +158,7 @@ class IndianGstHelper
             '23' => 'Madhya Pradesh',
             '24' => 'Gujarat',
             '25' => 'Daman and Diu',
-            '26' => 'Dadra and Nagar Haveli',
+            '26' => 'Dadra and Nagar Haveli and Daman and Diu',
             '27' => 'Maharashtra',
             '28' => 'Andhra Pradesh',
             '29' => 'Karnataka',
@@ -174,17 +184,18 @@ class IndianGstHelper
         }
 
         if (is_numeric($state)) {
-            // Might be a state ID or a 2-digit GST code
+            // Ecommerce Location fields persist IDs. Resolve them before GST codes.
+            if (function_exists('is_plugin_active') && is_plugin_active('location')
+                && \Botble\Ecommerce\Facades\EcommerceHelper::loadCountriesStatesCitiesFromPluginLocation()) {
+                $locState = \Botble\Location\Models\State::query()->find($state);
+                if ($locState) {
+                    return preg_replace('/[^a-z0-9]/', '', strtolower($locState->name));
+                }
+            }
             $padded = str_pad((string)$state, 2, '0', STR_PAD_LEFT);
             $states = self::getIndianStates();
             if (isset($states[$padded])) {
-                return strtolower(trim($states[$padded]));
-            }
-            if (is_plugin_active('location')) {
-                $locState = \Botble\Location\Models\State::query()->find($state);
-                if ($locState) {
-                    return strtolower(trim($locState->name));
-                }
+                return preg_replace('/[^a-z0-9]/', '', strtolower($states[$padded]));
             }
         }
 
@@ -232,6 +243,15 @@ class IndianGstHelper
         }
 
         return $normSeller !== $normCustomer;
+    }
+
+    /** Allocate a saved tax amount without losing an odd paisa. */
+    public static function splitTax(float $amount): array
+    {
+        $paise = (int) round($amount * 100);
+        $cgst = intdiv($paise + 1, 2);
+
+        return [$cgst / 100, ($paise - $cgst) / 100];
     }
 
     /**

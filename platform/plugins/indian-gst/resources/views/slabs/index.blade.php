@@ -4,17 +4,17 @@
     <div class="row g-3 mb-4">
         <div class="col-12 d-flex align-items-center justify-content-between flex-wrap gap-2">
             <div>
-                <h2 class="page-title mb-1">{{ __('Indian GST Tax Slabs & Catalogue Mapping') }}</h2>
-                <div class="text-muted">{{ __('Overview of all Indian GST slabs and real-time product mappings.') }}</div>
+                <h2 class="page-title mb-1">{{ trans('plugins/indian-gst::indian-gst.slabs.page_title') }}</h2>
+                <div class="text-muted">{{ trans('plugins/indian-gst::indian-gst.slabs.description') }}</div>
             </div>
             <div class="d-flex align-items-center gap-2">
                 <a href="{{ route('ecommerce.settings.indian-gst.index') }}" class="btn btn-outline-secondary">
                     <x-core::icon name="ti ti-settings" />
-                    {{ __('GST Settings') }}
+                    {{ trans('plugins/indian-gst::indian-gst.settings.menu') }}
                 </a>
                 <a href="{{ route('tax.index') }}" class="btn btn-primary">
                     <x-core::icon name="ti ti-receipt-tax" />
-                    {{ __('Manage Taxes Master') }}
+                    {{ trans('plugins/indian-gst::indian-gst.slabs.manage_taxes') }}
                 </a>
             </div>
         </div>
@@ -30,8 +30,7 @@
                             </span>
                         </div>
                         <div class="col">
-                            <div class="font-weight-medium">{{ $taxes->count() }} {{ __('Active Slabs') }}</div>
-                            <div class="text-muted small">{{ __('GST 0%, 5%, 18%, 40%') }}</div>
+                            <div class="font-weight-medium">{{ $taxes->count() }} {{ trans('plugins/indian-gst::indian-gst.slabs.active') }}</div>
                         </div>
                     </div>
                 </div>
@@ -48,8 +47,8 @@
                             </span>
                         </div>
                         <div class="col">
-                            <div class="font-weight-medium">{{ number_format($totalMappedProducts) }} {{ __('Mapped Products') }}</div>
-                            <div class="text-muted small">{{ __('Mapped to GST Slabs') }}</div>
+                            <div class="font-weight-medium">{{ number_format($totalMappedProducts) }} {{ trans('plugins/indian-gst::indian-gst.slabs.mapped_products') }}</div>
+                            <div class="text-muted small">{{ trans('plugins/indian-gst::indian-gst.slabs.mapped_to_slabs') }}</div>
                         </div>
                     </div>
                 </div>
@@ -67,7 +66,7 @@
                         </div>
                         <div class="col">
                             <div class="font-weight-medium">{{ \SparroWave\IndianGst\Supports\IndianGstHelper::getCompanyStateName() }}</div>
-                            <div class="text-muted small">{{ __('Origin State Code: :code', ['code' => \SparroWave\IndianGst\Supports\IndianGstHelper::getCompanyStateCode()]) }}</div>
+                            <div class="text-muted small">{{ trans('plugins/indian-gst::indian-gst.slabs.origin_state_code', ['code' => \SparroWave\IndianGst\Supports\IndianGstHelper::getCompanyStateCode() ?: '—']) }}</div>
                         </div>
                     </div>
                 </div>
@@ -84,8 +83,8 @@
                             </span>
                         </div>
                         <div class="col">
-                            <div class="font-weight-medium text-truncate" title="{{ setting('indian_gst_default_company_gstin', '08AUBPA5903F1Z5') }}">{{ setting('indian_gst_default_company_gstin', '08AUBPA5903F1Z5') }}</div>
-                            <div class="text-muted small">{{ __('Company GSTIN') }}</div>
+                            <div class="font-weight-medium text-truncate" title="{{ \SparroWave\IndianGst\Supports\IndianGstHelper::getCompanyGstin() }}">{{ \SparroWave\IndianGst\Supports\IndianGstHelper::getCompanyGstin() ?: '—' }}</div>
+                            <div class="text-muted small">{{ trans('plugins/indian-gst::indian-gst.settings.company_gstin') }}</div>
                         </div>
                     </div>
                 </div>
@@ -116,14 +115,14 @@
                             <div class="mb-2">
                                 <span class="badge bg-primary-lt">
                                     <x-core::icon name="ti ti-star-filled" style="width: 12px; height: 12px;" />
-                                    {{ __('Default Tax Rate') }}
+                                    {{ trans('plugins/indian-gst::indian-gst.slabs.default_rate') }}
                                 </span>
                             </div>
                         @endif
 
                         <div class="my-3">
                             <div class="display-6 fw-bold text-dark mb-1">{{ number_format($count) }}</div>
-                            <div class="text-muted small">{{ Str::plural(__('Product Mapped'), $count) }} ({{ $pctShare }}% {{ __('of catalogue') }})</div>
+                            <div class="text-muted small">{{ trans_choice('plugins/indian-gst::indian-gst.slabs.product_mapped', $count) }} ({{ $pctShare }}% {{ trans('plugins/indian-gst::indian-gst.slabs.of_catalogue') }})</div>
                         </div>
 
                         <div class="progress progress-sm mb-3">
@@ -133,9 +132,9 @@
                         <div class="mt-auto pt-3 border-top d-flex gap-2">
                             <a href="{{ route('indian-gst.slabs.products', $tax->id) }}" class="btn btn-primary w-100">
                                 <x-core::icon name="ti ti-list" />
-                                {{ __('View Products') }}
+                                {{ trans('plugins/indian-gst::indian-gst.slabs.view_products') }}
                             </a>
-                            <a href="{{ route('tax.edit', $tax->id) }}" class="btn btn-icon btn-ghost-secondary" title="{{ __('Edit Slab') }}">
+                            <a href="{{ route('tax.edit', $tax->id) }}" class="btn btn-icon btn-ghost-secondary" title="{{ trans('plugins/indian-gst::indian-gst.slabs.edit_slab') }}">
                                 <x-core::icon name="ti ti-edit" />
                             </a>
                         </div>

@@ -7,7 +7,7 @@ use SparroWave\IndianGst\Http\Controllers\IndianGstSlabController;
 
 Route::group(['namespace' => 'SparroWave\IndianGst\Http\Controllers', 'middleware' => ['web', 'core']], function () {
     Route::group(['prefix' => BaseHelper::getAdminPrefix(), 'middleware' => 'auth'], function () {
-        Route::group(['prefix' => 'ecommerce/settings/indian-gst', 'as' => 'ecommerce.settings.indian-gst.'], function () {
+        Route::group(['prefix' => 'ecommerce/settings/indian-gst', 'as' => 'ecommerce.settings.indian-gst.', 'permission' => 'ecommerce.settings.indian-gst'], function () {
             Route::get('', [IndianGstSettingController::class, 'edit'])->name('index');
             Route::put('', [IndianGstSettingController::class, 'update'])->name('update');
         });

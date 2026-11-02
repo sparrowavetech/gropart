@@ -17,7 +17,7 @@ class InclusiveTaxServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        if (! is_plugin_active('ecommerce')) {
+        if (! is_plugin_active('ecommerce') || ! \SparroWave\IndianGst\Supports\IndianGstHelper::isEnabled()) {
             return;
         }
         $this->app->bind(StoreTaxComponentsListener::class, StoreInclusiveTaxComponents::class);
@@ -29,7 +29,7 @@ class InclusiveTaxServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        if (! is_plugin_active('ecommerce')) {
+        if (! is_plugin_active('ecommerce') || ! \SparroWave\IndianGst\Supports\IndianGstHelper::isEnabled()) {
             return;
         }
         // Admin creation omits the flag from CartItem options. Populate only missing
