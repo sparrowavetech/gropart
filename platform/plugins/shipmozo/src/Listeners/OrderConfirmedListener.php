@@ -35,11 +35,29 @@ class OrderConfirmedListener
         }
 
         try {
+            $shipmentWeight = 0;
+            $isIndividualScope = setting('shipping_shipmozo_scope', 'all') === 'individual';
+            if ($isIndividualScope) {
+                foreach ($order->products as $orderProduct) {
+                    $prod = $orderProduct->product;
+                    $isEligible = $prod && (is_callable([$prod, 'isShipmozoShippingEnabled'])
+                        ? $prod->isShipmozoShippingEnabled()
+                        : (bool) $prod->enable_shipmozo_shipping);
+                    if ($isEligible) {
+                        $rawWeight = (float) ($orderProduct->weight ?: ($prod ? $prod->weight : 0));
+                        $shipmentWeight += $rawWeight * (int) $orderProduct->qty;
+                    }
+                }
+            }
+            if ($shipmentWeight <= 0) {
+                $shipmentWeight = (float) $order->products_weight;
+            }
+
             $shipment = Shipment::query()->firstOrCreate(
                 ['order_id' => $order->getKey()],
                 [
                     'user_id' => $event->confirmedBy?->getAuthIdentifier() ?: 0,
-                    'weight' => $order->products_weight,
+                    'weight' => $shipmentWeight,
                     'cod_amount' => is_plugin_active('payment')
                         && $order->payment
                         && $order->payment->status != PaymentStatusEnum::COMPLETED

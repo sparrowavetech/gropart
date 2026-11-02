@@ -49,6 +49,12 @@ class ShipmozoServiceProvider extends ServiceProvider
                 \Botble\Ecommerce\Services\HandleShippingFeeService::class,
                 \SparroWave\Shipmozo\Services\CheckoutShippingFeeService::class
             );
+            $this->app['view']->composer('plugins/ecommerce::orders.partials.shipping-methods', function ($view): void {
+                $view->setPath(plugin_path('shipmozo/resources/views/overrides/shipping-methods.blade.php'));
+            });
+            $this->app['view']->composer('plugins/marketplace::orders.checkout.products', function ($view): void {
+                $view->setPath(plugin_path('shipmozo/resources/views/overrides/marketplace-products.blade.php'));
+            });
             $this->app['view']->composer('plugins/ecommerce::orders.partials.shipping-option', function ($view): void {
                 if (($view->getData()['shippingKey'] ?? null) === SHIPMOZO_SHIPPING_METHOD_NAME) {
                     $view->setPath(plugin_path('shipmozo/resources/views/overrides/shipping-option.blade.php'));
@@ -151,6 +157,7 @@ class ShipmozoServiceProvider extends ServiceProvider
             ]);
         }
 
+        $this->app->singleton(HookServiceProvider::class, fn ($app) => new HookServiceProvider($app));
         $this->app->register(HookServiceProvider::class);
         $this->app->register(CommandServiceProvider::class);
     }

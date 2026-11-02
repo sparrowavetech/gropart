@@ -2,6 +2,35 @@
     preg_match('/\Ashipmozo_(\d+)/', (string) $order->shipping_option, $courierMatches);
     $courierId = $courierMatches[1] ?? null;
     $shipmozoOrderId = Arr::get($shipment->metadata, 'workflow.push_order.data.order_id');
+
+    $isMixedOrder = false;
+    $shipmozoCount = 0;
+    $nonShipmozoCount = 0;
+    if (setting('shipping_shipmozo_scope', 'all') === 'individual') {
+        foreach ($order->products as $orderProduct) {
+            $prod = $orderProduct->product;
+            $isEligible = $prod && (is_callable([$prod, 'isShipmozoShippingEnabled'])
+                ? $prod->isShipmozoShippingEnabled()
+                : (bool) $prod->enable_shipmozo_shipping);
+            if ($isEligible) {
+                $shipmozoCount++;
+            } else {
+                $nonShipmozoCount++;
+            }
+        }
+        $isMixedOrder = ($shipmozoCount > 0 && $nonShipmozoCount > 0);
+    }
+
+    $rate = $rate ?? null;
+    if (! $rate && isset($order)) {
+        try {
+            $controller = app(\SparroWave\Shipmozo\Http\Controllers\ShipmozoController::class);
+            $rates = $controller->resolveRatesWithNonShipmozo($controller->getRateData($order));
+            $rate = Arr::first($rates, fn (array $item): bool => Arr::get($item, 'id') == $order->shipping_option) ?: Arr::first($rates);
+        } catch (\Throwable $e) {
+            $rate = null;
+        }
+    }
 @endphp
 
 <div>
@@ -11,6 +40,20 @@
             <div>
                 <div class="fw-semibold">{{ trans('plugins/shipmozo::shipmozo.previous_attempt_attention') }}</div>
                 <div>{{ $error }}</div>
+            </div>
+        </div>
+    @endif
+
+    @if ($isMixedOrder)
+        <div class="alert alert-info d-flex align-items-start gap-2 mb-4" role="alert">
+            <x-core::icon name="ti ti-info-circle" class="flex-shrink-0 mt-1" />
+            <div>
+                <div class="fw-semibold">{{ trans('plugins/shipmozo::shipmozo.mixed_order_title', ['default' => 'Mixed Fulfillment Order']) }}</div>
+                <div class="small">{{ trans('plugins/shipmozo::shipmozo.mixed_order_desc', [
+                    'shipmozo_count' => $shipmozoCount,
+                    'standard_count' => $nonShipmozoCount,
+                    'default' => "This order contains {$shipmozoCount} ShipMozo item(s) and {$nonShipmozoCount} standard delivery item(s). Courier assignment below books shipping only for the ShipMozo parcel. Standard items are fulfilled directly."
+                ]) }}</div>
             </div>
         </div>
     @endif
@@ -45,16 +88,66 @@
                 <div class="small text-secondary">{{ trans('plugins/shipmozo::shipmozo.saved_at_checkout') }}</div>
             </div>
             <div class="col-sm-6">
-                <div class="small text-secondary mb-1">{{ trans('plugins/shipmozo::shipmozo.package_weight') }}</div>
+                <div class="small text-secondary mb-1">
+                    {{ trans('plugins/shipmozo::shipmozo.package_weight') }}
+                    @if ($isMixedOrder)
+                        <span class="text-primary">({{ trans('plugins/shipmozo::shipmozo.shipmozo_parcel') }})</span>
+                    @endif
+                </div>
                 <div class="fw-semibold">{{ number_format((float) $shipment->weight, 2) }} {{ ecommerce_weight_unit() }}</div>
+                @if ($isMixedOrder)
+                    <div class="small text-muted">{{ trans('plugins/shipmozo::shipmozo.shipmozo_item_count', ['count' => $shipmozoCount]) }}</div>
+                @endif
             </div>
             <div class="col-sm-6">
-                <div class="small text-secondary mb-1">{{ trans('plugins/shipmozo::shipmozo.shipping_charge') }}</div>
-                <div class="fw-semibold">{{ format_price($shipment->price ?: $order->shipping_amount) }}</div>
-                @if (is_plugin_active('payment') && $order->payment && $order->payment->payment_channel->getValue() == \Botble\Payment\Enums\PaymentMethodEnum::COD)
-                    <div class="small text-danger">{{ trans('plugins/shipmozo::shipmozo.cod_order') }}: {{ format_price($order->amount) }}</div>
+                <div class="small text-secondary mb-1">
+                    {{ trans('plugins/shipmozo::shipmozo.actual_shipmozo_cost') }}
+                    <span class="badge bg-success-lt ms-1" style="font-size: 10px;">{{ trans('plugins/shipmozo::shipmozo.wallet_deduction_label') }}</span>
+                </div>
+                @php
+                    $actualCharge = isset($rate) ? (float) Arr::get($rate, 'actual_charge', Arr::get($rate, 'raw_shipping_charges', 0)) : 0;
+                    $rawCharge = isset($rate) ? (float) Arr::get($rate, 'raw_shipping_charges', 0) : 0;
+                    $rawGst = isset($rate) ? (float) Arr::get($rate, 'gst', 0) : 0;
+                @endphp
+                @if ($actualCharge > 0)
+                    <div class="fw-semibold text-success">{{ format_price($actualCharge) }}</div>
+                    @if ($rawCharge > 0 && $rawGst > 0)
+                        <div class="small text-secondary">
+                            {{ trans('plugins/shipmozo::shipmozo.base_charge_with_gst', [
+                                'base' => format_price($rawCharge),
+                                'gst' => format_price($rawGst),
+                            ]) }}
+                        </div>
+                    @else
+                        <div class="small text-secondary">{{ trans('plugins/shipmozo::shipmozo.uninflated_note') }}</div>
+                    @endif
                 @else
-                    <div class="small text-secondary">{{ trans('plugins/shipmozo::shipmozo.prepaid_order') }}</div>
+                    <div class="fw-semibold">{{ format_price($shipment->price ?: $order->shipping_amount) }}</div>
+                @endif
+
+                <div class="mt-2 pt-1 border-top">
+                    <div class="small text-secondary mb-0">
+                        {{ trans('plugins/shipmozo::shipmozo.customer_paid_shipping') }}:
+                        <span class="fw-semibold text-dark">{{ format_price($order->shipping_amount) }}</span>
+                        @if ($isMixedOrder)
+                            <span class="text-muted">({{ trans('plugins/shipmozo::shipmozo.combined_fee') }})</span>
+                        @endif
+                    </div>
+                    @if ($isMixedOrder && isset($rate) && ! empty($rate['direct_shipping_fee']))
+                        <div class="small text-muted" style="font-size: 11px;">
+                            &bull; {{ trans('plugins/shipmozo::shipmozo.customer_shipmozo_fee') }}: {{ format_price(Arr::get($rate, 'customer_shipmozo_price', $order->shipping_amount - $rate['direct_shipping_fee'])) }}
+                            | {{ trans('plugins/shipmozo::shipmozo.direct_delivery_fee') }}: {{ format_price($rate['direct_shipping_fee']) }}
+                            @if (! empty($rate['direct_rule_name']))
+                                [{{ $rate['direct_rule_name'] }}]
+                            @endif
+                        </div>
+                    @endif
+                </div>
+
+                @if (is_plugin_active('payment') && $order->payment && $order->payment->payment_channel->getValue() == \Botble\Payment\Enums\PaymentMethodEnum::COD)
+                    <div class="small text-danger mt-1">{{ trans('plugins/shipmozo::shipmozo.cod_order') }}: {{ format_price($order->amount) }}</div>
+                @else
+                    <div class="small text-secondary mt-1">{{ trans('plugins/shipmozo::shipmozo.prepaid_order') }}</div>
                 @endif
             </div>
         </div>

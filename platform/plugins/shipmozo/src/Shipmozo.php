@@ -78,7 +78,7 @@ class Shipmozo
                 $hasEnabled = false;
                 foreach ($order->products as $orderProduct) {
                     $prod = $orderProduct->product;
-                    if ($prod && method_exists($prod, 'isShipmozoShippingEnabled') && $prod->isShipmozoShippingEnabled()) {
+                    if ($prod && (is_callable([$prod, 'isShipmozoShippingEnabled']) ? $prod->isShipmozoShippingEnabled() : (bool) $prod->enable_shipmozo_shipping)) {
                         $hasEnabled = true;
                         break;
                     }
@@ -154,6 +154,10 @@ class Shipmozo
 
     public function checkPincodeServiceability(string $pickupPincode, string $deliveryPincode): array
     {
+        if (! self::validPincode($pickupPincode) || ! self::validPincode($deliveryPincode)) {
+            return self::invalidPincodeResponse();
+        }
+
         $payload = [
             'pickup_pincode' => (int) $pickupPincode,
             'delivery_pincode' => (int) $deliveryPincode,
@@ -286,6 +290,19 @@ class Shipmozo
                     continue;
                 }
 
+                $rawShippingCharges = (float) Arr::get($rate, 'shipping_charges', 0);
+                $gst = (float) Arr::get($rate, 'gst', 0);
+                $overheadCharges = (float) Arr::get($rate, 'overhead_charges', 0);
+                $actualTotalCharges = (float) Arr::get(
+                    $rate,
+                    'total_charges',
+                    Arr::get(
+                        $rate,
+                        'total_charge',
+                        $rawShippingCharges > 0 ? ($rawShippingCharges + $gst + $overheadCharges) : 0
+                    )
+                );
+
                 $charge = (float) Arr::get(
                     $rate,
                     'total_charge',
@@ -300,9 +317,15 @@ class Shipmozo
                     )
                 );
 
-                if ($charge <= 0) {
+                if ($charge <= 0 && $actualTotalCharges <= 0) {
                     continue;
                 }
+
+                if ($charge <= 0) {
+                    $charge = $actualTotalCharges;
+                }
+
+                $uninflatedCharge = $charge;
 
                 if ($adjType === 'fixed') {
                     $charge += $adjVal;
@@ -329,9 +352,15 @@ class Shipmozo
                     'id' => $courierKey,
                     'name' => $courierName,
                     'price' => $charge,
+                    'actual_charge' => $actualTotalCharges > 0 ? $actualTotalCharges : $uninflatedCharge,
+                    'raw_shipping_charges' => $rawShippingCharges > 0 ? $rawShippingCharges : $uninflatedCharge,
+                    'gst' => $gst,
+                    'overhead_charges' => $overheadCharges,
+                    'customer_shipmozo_price' => $charge,
                     'courier_id' => (int) $courierId,
                     'pickups_automatically_scheduled' => Arr::get($rate, 'pickups_automatically_scheduled'),
-                    'estimated_delivery' => Arr::get($rate, 'estimated_delivery', Arr::get($rate, 'etd', '')),
+                    'estimated_delivery' => Arr::get($rate, 'estimated_delivery') ?: Arr::get($rate, 'etd', ''),
+                    'package_weight_grams' => (int) $weight,
                     'disabled' => false,
                     'error_message' => null,
                     'image' => Arr::get($rate, 'courier_logo', Arr::get($rate, 'image')),
@@ -386,6 +415,9 @@ class Shipmozo
     public function pushOrder(Order $order): array
     {
         $address = $order->shippingAddress;
+        if (! $address || ! self::validPincode($address->zip_code)) {
+            return self::invalidPincodeResponse();
+        }
 
         $totalWeight = 0;
         $items = [];
@@ -398,8 +430,18 @@ class Shipmozo
         foreach ($order->products as $orderProduct) {
             $product = $orderProduct->product;
 
-            if ($isIndividualScope && $product && method_exists($product, 'isShipmozoShippingEnabled') && ! $product->isShipmozoShippingEnabled()) {
-                continue;
+            if ($isIndividualScope) {
+                if (! $product) {
+                    continue;
+                }
+
+                $isItemEligible = is_callable([$product, 'isShipmozoShippingEnabled'])
+                    ? $product->isShipmozoShippingEnabled()
+                    : (bool) $product->enable_shipmozo_shipping;
+
+                if (! $isItemEligible) {
+                    continue;
+                }
             }
 
             // Dynamic Dimensions & Weight
@@ -689,6 +731,9 @@ class Shipmozo
     {
         $order = $orderReturn->order;
         $address = $order->shippingAddress;
+        if (! $address || ! self::validPincode($address->zip_code)) {
+            return self::invalidPincodeResponse();
+        }
 
         $totalWeight = 0;
         $items = [];
@@ -813,6 +858,10 @@ class Shipmozo
 
     public function createWarehouse(array $data): array
     {
+        if (! self::validPincode(Arr::get($data, 'pincode'))) {
+            return self::invalidPincodeResponse();
+        }
+
         $payload = [
             'address_title' => $this->sanitize(Arr::get($data, 'address_title')),
             'name' => $this->sanitize(Arr::get($data, 'contact_name', Arr::get($data, 'name'))),
@@ -839,6 +888,10 @@ class Shipmozo
             return ['result' => 1, 'message' => 'Using linked warehouse_id', 'id' => $store->warehouse_id];
         }
 
+        if (! self::validPincode($store->zip_code)) {
+            return self::invalidPincodeResponse();
+        }
+
         $locationName = $this->warehouseName($store->getKey());
         $payload = [
             'address_title' => $locationName,
@@ -860,6 +913,16 @@ class Shipmozo
         $this->log('Sync Warehouse Response', $responseData);
 
         return $responseData;
+    }
+
+    private static function validPincode(mixed $pincode): bool
+    {
+        return is_scalar($pincode) && preg_match('/^[1-9][0-9]{5}$/', (string) $pincode) === 1;
+    }
+
+    private static function invalidPincodeResponse(): array
+    {
+        return ['result' => 0, 'data' => ['error' => trans('plugins/shipmozo::shipmozo.api_invalid_pincode')]];
     }
 
     public function trackOrder(string $awbNumber): array

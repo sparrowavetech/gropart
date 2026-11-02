@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
+use SparroWave\Shipmozo\Providers\HookServiceProvider;
 use SparroWave\Shipmozo\Shipmozo;
 use Throwable;
 
@@ -39,8 +40,14 @@ class ShipmozoController extends BaseController
         $this->check($shipment);
 
         $order = $shipment->order;
+        $rateData = $this->getRateData($order);
+        $rates = $this->resolveRatesWithNonShipmozo($rateData);
+        $rate = Arr::first($rates, fn (array $item): bool => Arr::get($item, 'id') == $order->shipping_option);
+        if (! $rate && ! empty($rates)) {
+            $rate = Arr::first($rates);
+        }
 
-        $content = view('plugins/shipmozo::info', compact('shipment', 'order'))->render();
+        $content = view('plugins/shipmozo::info', compact('shipment', 'order', 'rate', 'rates'))->render();
 
         return $response->setData([
             'html' => $content,
@@ -234,7 +241,7 @@ class ShipmozoController extends BaseController
         $this->check($shipment);
 
         try {
-            $rates = Arr::get($this->shipmozo->getRates($this->getRateData($shipment->order)), 'shipment.rates', []);
+            $rates = $this->resolveRatesWithNonShipmozo($this->getRateData($shipment->order));
             $rate = Arr::first($rates, fn (array $item): bool => Arr::get($item, 'id') == $shipment->order->shipping_option);
 
             if ($rate) {
@@ -267,7 +274,7 @@ class ShipmozoController extends BaseController
 
         try {
             $order = $shipment->order;
-            $rates = Arr::get($this->shipmozo->getRates($this->getRateData($order)), 'shipment.rates', []);
+            $rates = $this->resolveRatesWithNonShipmozo($this->getRateData($order));
             $rate = Arr::first($rates, fn (array $item): bool => ! Arr::get($item, 'disabled')
                 && Arr::get($item, 'id') === $validated['shipping_option']);
 
@@ -288,8 +295,10 @@ class ShipmozoController extends BaseController
             $shipment->price = $newShippingAmount;
             $shipment->save();
 
+            $content = view('plugins/shipmozo::info', compact('shipment', 'order', 'rate', 'rates'))->render();
+
             return $response
-                ->setData(['html' => view('plugins/shipmozo::info', compact('shipment', 'order'))->render()])
+                ->setData(['html' => $content])
                 ->setMessage(trans('plugins/shipmozo::shipmozo.updated_rate_success'));
         } catch (Throwable $exception) {
             $this->shipmozo->logError('Shipment rate update failed', [
@@ -301,28 +310,90 @@ class ShipmozoController extends BaseController
         }
     }
 
-    private function getRateData(Order $order): array
+    public function resolveRatesWithNonShipmozo(array $rateData): array
+    {
+        $rates = Arr::get($this->shipmozo->getRates($rateData), 'shipment.rates', []);
+        $nonShipmozoItems = Arr::get($rateData, 'non_shipmozo_items', []);
+
+        if (! empty($nonShipmozoItems)) {
+            $hookProvider = new HookServiceProvider(app());
+            $directDetails = $hookProvider->resolveNonShipmozoShippingDetails($rateData, $nonShipmozoItems);
+            $nonShipmozoFee = (float) Arr::get($directDetails, 'price', 0.0);
+            $ruleName = Arr::get($directDetails, 'rule_name');
+            $ruleId = Arr::get($directDetails, 'rule_id');
+
+            if ($nonShipmozoFee > 0) {
+                foreach ($rates as &$r) {
+                    if (is_array($r) && isset($r['price']) && empty($r['disabled'])) {
+                        $customerShipmozoFee = (float) $r['price'];
+                        $r['customer_shipmozo_price'] = $customerShipmozoFee;
+                        $r['direct_shipping_fee'] = $nonShipmozoFee;
+                        $r['direct_rule_name'] = $ruleName;
+                        $r['direct_rule_id'] = $ruleId;
+                        $r['is_mixed'] = true;
+                        $r['price'] = $customerShipmozoFee + $nonShipmozoFee;
+
+                        $combinedSuffix = trans('plugins/shipmozo::shipmozo.combined_delivery_suffix');
+                        if (! str_contains($r['name'], 'Combined:') && ! str_contains($r['name'], 'संयुक्त:')) {
+                            $r['name'] .= $combinedSuffix;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $rates;
+    }
+
+    public function getRateData(Order $order): array
     {
         $address = $order->shippingAddress;
+        $isIndividualScope = setting('shipping_shipmozo_scope', 'all') === 'individual';
+        $shipmozoItems = [];
+        $nonShipmozoItems = [];
+
+        foreach ($order->products as $orderProduct) {
+            $product = $orderProduct->product;
+            $isEligible = true;
+            if ($isIndividualScope) {
+                $isEligible = $product && (is_callable([$product, 'isShipmozoShippingEnabled'])
+                    ? $product->isShipmozoShippingEnabled()
+                    : (bool) $product->enable_shipmozo_shipping);
+            }
+
+            $itemData = [
+                'id' => $orderProduct->product_id,
+                'qty' => $orderProduct->qty,
+                'price' => $orderProduct->price,
+                'weight' => $orderProduct->weight ?: ($product ? $product->weight : 0),
+                'length' => $product?->length ?: 10,
+                'wide' => $product?->wide ?: 10,
+                'height' => $product?->height ?: 10,
+            ];
+
+            if ($isEligible) {
+                $shipmozoItems[$orderProduct->product_id] = $itemData;
+            } else {
+                $nonShipmozoItems[$orderProduct->product_id] = $itemData;
+            }
+        }
+
+        $items = ! empty($shipmozoItems) ? $shipmozoItems : $nonShipmozoItems;
+
         $data = [
-            'address_to' => ['zip_code' => $address->zip_code],
+            'address_to' => [
+                'zip_code' => $address ? $address->zip_code : '',
+                'city' => $address ? $address->city : '',
+                'state' => $address ? $address->state : '',
+                'country' => $address ? $address->country : '',
+            ],
             'origin' => EcommerceHelper::getOriginAddress(),
             'store_id' => $order->store_id,
             'payment_method' => is_plugin_active('payment')
                 ? $order->payment?->payment_channel?->getValue()
                 : null,
-            'items' => $order->products->map(function ($orderProduct): array {
-                $product = $orderProduct->product;
-
-                return [
-                    'qty' => $orderProduct->qty,
-                    'price' => $orderProduct->price,
-                    'weight' => $orderProduct->weight ?: $product?->weight,
-                    'length' => $product?->length ?: 10,
-                    'wide' => $product?->wide ?: 10,
-                    'height' => $product?->height ?: 10,
-                ];
-            })->all(),
+            'items' => $items,
+            'non_shipmozo_items' => $nonShipmozoItems,
         ];
 
         if (is_plugin_active('marketplace') && $order->store_id && $order->store) {

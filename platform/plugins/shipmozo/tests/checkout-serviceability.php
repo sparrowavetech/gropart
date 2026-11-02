@@ -9,6 +9,8 @@ require dirname(__DIR__).'/src/Shipmozo.php';
 require dirname(__DIR__).'/src/Providers/HookServiceProvider.php';
 define('SHIPMOZO_SHIPPING_METHOD_NAME', 'shipmozo');
 function setting($key, $default = null) { return $key === 'shipping_shipmozo_status' ? 1 : $default; }
+function get_ecommerce_setting($key, $default = null) { return $default; }
+function ecommerce_weight_unit() { return 'kg'; }
 function is_plugin_active($plugin) { return $plugin === 'marketplace'; }
 function apply_filters($name, $value, ...$args) { return $name === 'ecommerce_product_has_free_shipping' ? ($args[0]['product_free_shipping'] ?? false) : $value; }
 function __($value) { return $value; }
@@ -62,7 +64,7 @@ $before=$carrier->calls;
 $carrier->response=['result'=>1,'data'=>[['courier_id'=>403,'total_charge'=>87]]];
 $r=$hook->handleShippingFee($free,$data);
 check($carrier->calls===$before+1 && $carrier->payload['weight']===450,'free delivery still checks physical package');
-check(!isset($r['default']) && $r['shipmozo']['shipmozo_403']['price']===0,'serviceable free delivery keeps courier at zero customer cost');
+check(isset($r['default']['free_shipping']) && $r['default']['free_shipping']['price']===0,'serviceable free delivery preserves direct free delivery option');
 $carrier->response=['result'=>1,'data'=>[]];
 $r=$hook->handleShippingFee($free,$data);
 check(!isset($r['default']) && $r['shipmozo']['no_service']['disabled'],'unserviceable free delivery cannot bypass check');

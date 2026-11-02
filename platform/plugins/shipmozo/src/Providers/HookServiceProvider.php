@@ -19,6 +19,7 @@ use Botble\Ecommerce\Forms\ProductForm;
 use Botble\Ecommerce\Models\Product;
 use Botble\Ecommerce\Models\ProductVariation;
 use Botble\Ecommerce\Models\Shipment;
+use Botble\Ecommerce\Services\HandleShippingFeeService;
 use Botble\Ecommerce\Tables\ProductTable;
 use Botble\Marketplace\Forms\VendorProductForm;
 use Botble\Marketplace\Models\Store;
@@ -38,6 +39,36 @@ class HookServiceProvider extends ServiceProvider
         add_filter('handle_shipping_fee', [$this, 'handleShippingFee'], 130, 2);
         add_filter('ecommerce_product_has_shipmozo_shipping', [$this, 'checkProductShipmozoEligibility'], 10, 2);
         add_filter('base_filter_table_filters', [$this, 'addTableFilters'], 130, 2);
+
+        add_filter('ecommerce_order_product_item_extra_info', function (?string $html, $orderProduct, $order): ?string {
+            if (! \Botble\Base\Facades\AdminHelper::isInAdmin() && ! is_in_admin(true) && ! request()->is('vendor/*')) {
+                return $html;
+            }
+
+            if (setting('shipping_shipmozo_status') != 1 || setting('shipping_shipmozo_scope', 'all') !== 'individual') {
+                return $html;
+            }
+
+            $product = $orderProduct->product?->original_product ?: $orderProduct->product;
+            if (! $product) {
+                return $html;
+            }
+
+            $isEligible = is_callable([$product, 'isShipmozoShippingEnabled'])
+                ? (bool) $product->isShipmozoShippingEnabled()
+                : (bool) $product->enable_shipmozo_shipping;
+
+            $shipmozoTitle = trans('plugins/shipmozo::shipmozo.fulfilled_via_shipmozo');
+            $shipmozoLabel = 'ShipMozo';
+            $directTitle = trans('plugins/shipmozo::shipmozo.fulfilled_via_direct');
+            $directLabel = trans('plugins/shipmozo::shipmozo.standard_delivery');
+
+            $badge = $isEligible
+                ? '<span class="badge bg-blue-lt text-blue ms-1" title="' . e($shipmozoTitle) . '" style="font-size: 10px; padding: 2px 6px;"><i class="ti ti-truck me-1"></i>' . e($shipmozoLabel) . '</span>'
+                : '<span class="badge bg-secondary-lt text-secondary ms-1" title="' . e($directTitle) . '" style="font-size: 10px; padding: 2px 6px;"><i class="ti ti-package me-1"></i>' . e($directLabel) . '</span>';
+
+            return $html . $badge;
+        }, 195, 3);
 
         // Product Form Extensions (Admin & Marketplace Vendor)
         if (class_exists(ProductForm::class)) {
@@ -175,7 +206,7 @@ class HookServiceProvider extends ServiceProvider
 
     public function handleShippingFee(array $result, array $data): array
     {
-        if (setting('shipping_shipmozo_status') != 1 || empty($data['items'])) {
+        if (setting('shipping_shipmozo_status') != 1 || empty($data['items']) || ! empty($data['skip_shipmozo'])) {
             return $result;
         }
 
@@ -227,22 +258,44 @@ class HookServiceProvider extends ServiceProvider
             $rates = $shipmozo->unavailableRates('api_error');
         }
 
-        // Mixed Cart rate handling: If this package has non-ShipMozo items too,
-        // extract the baseline standard shipping fee and add to courier price
-        if ($isIndividualScope && ! empty($nonShipmozoItems) && ! $freeDelivery) {
-            $defaultNonShipmozoFee = 0;
-            $defaultOptions = Arr::get($result, ShippingMethodEnum::DEFAULT, []);
-            foreach ($defaultOptions as $opt) {
-                if (isset($opt['price']) && is_numeric($opt['price']) && empty($opt['disabled'])) {
-                    $defaultNonShipmozoFee = (float) $opt['price'];
-                    break;
-                }
+        foreach ($rates as $key => $rate) {
+            if (is_array($rate)) {
+                $rates[$key]['shipmozo_only'] = empty($nonShipmozoItems);
             }
+        }
+
+        // Mixed Cart rate handling: If this package has non-ShipMozo items too,
+        // compute the baseline standard shipping fee for the non-ShipMozo parcel only
+        // and combine with each active courier rate
+        if ($isIndividualScope && ! empty($nonShipmozoItems) && ! $freeDelivery) {
+            $directDetails = $this->resolveNonShipmozoShippingDetails($data, $nonShipmozoItems);
+            $defaultNonShipmozoFee = (float) Arr::get($directDetails, 'price', 0.0);
+            $directRuleName = Arr::get($directDetails, 'rule_name');
+            $req = function_exists('request') ? request() : null;
+            $isInAdmin = (function_exists('is_in_admin') && is_in_admin(true))
+                || ($req && is_object($req) && method_exists($req, 'is') && $req->is('admin/*'));
 
             if ($defaultNonShipmozoFee > 0) {
                 foreach ($rates as $key => &$rate) {
                     if (is_array($rate) && isset($rate['price']) && empty($rate['disabled'])) {
-                        $rate['price'] += $defaultNonShipmozoFee;
+                        $customerShipmozoPrice = (float) $rate['price'];
+                        $combinedPrice = $customerShipmozoPrice + $defaultNonShipmozoFee;
+
+                        $rate['customer_shipmozo_price'] = $customerShipmozoPrice;
+                        $rate['direct_shipping_fee'] = $defaultNonShipmozoFee;
+                        $rate['direct_rule_name'] = $directRuleName;
+                        $rate['direct_rule_id'] = Arr::get($directDetails, 'rule_id');
+                        $rate['is_mixed'] = true;
+                        $rate['price'] = $combinedPrice;
+
+                        if ($isInAdmin) {
+                            $breakdownText = trans('plugins/shipmozo::shipmozo.admin_rate_breakdown', [
+                                'shipmozo_fee' => format_price($customerShipmozoPrice),
+                                'direct_fee' => format_price($defaultNonShipmozoFee),
+                                'rule_name' => $directRuleName ?: trans('plugins/shipmozo::shipmozo.default_shipping_rule'),
+                            ]);
+                            $rate['name'] = Arr::get($rate, 'name') . ' ' . $breakdownText;
+                        }
                     }
                 }
             }
@@ -280,6 +333,69 @@ class HookServiceProvider extends ServiceProvider
         return $result;
     }
 
+    public function resolveNonShipmozoShippingDetails(array $baseData, array $nonShipmozoItems): array
+    {
+        if (empty($nonShipmozoItems)) {
+            return [
+                'price' => 0.0,
+                'rule_id' => null,
+                'rule_name' => null,
+                'weight' => 0.0,
+                'count' => 0,
+            ];
+        }
+
+        $nonShipmozoWeight = 0;
+        $nonShipmozoTotal = 0;
+        $itemCount = 0;
+
+        foreach ($nonShipmozoItems as $item) {
+            $qty = max((int) Arr::get($item, 'qty', 1), 1);
+            $itemWeight = (float) Arr::get($item, 'weight', 0);
+            $itemPrice = (float) Arr::get($item, 'price', 0);
+
+            $nonShipmozoWeight += $itemWeight * $qty;
+            $nonShipmozoTotal += $itemPrice * $qty;
+            $itemCount += $qty;
+        }
+
+        $nonShipmozoData = $baseData;
+        $nonShipmozoData['items'] = $nonShipmozoItems;
+        $nonShipmozoData['weight'] = (float) $nonShipmozoWeight;
+        $nonShipmozoData['order_total'] = (float) $nonShipmozoTotal;
+        $nonShipmozoData['skip_shipmozo'] = true;
+
+        $calcResult = app(HandleShippingFeeService::class)->execute($nonShipmozoData);
+        $defaultOptions = Arr::get($calcResult, ShippingMethodEnum::DEFAULT, []);
+
+        $bestOption = null;
+        foreach ($defaultOptions as $key => $opt) {
+            if (isset($opt['price']) && is_numeric($opt['price']) && empty($opt['disabled'])) {
+                $price = (float) $opt['price'];
+                if ($bestOption === null || $price < $bestOption['price']) {
+                    $bestOption = [
+                        'price' => $price,
+                        'rule_id' => Arr::get($opt, 'id', $key),
+                        'rule_name' => Arr::get($opt, 'name'),
+                    ];
+                }
+            }
+        }
+
+        return [
+            'price' => $bestOption ? (float) $bestOption['price'] : 0.0,
+            'rule_id' => $bestOption ? $bestOption['rule_id'] : null,
+            'rule_name' => $bestOption ? $bestOption['rule_name'] : null,
+            'weight' => (float) $nonShipmozoWeight,
+            'count' => $itemCount,
+        ];
+    }
+
+    public function calculateNonShipmozoShippingFee(array $baseData, array $nonShipmozoItems): float
+    {
+        return (float) Arr::get($this->resolveNonShipmozoShippingDetails($baseData, $nonShipmozoItems), 'price', 0.0);
+    }
+
     public function checkProductShipmozoEligibility(?bool $enabled, array $item): bool
     {
         if (setting('shipping_shipmozo_scope', 'all') === 'all') {
@@ -295,8 +411,8 @@ class HookServiceProvider extends ServiceProvider
         if ($productId) {
             $product = Product::find($productId);
             if ($product) {
-                return method_exists($product, 'isShipmozoShippingEnabled')
-                    ? $product->isShipmozoShippingEnabled()
+                return is_callable([$product, 'isShipmozoShippingEnabled'])
+                    ? (bool) $product->isShipmozoShippingEnabled()
                     : (bool) $product->enable_shipmozo_shipping;
             }
         }
