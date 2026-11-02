@@ -15,25 +15,71 @@ class Catalog
     public function isStorefront(): bool
     {
         $request = request();
-        $name = $request->route()?->getName() ?? '';
+        if (! $request->route()) {
+            return false;
+        }
+
+        $name = $request->route()->getName() ?? '';
+        $action = $request->route()->getActionName() ?? '';
+
         if (! $request->isMethod('GET') && ! $request->isMethod('HEAD') && $name !== 'public.ajax.render-ui-block') {
             return false;
         }
-        $action = $request->route()?->getActionName() ?? '';
+
+        if (
+            is_in_admin(true)
+            || $request->is('admin/*')
+            || $request->is('vendor/*')
+            || $request->is('customer/*')
+            || str_starts_with($name, 'admin.')
+            || str_starts_with($name, 'marketplace.vendor.')
+            || str_starts_with($name, 'vendor.')
+        ) {
+            return false;
+        }
+
+        foreach (['cart', 'checkout', 'order', 'customer', 'account', 'download', 'wishlist', 'compare', 'tracking', 'invoice', 'payment'] as $part) {
+            if (str_contains($name, $part) || $request->is($part . '*') || $request->is('*/' . $part . '*')) {
+                return false;
+            }
+        }
+
+        if (str_starts_with($name, 'public.enquiry-products.') || str_contains($action, 'SparroWave\\EnquiryProducts\\Http\\Controllers\\CatalogController')) {
+            return false;
+        }
+
         foreach (['ProductController', 'ProductCategoryController', 'BrandController', 'FilterController', 'FlashSaleController'] as $controller) {
             if (str_starts_with($action, 'Botble\\Ecommerce\\Http\\Controllers\\API\\' . $controller . '@')) {
                 return true;
             }
         }
-        if (! str_starts_with($name, 'public.')) {
-            return false;
+
+        if (str_starts_with($action, 'Botble\\Theme\\Http\\Controllers\\PublicController@')) {
+            return true;
         }
-        foreach (['cart', 'checkout', 'order', 'customer', 'account', 'download', 'wishlist', 'compare', 'tracking', 'invoice', 'payment'] as $part) {
-            if (str_contains($name, $part)) {
-                return false;
-            }
+
+        if (str_starts_with($name, 'public.')) {
+            return true;
         }
-        return true;
+
+        if (
+            str_starts_with($action, 'Botble\\Ecommerce\\Http\\Controllers\\Fronts\\')
+            || str_starts_with($action, 'Botble\\Marketplace\\Http\\Controllers\\Fronts\\')
+            || str_starts_with($action, 'Theme\\')
+        ) {
+            return true;
+        }
+
+        if (
+            $request->is('brands/*')
+            || $request->is('product-tags/*')
+            || $request->is('product-categories/*')
+            || $request->is('product-collections/*')
+        ) {
+            return true;
+        }
+
+        return false;
     }
 
     public function constrain(Builder $query, bool $enquiry): Builder

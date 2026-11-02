@@ -142,4 +142,7 @@ return [
     'enquiry_sellers' => 'Enquiry Sellers',
     'seller' => 'Seller',
     'published_enquiry_products' => 'Published enquiry products',
+    'permission_settings' => 'Enquiry settings',
+    'permission_delete' => 'Delete enquiries',
+    'permission_update' => 'Update enquiries',
 ];
