@@ -241,6 +241,7 @@ return [
     'mixed_order_title' => 'Mixed Fulfillment Order',
     'mixed_order_desc' => 'This order contains :shipmozo_count ShipMozo item(s) and :standard_count standard delivery item(s). Courier assignment below books shipment only for the ShipMozo parcel. Standard items are fulfilled directly.',
     'mixed_fulfillment' => 'Mixed Fulfillment',
+    'shipping_breakdown_included' => 'Included in the shipping fee above',
     'shipmozo_parcel' => 'ShipMozo Parcel',
     'direct_shop_parcel' => 'Direct / Shop Parcel',
     'total_weight' => 'Total Weight',

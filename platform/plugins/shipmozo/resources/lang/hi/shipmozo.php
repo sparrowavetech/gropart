@@ -241,6 +241,7 @@ return [
     'mixed_order_title' => 'मिश्रित पूर्ति ऑर्डर (Mixed Fulfillment Order)',
     'mixed_order_desc' => 'इस ऑर्डर में :shipmozo_count शिपमोजो आइटम और :standard_count स्टैंडर्ड डिलीवरी आइटम शामिल हैं। नीचे कूरियर असाइन करने से केवल शिपमोजो पार्सल बुक होगा। स्टैंडर्ड आइटम को सीधे पूरा किया जाएगा।',
     'mixed_fulfillment' => 'मिश्रित पूर्ति (Mixed Fulfillment)',
+    'shipping_breakdown_included' => 'ऊपर दिखाए गए शिपिंग शुल्क में शामिल',
     'shipmozo_parcel' => 'शिपमोजो पार्सल',
     'direct_shop_parcel' => 'सीधी / दुकान पार्सल',
     'total_weight' => 'कुल वजन',

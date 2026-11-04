@@ -5,6 +5,7 @@ namespace SparroWave\Shipmozo\Services;
 use Botble\Ecommerce\Enums\ShippingMethodEnum;
 use Botble\Ecommerce\Services\HandleShippingFeeService;
 use Illuminate\Support\Arr;
+use SparroWave\Shipmozo\Supports\ShippingBreakdown;
 
 // Keep the upstream calculation/cache methods; only exclude disabled quotes from free-rate detection.
 class CheckoutShippingFeeService extends HandleShippingFeeService
@@ -41,6 +42,10 @@ class CheckoutShippingFeeService extends HandleShippingFeeService
             });
 
             $response = Arr::get($filtered, $option);
+
+            if ($method === SHIPMOZO_SHIPPING_METHOD_NAME && is_array($response)) {
+                ShippingBreakdown::remember($response, $data);
+            }
 
             return $response ? [$response] : [];
         }

@@ -13,6 +13,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
+use SparroWave\Shipmozo\Supports\PackageDimensionsCalculator;
 
 class Shipmozo
 {
@@ -100,17 +101,7 @@ class Shipmozo
 
     public function convertWeightToGrams(float $rawWeight): int
     {
-        $storeWeightUnit = function_exists('ecommerce_weight_unit') ? ecommerce_weight_unit() : 'g';
-
-        if ($storeWeightUnit === 'kg') {
-            $itemWeightInGrams = (int) round($rawWeight * 1000);
-        } elseif ($storeWeightUnit === 'g') {
-            $itemWeightInGrams = (int) round($rawWeight);
-        } else {
-            $itemWeightInGrams = (int) round($rawWeight < 10 ? ($rawWeight * 1000) : $rawWeight);
-        }
-
-        return $itemWeightInGrams > 0 ? $itemWeightInGrams : 200;
+        return PackageDimensionsCalculator::normalizeWeightInGrams($rawWeight);
     }
 
     protected function getHeaders(): array
@@ -193,10 +184,8 @@ class Shipmozo
         }
 
         $items = Arr::get($data, 'items', []);
-        $length = 0;
-        $wide = 0;
-        $height = 0;
         $billableItemCount = 0;
+        $billableItems = [];
 
         foreach ($items as $productId => $item) {
             $qty = max((int) Arr::get($item, 'qty', 1), 1);
@@ -210,15 +199,8 @@ class Shipmozo
             }
 
             $billableItemCount++;
-
-            $rawWeight = (float) Arr::get($item, 'weight', 0);
-            $itemWeightInGrams = $this->convertWeightToGrams($rawWeight);
-
-            $weight += $itemWeightInGrams * $qty;
             $totalValue += (float) Arr::get($item, 'price', 0) * $qty;
-            $length = max($length, (float) Arr::get($item, 'length', 10));
-            $wide = max($wide, (float) Arr::get($item, 'wide', Arr::get($item, 'width', 10)));
-            $height = max($height, (float) Arr::get($item, 'height', 10));
+            $billableItems[] = $item;
         }
 
         // If all items in this package are free shipping, bypass ShipMozo rate calculation (Free Delivery applies)
@@ -226,10 +208,15 @@ class Shipmozo
             return [];
         }
 
-        // Enforce global minimum weight safely ensuring the payload is never 0
-        if ($weight <= 0) {
-            $weight = 200;
+        if (empty($billableItems) && $weight > 0) {
+            $billableItems[] = ['weight' => $weight, 'qty' => 1];
         }
+
+        $packageCalc = PackageDimensionsCalculator::calculate($billableItems);
+        $weight = $packageCalc['chargeable_weight_grams'];
+        $length = $packageCalc['length'];
+        $wide = $packageCalc['width'];
+        $height = $packageCalc['height'];
 
         $paymentMethod = Arr::get($data, 'payment_method');
         $isCod = $paymentMethod == PaymentMethodEnum::COD;
@@ -419,13 +406,9 @@ class Shipmozo
             return self::invalidPincodeResponse();
         }
 
-        $totalWeight = 0;
         $items = [];
-        $maxLength = 0;
-        $maxWidth = 0;
-        $maxHeight = 0;
-
         $isIndividualScope = setting('shipping_shipmozo_scope', 'all') === 'individual';
+        $packageCalc = PackageDimensionsCalculator::calculateForOrder($order, $isIndividualScope);
 
         foreach ($order->products as $orderProduct) {
             $product = $orderProduct->product;
@@ -443,18 +426,6 @@ class Shipmozo
                     continue;
                 }
             }
-
-            // Dynamic Dimensions & Weight
-            $itemLength = (float) ($product ? ($product->length ?: 10) : 10);
-            $itemWidth = (float) ($product ? ($product->wide ?: 10) : 10);
-            $itemHeight = (float) ($product ? ($product->height ?: 10) : 10);
-            $rawWeight = (float) ($orderProduct->weight ?: ($product ? $product->weight : 0));
-            $itemWeightInGrams = $this->convertWeightToGrams($rawWeight);
-
-            $totalWeight += $itemWeightInGrams * $orderProduct->qty;
-            $maxLength = max($maxLength, $itemLength);
-            $maxWidth = max($maxWidth, $itemWidth);
-            $maxHeight = max($maxHeight, $itemHeight);
 
             $categoryName = 'General';
             if ($product && $product->categories->first()) {
@@ -553,10 +524,10 @@ class Shipmozo
             'product_detail' => $cleanItems,
             'payment_type' => $isCod ? 'COD' : 'PREPAID',
             'cod_amount' => $isCod ? $this->formatAmount($collectionAmount) : '',
-            'weight' => (int) max($totalWeight, 200),
-            'length' => (int) max($maxLength, 10),
-            'width' => (int) max($maxWidth, 10),
-            'height' => (int) max($maxHeight, 10),
+            'weight' => (int) $packageCalc['chargeable_weight_grams'],
+            'length' => (int) $packageCalc['length'],
+            'width' => (int) $packageCalc['width'],
+            'height' => (int) $packageCalc['height'],
             'warehouse_id' => (string) $warehouseId,
             'gst_ewaybill_number' => '',
             'gstin_number' => '',
@@ -735,26 +706,11 @@ class Shipmozo
             return self::invalidPincodeResponse();
         }
 
-        $totalWeight = 0;
         $items = [];
-        $maxLength = 0;
-        $maxWidth = 0;
-        $maxHeight = 0;
+        $returnCalc = PackageDimensionsCalculator::calculateForReturn($orderReturn);
 
         foreach ($orderReturn->items as $returnItem) {
             $product = $returnItem->product;
-
-            // Dynamic Dimensions & Weight
-            $itemLength = (float) ($product ? ($product->length ?: 10) : 10);
-            $itemWidth = (float) ($product ? ($product->wide ?: 10) : 10);
-            $itemHeight = (float) ($product ? ($product->height ?: 10) : 10);
-            $rawWeight = (float) ($product ? $product->weight : 0);
-            $itemWeightInGrams = $this->convertWeightToGrams($rawWeight);
-
-            $totalWeight += $itemWeightInGrams * $returnItem->qty;
-            $maxLength = max($maxLength, $itemLength);
-            $maxWidth = max($maxWidth, $itemWidth);
-            $maxHeight = max($maxHeight, $itemHeight);
 
             $categoryName = 'General';
             if ($product && $product->categories->first()) {
@@ -798,10 +754,10 @@ class Shipmozo
             'pickup_state' => $this->sanitize($address->state_name),
             'product_detail' => $items,
             'payment_type' => 'PREPAID',
-            'weight' => round(max($totalWeight, 200) / 1000, 3),
-            'length' => (float) max($maxLength, 10),
-            'width' => (float) max($maxWidth, 10),
-            'height' => (float) max($maxHeight, 10),
+            'weight' => round($returnCalc['chargeable_weight_grams'] / 1000, 3),
+            'length' => (float) $returnCalc['length'],
+            'width' => (float) $returnCalc['width'],
+            'height' => (float) $returnCalc['height'],
             'warehouse_id' => $this->resolveWarehouseId($order),
             'return_reason_id' => $this->returnReasonId($orderReturn),
             'customer_request' => 'REFUND',

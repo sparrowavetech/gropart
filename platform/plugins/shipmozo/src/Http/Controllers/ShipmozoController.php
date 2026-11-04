@@ -291,6 +291,12 @@ class ShipmozoController extends BaseController
             $order->amount = max(0, (float) $order->amount - $oldShippingAmount + $newShippingAmount);
             $order->save();
 
+            try {
+                \SparroWave\Shipmozo\Supports\ShippingBreakdown::saveRate($order, $rate);
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
+
             $shipment->rate_id = Arr::get($rate, 'id');
             $shipment->price = $newShippingAmount;
             $shipment->save();
@@ -321,6 +327,13 @@ class ShipmozoController extends BaseController
             $nonShipmozoFee = (float) Arr::get($directDetails, 'price', 0.0);
             $ruleName = Arr::get($directDetails, 'rule_name');
             $ruleId = Arr::get($directDetails, 'rule_id');
+            $shipmozoWeight = 0.0;
+            $shipmozoCount = 0;
+            foreach (Arr::get($rateData, 'items', []) as $item) {
+                $qty = max(1, (int) Arr::get($item, 'qty', 1));
+                $shipmozoWeight += (float) Arr::get($item, 'weight', 0) * $qty;
+                $shipmozoCount += $qty;
+            }
 
             if ($nonShipmozoFee > 0) {
                 foreach ($rates as &$r) {
@@ -331,6 +344,11 @@ class ShipmozoController extends BaseController
                         $r['direct_rule_name'] = $ruleName;
                         $r['direct_rule_id'] = $ruleId;
                         $r['is_mixed'] = true;
+                        $r['shipmozo_weight'] = $shipmozoWeight;
+                        $r['shipmozo_count'] = $shipmozoCount;
+                        $r['direct_weight'] = (float) Arr::get($directDetails, 'weight', 0);
+                        $r['direct_count'] = (int) Arr::get($directDetails, 'count', 0);
+                        $r['weight_unit'] = ecommerce_weight_unit();
                         $r['price'] = $customerShipmozoFee + $nonShipmozoFee;
 
                         $combinedSuffix = trans('plugins/shipmozo::shipmozo.combined_delivery_suffix');

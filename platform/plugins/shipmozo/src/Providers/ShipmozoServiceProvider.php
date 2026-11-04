@@ -12,6 +12,7 @@ use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\ServiceProvider;
 use SparroWave\Shipmozo\Http\Middleware\WebhookMiddleware;
 use SparroWave\Shipmozo\Listeners\OrderConfirmedListener;
+use SparroWave\Shipmozo\Supports\ShippingBreakdown;
 
 class ShipmozoServiceProvider extends ServiceProvider
 {
@@ -62,11 +63,41 @@ class ShipmozoServiceProvider extends ServiceProvider
             });
         }
 
+        $this->app['events']->listen('eloquent.saved: Botble\\Ecommerce\\Models\\Order', function ($order): void {
+            if ($order instanceof \Botble\Ecommerce\Models\Order) {
+                try {
+                    ShippingBreakdown::persistForOrder($order);
+                } catch (\Throwable $exception) {
+                    report($exception);
+                }
+            }
+        });
+
+        add_filter('ecommerce_admin_order_extra_info', function (?string $html, $order): ?string {
+            if (! $order instanceof \Botble\Ecommerce\Models\Order
+                || $order->shipping_method?->getValue() !== SHIPMOZO_SHIPPING_METHOD_NAME) {
+                return $html;
+            }
+
+            try {
+                $breakdown = ShippingBreakdown::forOrder($order);
+
+                return $breakdown
+                    ? (string) $html . view('plugins/shipmozo::order-shipping-breakdown', compact('breakdown'))->render()
+                    : $html;
+            } catch (\Throwable $exception) {
+                report($exception);
+
+                return $html;
+            }
+        }, 120, 2);
+
         // Stored order weight already uses the store unit. The core view converts it
         // to grams but labels it with the store unit (0.84 kg becomes '840 kilograms').
         // Scope this presentation override to Shipmozo; API payloads stay in grams.
         $this->app['view']->composer('plugins/ecommerce::orders.edit.order-info', function ($view): void {
-            if (is_plugin_active('farmart-helper')) {
+            // Respect another plugin's existing view override without depending on it by name.
+            if ($view->getPath() !== $this->app['view']->getFinder()->find('plugins/ecommerce::orders.edit.order-info')) {
                 return;
             }
             $order = $view->getData()['order'] ?? null;

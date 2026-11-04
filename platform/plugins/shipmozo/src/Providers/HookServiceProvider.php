@@ -96,6 +96,23 @@ class HookServiceProvider extends ServiceProvider
 
         add_filter(ECOMMERCE_PRODUCT_DETAIL_EXTRA_HTML, [$this, 'addPincodeCheck'], 12, 2);
 
+        // Mark card forms from their own view data, independent of the active theme/helper.
+        $this->app['view']->composer('theme.*::partials.ecommerce.product-cart-form', function ($view): void {
+            $data = $view->getData();
+            $product = $data['product'] ?? null;
+            $isCard = $product && ! array_key_exists('withVariations', $data)
+                && ! array_key_exists('withProductOptions', $data)
+                && ! array_key_exists('isQuickShop', $data)
+                && ! array_key_exists('withBuyNow', $data);
+
+            request()->attributes->set('shipmozo_card_product_id', $isCard ? (string) ($product->id ?? '') : null);
+        });
+        add_filter(ECOMMERCE_PRODUCT_DETAIL_EXTRA_HTML, static function (mixed $html): mixed {
+            request()->attributes->remove('shipmozo_card_product_id');
+
+            return $html;
+        }, 250);
+
         add_filter(BASE_FILTER_ENUM_ARRAY, function ($values, $class) {
             if ($class == ShippingMethodEnum::class) {
                 $values['SHIPMOZO'] = SHIPMOZO_SHIPPING_METHOD_NAME;
@@ -271,6 +288,13 @@ class HookServiceProvider extends ServiceProvider
             $directDetails = $this->resolveNonShipmozoShippingDetails($data, $nonShipmozoItems);
             $defaultNonShipmozoFee = (float) Arr::get($directDetails, 'price', 0.0);
             $directRuleName = Arr::get($directDetails, 'rule_name');
+            $shipmozoWeight = 0.0;
+            $shipmozoCount = 0;
+            foreach ($shipmozoEligibleItems as $item) {
+                $qty = max(1, (int) Arr::get($item, 'qty', 1));
+                $shipmozoWeight += (float) Arr::get($item, 'weight', 0) * $qty;
+                $shipmozoCount += $qty;
+            }
             $req = function_exists('request') ? request() : null;
             $isInAdmin = (function_exists('is_in_admin') && is_in_admin(true))
                 || ($req && is_object($req) && method_exists($req, 'is') && $req->is('admin/*'));
@@ -286,6 +310,11 @@ class HookServiceProvider extends ServiceProvider
                         $rate['direct_rule_name'] = $directRuleName;
                         $rate['direct_rule_id'] = Arr::get($directDetails, 'rule_id');
                         $rate['is_mixed'] = true;
+                        $rate['shipmozo_weight'] = $shipmozoWeight;
+                        $rate['shipmozo_count'] = $shipmozoCount;
+                        $rate['direct_weight'] = (float) Arr::get($directDetails, 'weight', 0);
+                        $rate['direct_count'] = (int) Arr::get($directDetails, 'count', 0);
+                        $rate['weight_unit'] = ecommerce_weight_unit();
                         $rate['price'] = $combinedPrice;
 
                         if ($isInAdmin) {
@@ -578,7 +607,9 @@ class HookServiceProvider extends ServiceProvider
             }
         }
 
-        if (request()->has('farmart_helper_card_context') || request()->has('farmart_child_card_context') || request()->has('is_product_card')) {
+        if (request()->attributes->get('is_product_card') === true
+            || (is_object($product) && ($id = (string) ($product->id ?? '')) !== ''
+                && request()->attributes->get('shipmozo_card_product_id') === $id)) {
             return (string) $html;
         }
 
