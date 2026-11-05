@@ -13,6 +13,17 @@ return [
     'variable'=>'SMS Variable',
     'save_settings'=>'Save Setting',
     'sms_otp_enabled'=>'OTP Enabled',
+    'permission_create' => 'Create SMS template',
+    'permission_edit' => 'Edit SMS template',
+    'permission_delete' => 'Delete SMS template',
+    'delivery_report' => [
+        'title' => 'Delivery Reports',
+        'desc' => 'Track SMS delivery status from provider.',
+    ],
+    'logs' => [
+        'title' => 'Logs',
+        'view' => 'View Log',
+    ],
     'settings' => [
         'title' => 'SMS',
         'description' => 'Settings for SMS plugin',

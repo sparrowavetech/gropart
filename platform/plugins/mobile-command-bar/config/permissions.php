@@ -2,7 +2,8 @@
 
 return [
     [
-        'name' => 'plugins/mobile-command-bar::mobile-command-bar.permissions.settings',
+        'name' => 'Mobile Command Bar Settings',
         'flag' => 'mobile-command-bar.settings',
+        'parent_flag' => 'ecommerce.settings',
     ],
 ];

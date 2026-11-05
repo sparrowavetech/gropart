@@ -2,41 +2,41 @@
 
 return [
     [
-        'name' => 'plugins/sms::sms.title',
+        'name' => 'SMS Gateway',
         'flag' => 'sms.index',
     ],
     [
-        'name'        => 'plugins/sms::sms.permission_create',
+        'name'        => 'Create',
         'flag'        => 'sms.create',
         'parent_flag' => 'sms.index',
     ],
     [
-        'name'        => 'plugins/sms::sms.permission_edit',
+        'name'        => 'Edit',
         'flag'        => 'sms.edit',
         'parent_flag' => 'sms.index',
     ],
     [
-        'name'        => 'plugins/sms::sms.permission_delete',
+        'name'        => 'Delete',
         'flag'        => 'sms.destroy',
         'parent_flag' => 'sms.index',
     ],
     [
-        'name'        => 'plugins/sms::sms.setting',
+        'name'        => 'Settings',
         'flag'        => 'sms.settings',
         'parent_flag' => 'sms.index',
     ],
     [
-        'name' => 'plugins/sms::sms.delivery_report.title',
+        'name' => 'Delivery Reports',
         'flag' => 'sms.delivery-reports.index',
         'parent_flag' => 'sms.index',
     ],
     [
-        'name' => 'plugins/sms::sms.logs.title',
+        'name' => 'Logs',
         'flag' => 'sms.logs.index',
         'parent_flag' => 'sms.index',
     ],
     [
-        'name' => 'plugins/sms::sms.logs.view',
+        'name' => 'View Log',
         'flag' => 'sms.logs.show',
         'parent_flag' => 'sms.logs.index',
     ],
