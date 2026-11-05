@@ -1,0 +1,12 @@
+{
+    "id": "sparrowave/seller-invoicing",
+    "name": "Seller Invoicing",
+    "namespace": "SparroWave\\SellerInvoicing\\",
+    "provider": "SparroWave\\SellerInvoicing\\Providers\\SellerInvoicingServiceProvider",
+    "author": "Sparrowave",
+    "url": "https://www.sparrowave.com",
+    "version": "0.1.0",
+    "description": "Marketplace seller fee records, invoice preparation and reconciliation.",
+    "minimum_core_version": "7.6.0",
+    "require": ["ecommerce", "marketplace"]
+}
