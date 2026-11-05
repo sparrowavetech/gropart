@@ -36,110 +36,13 @@
             </x-core::table.body.cell>
         </x-core::table.body.row>
         @if ($order->shipping_method_name)
-            @php
-                $isMixedOrder = false;
-                $shipmozoWeight = 0;
-                $directWeight = 0;
-                $shipmozoItemCount = 0;
-                $directItemCount = 0;
-                $nonShipmozoItemsFormatted = [];
-
-                if (is_plugin_active('shipmozo') && setting('shipping_shipmozo_status') == 1 && setting('shipping_shipmozo_scope', 'all') === 'individual') {
-                    foreach ($order->products as $orderProduct) {
-                        $prod = $orderProduct->product?->original_product ?: $orderProduct->product;
-                        $qty = (int) $orderProduct->qty;
-                        $itemWeight = (float) ($prod ? $prod->weight : 0) * $qty;
-
-                        $isEligible = $prod && (is_callable([$prod, 'isShipmozoShippingEnabled'])
-                            ? $prod->isShipmozoShippingEnabled()
-                            : (bool) $prod->enable_shipmozo_shipping);
-
-                        if ($isEligible) {
-                            $shipmozoItemCount += $qty;
-                            $shipmozoWeight += $itemWeight;
-                        } else {
-                            $directItemCount += $qty;
-                            $directWeight += $itemWeight;
-                            $nonShipmozoItemsFormatted[] = [
-                                'id' => $orderProduct->product_id,
-                                'product_id' => $orderProduct->product_id,
-                                'qty' => $qty,
-                                'weight' => (float) ($prod ? $prod->weight : 0),
-                                'price' => (float) $orderProduct->price,
-                            ];
-                        }
-                    }
-                    $isMixedOrder = ($shipmozoItemCount > 0 && $directItemCount > 0);
-                }
-
-                $directFee = 0.0;
-                $directRuleName = null;
-                $shipmozoCustomerFee = 0.0;
-                if ($isMixedOrder && ! empty($nonShipmozoItemsFormatted)) {
-                    try {
-                        $hookProvider = new \SparroWave\Shipmozo\Providers\HookServiceProvider(app());
-                        $address = $order->shippingAddress ?: $order->address;
-                        $directDetails = $hookProvider->resolveNonShipmozoShippingDetails([
-                            'address_to' => [
-                                'zip_code' => $address?->zip_code ?: $address?->zip,
-                                'city' => $address?->city,
-                                'state' => $address?->state,
-                                'country' => $address?->country,
-                            ],
-                            'origin' => EcommerceHelper::getOriginAddress(),
-                            'store_id' => $order->store_id,
-                        ], $nonShipmozoItemsFormatted);
-                        $directFee = (float) Arr::get($directDetails, 'price', 0.0);
-                        $directRuleName = Arr::get($directDetails, 'rule_name');
-                        $shipmozoCustomerFee = max(0, (float) $order->shipping_amount - $directFee);
-                    } catch (\Throwable $e) {
-                        // Safe fallback
-                    }
-                }
-            @endphp
             <x-core::table.body.row>
                 <x-core::table.body.cell>
                     <p class="mb-1">{{ trans('plugins/ecommerce::order.shipping_fee') }}</p>
                     <span class="small d-block fw-semibold">{{ $order->shipping_method_name }}</span>
-                    @if ($isMixedOrder)
-                        <div class="mt-1 small text-start">
-                            <span class="badge bg-purple-lt text-purple mb-1" style="font-size: 11px;">
-                                <i class="ti ti-packages me-1"></i>{{ trans('plugins/shipmozo::shipmozo.mixed_fulfillment') }}
-                            </span>
-                            <div class="text-secondary" style="font-size: 12px;">
-                                &bull; {{ trans('plugins/shipmozo::shipmozo.shipmozo_parcel') }}: <strong>{{ rtrim(rtrim(number_format($shipmozoWeight, 3, '.', ''), '0'), '.') }} {{ ecommerce_weight_unit() }}</strong> ({{ trans('plugins/shipmozo::shipmozo.item_count_label', ['count' => $shipmozoItemCount]) }})
-                                @if ($shipmozoCustomerFee > 0)
-                                    &mdash; <span class="fw-semibold text-dark">{{ format_price($shipmozoCustomerFee) }}</span>
-                                @endif
-                            </div>
-                            <div class="text-secondary" style="font-size: 12px;">
-                                &bull; {{ trans('plugins/shipmozo::shipmozo.direct_shop_parcel') }}: <strong>{{ rtrim(rtrim(number_format($directWeight, 3, '.', ''), '0'), '.') }} {{ ecommerce_weight_unit() }}</strong> ({{ trans('plugins/shipmozo::shipmozo.item_count_label', ['count' => $directItemCount]) }})
-                                @if ($directFee > 0)
-                                    &mdash; <span class="fw-semibold text-dark">{{ format_price($directFee) }}</span>
-                                @endif
-                                @if ($directRuleName)
-                                    <span class="badge bg-blue-lt ms-1" style="font-size: 10px;" title="{{ trans('plugins/shipmozo::shipmozo.applied_shipping_rule') }}">
-                                        {{ trans('plugins/shipmozo::shipmozo.rule_label') }}: {{ $directRuleName }}
-                                    </span>
-                                @endif
-                            </div>
-                            <div class="text-muted" style="font-size: 11px;">
-                                {{ trans('plugins/shipmozo::shipmozo.total_weight') }}: {{ rtrim(rtrim(number_format((float) $weight, 3, '.', ''), '0'), '.') }} {{ ecommerce_weight_unit() }}
-                                @if ((float) $order->shipping_amount > 0)
-                                    | {{ trans('plugins/shipmozo::shipmozo.combined_total') }}: {{ format_price($order->shipping_amount) }}
-                                @endif
-                            </div>
-                        </div>
-                    @else
-                        <span class="small d-block">{{ trans('plugins/shipmozo::shipmozo.package_weight') }}: {{ rtrim(rtrim(number_format((float) $weight, 3, '.', ''), '0'), '.') }} {{ ecommerce_weight_unit() }}</span>
-                    @endif
+                    <span class="small d-block">{{ rtrim(rtrim(number_format((float) $weight, 3, '.', ''), '0'), '.') }} {{ ecommerce_weight_unit() }}</span>
                 </x-core::table.body.cell>
-                <x-core::table.body.cell>
-                    {{ format_price($order->shipping_amount) }}
-                    @if ($isMixedOrder)
-                        <span class="small text-muted d-block" style="font-size: 11px;">({{ trans('plugins/shipmozo::shipmozo.combined_fee') }})</span>
-                    @endif
-                </x-core::table.body.cell>
+                <x-core::table.body.cell>{{ format_price($order->shipping_amount) }}</x-core::table.body.cell>
             </x-core::table.body.row>
         @endif
         @if (EcommerceHelper::isTaxEnabled())
