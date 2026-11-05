@@ -60,6 +60,9 @@ setting()->set('shipping_shipmozo_rate_adjustment_type', 'none');
 setting()->set('shipping_shipmozo_rate_adjustment_value', 0);
 
 // Setup deterministic HTTP mock for ShipMozo API
+Http::preventStrayRequests();
+\Illuminate\Support\Facades\Mail::fake();
+\Illuminate\Support\Facades\Notification::fake();
 Http::fake([
     '*/get-warehouses' => Http::response([
         'result' => 1,
@@ -489,12 +492,12 @@ try {
             "order-info.blade.php displays Direct / Shop Parcel weight (0.45 kg)"
         );
         autonomous_assert(
-            str_contains($orderInfoHtml, 'Total Weight') && str_contains($orderInfoHtml, '3.73'),
-            "order-info.blade.php displays Total Weight (3.73 kg)"
+            str_contains($orderInfoHtml, '3.73'),
+            "order-info.blade.php displays the recorded total package weight (3.73 kg)"
         );
         autonomous_assert(
-            str_contains($orderInfoHtml, 'Combined Fee'),
-            "order-info.blade.php labels shipping fee as 'Combined Fee'"
+            str_contains($orderInfoHtml, trans('plugins/shipmozo::shipmozo.shipping_breakdown_included')),
+            "order-info.blade.php marks parcel components as included in the recorded shipping fee"
         );
         autonomous_assert(
             str_contains($orderInfoHtml, '250') && str_contains($orderInfoHtml, '100'),
@@ -505,6 +508,19 @@ try {
             "order-info.blade.php displays applied standard shipping rule"
         );
     }
+
+    // ShipMozo's own fallback must render the same recorded breakdown without Helper's view.
+    $standaloneOrderInfo = view()->file(
+        plugin_path('shipmozo/resources/views/overrides/order-info.blade.php'),
+        ['order' => $order, 'weight' => 3.73]
+    )->render();
+    autonomous_assert(
+        str_contains($standaloneOrderInfo, '3.28')
+            && str_contains($standaloneOrderInfo, '0.45')
+            && str_contains($standaloneOrderInfo, '250')
+            && str_contains($standaloneOrderInfo, '100'),
+        'ShipMozo-owned order-info fallback shows saved parcel weights and fee components'
+    );
 
     // Test farmart-helper incomplete.blade.php rendering
     $incompletePath = plugin_path('farmart-helper/resources/views/orders/incomplete.blade.php');
