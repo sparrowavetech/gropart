@@ -20,6 +20,7 @@ class FarmartHelperServiceProvider extends ServiceProvider
         $this->app->register(ProductCardServiceProvider::class);
         $this->app->register(SidebarAdsServiceProvider::class);
         $this->app->register(ProductDescriptionServiceProvider::class);
+        $this->app->register(MixedCartShippingServiceProvider::class);
     }
 
     public function boot(): void
