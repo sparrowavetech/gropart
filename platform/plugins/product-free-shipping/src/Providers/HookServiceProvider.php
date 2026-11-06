@@ -28,6 +28,10 @@ class HookServiceProvider extends ServiceProvider
             if (!\Botble\Base\Facades\AdminHelper::isInAdmin()) return $html;
             return $html . $this->renderProductDetailBadge('', $item->product?->original_product ?: $item->product, true);
         }, 191, 3);
+        add_filter('ecommerce_admin_product_view_badges', function ($html, $product) {
+            if (!\Botble\Base\Facades\AdminHelper::isInAdmin() || !$product) return $html;
+            return $html . $this->renderProductDetailBadge('', $product->original_product ?: $product, true);
+        }, 120, 2);
         // 1. Form Injections (Admin & Marketplace Vendor)
         ProductForm::extend(function (ProductForm $form) {
             $this->injectProductFormField($form);
@@ -286,14 +290,14 @@ class HookServiceProvider extends ServiceProvider
 
         $badgeText = ProductFreeShippingHelper::getBadgeText();
 
-        $badgeHtml = '<span class="badge bg-success" style="background-color: #28a745 !important; color: white !important; padding: 5px 9px; font-size: 11px; border-radius: 4px; font-weight: 500; line-height: 1.2; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">'
+        $badgeHtml = '<span class="badge bg-success" style="background-color: #28a745 !important; color: white !important; padding: ' . ($forAdminOrder ? '4px 8px' : '5px 9px') . '; font-size: 11px; border-radius: 4px; font-weight: 500; line-height: 1.2; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">'
             . '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width: 13px !important; height: 13px !important; max-width: 13px !important; max-height: 13px !important; display: inline-block; vertical-align: middle; flex-shrink: 0;">'
-            . '<rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle>'
+            . '<rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle>'
             . '</svg>'
             . '<span>' . e($badgeText) . '</span>'
             . '</span>';
 
-        return ($html ?? '') . '<span class="product-free-shipping-detail-badge" style="display: inline-flex; vertical-align: middle; margin: 6px 6px 6px 0;">' . $badgeHtml . '</span>';
+        return ($html ?? '') . '<span class="product-free-shipping-detail-badge" style="display: inline-flex; vertical-align: middle; margin: ' . ($forAdminOrder ? '4px 4px 4px 0' : '6px 6px 6px 0') . ';">' . $badgeHtml . '</span>';
     }
 
     public function renderCartItemBadge(?string $html, mixed $cartItem = null): ?string

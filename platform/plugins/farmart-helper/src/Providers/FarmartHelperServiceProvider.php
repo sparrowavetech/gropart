@@ -5,6 +5,8 @@ namespace SparroWave\FarmartHelper\Providers;
 use Botble\Base\Supports\ServiceProvider;
 use Botble\Base\Traits\LoadAndPublishDataTrait;
 use Illuminate\Routing\Router;
+use SparroWave\FarmartHelper\Http\Middleware\GuardIncompleteOrderEditMiddleware;
+use SparroWave\FarmartHelper\Http\Middleware\ProcessNormalCodIncompleteOrder;
 use SparroWave\FarmartHelper\Http\Middleware\SanitizePhoneRequestMiddleware;
 
 class FarmartHelperServiceProvider extends ServiceProvider
@@ -21,6 +23,7 @@ class FarmartHelperServiceProvider extends ServiceProvider
         $this->app->register(SidebarAdsServiceProvider::class);
         $this->app->register(ProductDescriptionServiceProvider::class);
         $this->app->register(MixedCartShippingServiceProvider::class);
+        $this->app->register(ProductAdminViewServiceProvider::class);
     }
 
     public function boot(): void
@@ -33,5 +36,7 @@ class FarmartHelperServiceProvider extends ServiceProvider
         /** @var Router $router */
         $router = $this->app['router'];
         $router->pushMiddlewareToGroup('web', SanitizePhoneRequestMiddleware::class);
+        $router->pushMiddlewareToGroup('web', ProcessNormalCodIncompleteOrder::class);
+        $router->pushMiddlewareToGroup('web', GuardIncompleteOrderEditMiddleware::class);
     }
 }

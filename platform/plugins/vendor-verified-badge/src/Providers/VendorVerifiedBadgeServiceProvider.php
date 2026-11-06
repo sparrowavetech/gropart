@@ -43,6 +43,18 @@ class VendorVerifiedBadgeServiceProvider extends ServiceProvider
 
         $this->app->register(HookServiceProvider::class);
 
+        $this->app['router']->pushMiddlewareToGroup('web', \SparroWave\VendorVerifiedBadge\Http\Middleware\EnrichVendorBadgeProductSearchMiddleware::class);
+
+        add_filter('core_layout_end_body', function (?string $html): ?string {
+            if (! \Botble\Base\Facades\AdminHelper::isInAdmin()) {
+                return $html;
+            }
+
+            $jsUrl = asset('vendor/core/plugins/vendor-verified-badge/js/admin-vendor-badge.js');
+
+            return ($html ?? '') . "\n" . '<script src="' . $jsUrl . '?v=' . get_cms_version() . '"></script>';
+        }, 130);
+
         $this->registerBladeDirectives();
         $this->registerStoreMacros();
         $this->registerThemeAssets();

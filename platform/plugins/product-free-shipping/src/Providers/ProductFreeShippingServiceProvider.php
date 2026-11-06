@@ -46,6 +46,18 @@ class ProductFreeShippingServiceProvider extends ServiceProvider
 
         $this->registerProductMacros();
 
+        $this->app['router']->pushMiddlewareToGroup('web', \SparroWave\ProductFreeShipping\Http\Middleware\EnrichFreeShippingProductSearchMiddleware::class);
+
+        add_filter('core_layout_end_body', function (?string $html): ?string {
+            if (! \Botble\Base\Facades\AdminHelper::isInAdmin()) {
+                return $html;
+            }
+
+            $jsUrl = asset('vendor/core/plugins/product-free-shipping/js/admin-product-free-shipping.js');
+
+            return ($html ?? '') . "\n" . '<script src="' . $jsUrl . '?v=' . get_cms_version() . '"></script>';
+        }, 125);
+
         // Automatically inject universal CSS on frontend and checkout across ANY active theme
         add_filter([THEME_FRONT_HEADER, 'ecommerce_checkout_header'], function (?string $html): ?string {
             if (! ProductFreeShippingHelper::isEnabled()) {

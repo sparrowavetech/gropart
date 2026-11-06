@@ -254,8 +254,19 @@
                     </form>
                 </x-core::card.body>
                 <x-core::card.footer class="text-end">
+                    @php
+                        $orderEligibility = is_plugin_active('advanced-cod')
+                            ? \SparroWave\AdvancedCod\Supports\OrderEligibility::read($order)
+                            : ['cod' => true];
+                        $isCodEligible = $orderEligibility['cod'] && (function_exists('get_payment_setting') ? get_payment_setting('status', 'cod') == 1 : true);
+                    @endphp
+                    @if ($isCodEligible && is_plugin_active('advanced-cod') && auth()->user()?->hasPermission('advanced-cod.manual-confirm') && auth()->user()?->hasPermission('orders.edit'))
+                        <a href="{{ route('advanced-cod.confirm.show', $order->id) }}" class="btn btn-primary me-2">
+                            <i class="ti ti-shield-check me-1"></i> {{ trans('plugins/advanced-cod::advanced-cod.review_and_place_order') }}
+                        </a>
+                    @endif
                     <x-core::button
-                        color="primary"
+                        color="secondary"
                         data-bs-toggle="modal"
                         data-bs-target="#mark-order-as-completed-modal"
                         icon="ti ti-check"
@@ -411,11 +422,62 @@
         :form-action="route('orders.mark-as-completed', $order->id)"
     >
         @if (is_plugin_active('payment'))
+            @php
+                $orderEligibility = is_plugin_active('advanced-cod')
+                    ? \SparroWave\AdvancedCod\Supports\OrderEligibility::read($order)
+                    : ['cod' => true];
+                $isCodEligible = $orderEligibility['cod'] && (function_exists('get_payment_setting') ? get_payment_setting('status', 'cod') == 1 : true);
+                $availableMethods = \Botble\Payment\Enums\PaymentMethodEnum::labels();
+                if (! $isCodEligible) {
+                    unset($availableMethods['cod'], $availableMethods['advanced_cod_manual']);
+                }
+                $baseOrderAmount = round((float) $order->amount - (float) $order->payment_fee, 2);
+                $codFeeEstimate = round(\Botble\Payment\Supports\PaymentFeeHelper::calculateFee('cod', $baseOrderAmount), 2);
+            @endphp
+
+            @if (! $isCodEligible)
+                <div class="alert alert-warning py-2 mb-3 d-flex align-items-center">
+                    <i class="ti ti-alert-triangle me-2 fs-4"></i>
+                    <span>{{ __('This order contains products not eligible for Cash on Delivery (COD). Only prepaid payment methods are available.') }}</span>
+                </div>
+            @endif
+
             <x-core::form.select
                 name="payment_method"
                 :label="trans('plugins/ecommerce::order.payment_method')"
-                :options="\Botble\Payment\Enums\PaymentMethodEnum::labels()"
+                :options="$availableMethods"
             />
+
+            @if ($isCodEligible)
+                <div id="incomplete-cod-notice-box" class="alert alert-info py-2 mb-3" style="display: none;">
+                    <div class="d-flex align-items-center">
+                        <i class="ti ti-info-circle me-2 fs-4"></i>
+                        <div>
+                            <strong>Normal COD:</strong> Order total will include the Cash Collection / Processing fee of <strong>{{ format_price($codFeeEstimate) }}</strong>. Full balance of <strong>{{ format_price($baseOrderAmount + $codFeeEstimate) }}</strong> will be collected on delivery.
+                        </div>
+                    </div>
+                </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const modal = document.getElementById('mark-order-as-completed-modal');
+                        if (! modal) return;
+                        const methodSelect = modal.querySelector('[name="payment_method"]');
+                        const noticeBox = document.getElementById('incomplete-cod-notice-box');
+                        if (! methodSelect || ! noticeBox) return;
+
+                        function toggleCodNotice() {
+                            if (methodSelect.value === 'cod') {
+                                noticeBox.style.display = 'block';
+                            } else {
+                                noticeBox.style.display = 'none';
+                            }
+                        }
+                        methodSelect.addEventListener('change', toggleCodNotice);
+                        modal.addEventListener('shown.bs.modal', toggleCodNotice);
+                        toggleCodNotice();
+                    });
+                </script>
+            @endif
 
             <x-core::form.select
                 name="payment_status"

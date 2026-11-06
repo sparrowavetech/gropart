@@ -36,6 +36,8 @@ class AdvancedCodServiceProvider extends ServiceProvider
         $this->app->register(SettlementServiceProvider::class);
         $this->app->register(ManualConfirmationServiceProvider::class);
 
+        $this->app['router']->pushMiddlewareToGroup('web', \SparroWave\AdvancedCod\Http\Middleware\EnrichCodProductSearchMiddleware::class);
+
         $this->app->booted(function () {
             add_filter('ecommerce_order_checkout_locked', fn ($locked, $order) => $locked || (bool) \SparroWave\AdvancedCod\Supports\AdvancePayment::intent($order), 20, 2);
             add_action('ecommerce_checkout_restarted', function () { if (request()->hasSession()) session()->forget(['advanced_cod_prepayment', 'advanced_cod_order_ids']); }, 20, 2);
@@ -102,6 +104,7 @@ class AdvancedCodServiceProvider extends ServiceProvider
             add_action(BASE_ACTION_AFTER_UPDATE_CONTENT, [AdvancedCodHookListener::class, 'saveProductCodEligibility'], 120, 3);
 
             add_filter('ecommerce_before_product_description', [AdvancedCodHookListener::class, 'addCodLabelToProductPage'], 120, 2);
+            add_filter('ecommerce_admin_product_view_badges', [AdvancedCodHookListener::class, 'addCodLabelToProductView'], 120, 2);
             add_filter('ecommerce_after_product_price', [AdvancedCodHookListener::class, 'addCodLabelToProductCard'], 120, 2);
             add_filter('ecommerce_product_item_badges', [AdvancedCodHookListener::class, 'addCodLabelToProductCard'], 120, 2);
             add_filter('ecommerce_product_loop_extra_html', [AdvancedCodHookListener::class, 'addCodLabelToProductCard'], 120, 2);

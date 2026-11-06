@@ -7,15 +7,15 @@
         : (Route::has('seller-invoicing.bulk-download') ? route('seller-invoicing.bulk-download') : '');
 @endphp
 
-<div class="card mb-3 si-date-range-filter-card shadow-sm border">
-    <div class="card-header py-2 px-3 bg-light-subtle d-flex align-items-center justify-content-between flex-wrap gap-2">
+<div class="card mb-3 si-date-range-filter-card">
+    <div class="card-header py-2 px-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div class="d-flex align-items-center gap-2">
-            <i class="ti ti-calendar-search text-primary fs-3"></i>
-            <span class="fw-bold text-dark fs-5 mb-0">{{ trans('plugins/seller-invoicing::seller-invoicing.search_by_date_range') }}</span>
+            <x-core::icon name="ti ti-calendar-search" class="text-primary fs-3" />
+            <h4 class="card-title text-dark mb-0">{{ trans('plugins/seller-invoicing::seller-invoicing.search_by_date_range') }}</h4>
         </div>
         @if(!empty($currentDateFrom) || !empty($currentDateTo))
             <span class="badge bg-primary-lt text-primary px-2 py-1">
-                <i class="ti ti-filter me-1"></i> {{ $currentDateFrom ?: 'Start' }} &rarr; {{ $currentDateTo ?: 'Today' }}
+                <x-core::icon name="ti ti-filter" class="me-1" /> {{ $currentDateFrom ?: 'Start' }} &rarr; {{ $currentDateTo ?: 'Today' }}
             </span>
         @endif
     </div>
@@ -28,19 +28,19 @@
                 </label>
                 <select class="form-select form-select-sm si-quick-period">
                     <option value="">{{ trans('plugins/seller-invoicing::seller-invoicing.quick_range') }}</option>
-                    <option value="today">Today</option>
-                    <option value="yesterday">Yesterday</option>
-                    <option value="last_7_days">Last 7 Days</option>
-                    <option value="this_month">This Month</option>
-                    <option value="last_month">Last Month</option>
-                    <option value="this_year">This Year</option>
+                    <option value="today">{{ trans('plugins/seller-invoicing::seller-invoicing.today') }}</option>
+                    <option value="yesterday">{{ trans('plugins/seller-invoicing::seller-invoicing.yesterday') }}</option>
+                    <option value="last_7_days">{{ trans('plugins/seller-invoicing::seller-invoicing.last_7_days') }}</option>
+                    <option value="this_month">{{ trans('plugins/seller-invoicing::seller-invoicing.this_month') }}</option>
+                    <option value="last_month">{{ trans('plugins/seller-invoicing::seller-invoicing.last_month') }}</option>
+                    <option value="this_year">{{ trans('plugins/seller-invoicing::seller-invoicing.this_year') }}</option>
                 </select>
             </div>
 
             @if(empty($isOrderTable))
                 <div class="col-12 col-sm-6 col-md-3 col-lg-2">
                     <label class="form-label text-muted small fw-semibold mb-1">
-                        Filter By Field
+                        {{ trans('plugins/seller-invoicing::seller-invoicing.filter_by_field') }}
                     </label>
                     <select class="form-select form-select-sm si-date-type">
                         <option value="order_date" {{ $currentDateType === 'order_date' ? 'selected' : '' }}>{{ trans('plugins/seller-invoicing::seller-invoicing.order_date') }}</option>
@@ -50,8 +50,9 @@
             @endif
 
             <div class="col-12 col-sm-6 col-md-3 col-lg-3">
-                <label class="form-label text-muted small fw-semibold mb-1">
-                    <i class="ti ti-calendar me-1"></i>{{ trans('plugins/seller-invoicing::seller-invoicing.order_date_from') }}
+                <label class="form-label text-muted small fw-semibold mb-1 d-flex align-items-center">
+                    <x-core::icon name="ti ti-calendar" class="me-1 text-muted" />
+                    <span class="si-label-from-text">{{ $currentDateType === 'issued_at' ? trans('plugins/seller-invoicing::seller-invoicing.invoice_date_from') : trans('plugins/seller-invoicing::seller-invoicing.order_date_from') }}</span>
                 </label>
                 <div class="input-group input-group-sm datepicker">
                     <input
@@ -64,17 +65,18 @@
                         readonly="readonly"
                     >
                     <button class="btn btn-icon btn-light" type="button" data-toggle="data-toggle" aria-label="Select date">
-                        <i class="ti ti-calendar"></i>
+                        <x-core::icon name="ti ti-calendar" />
                     </button>
                     <button class="btn btn-icon btn-light text-danger" type="button" data-clear="data-clear" aria-label="Clear date">
-                        <i class="ti ti-x"></i>
+                        <x-core::icon name="ti ti-x" />
                     </button>
                 </div>
             </div>
 
             <div class="col-12 col-sm-6 col-md-3 col-lg-3">
-                <label class="form-label text-muted small fw-semibold mb-1">
-                    <i class="ti ti-calendar me-1"></i>{{ trans('plugins/seller-invoicing::seller-invoicing.order_date_to') }}
+                <label class="form-label text-muted small fw-semibold mb-1 d-flex align-items-center">
+                    <x-core::icon name="ti ti-calendar" class="me-1 text-muted" />
+                    <span class="si-label-to-text">{{ $currentDateType === 'issued_at' ? trans('plugins/seller-invoicing::seller-invoicing.invoice_date_to') : trans('plugins/seller-invoicing::seller-invoicing.order_date_to') }}</span>
                 </label>
                 <div class="input-group input-group-sm datepicker">
                     <input
@@ -87,20 +89,20 @@
                         readonly="readonly"
                     >
                     <button class="btn btn-icon btn-light" type="button" data-toggle="data-toggle" aria-label="Select date">
-                        <i class="ti ti-calendar"></i>
+                        <x-core::icon name="ti ti-calendar" />
                     </button>
                     <button class="btn btn-icon btn-light text-danger" type="button" data-clear="data-clear" aria-label="Clear date">
-                        <i class="ti ti-x"></i>
+                        <x-core::icon name="ti ti-x" />
                     </button>
                 </div>
             </div>
 
             <div class="col-12 col-sm-6 col-md-auto ms-auto d-flex gap-2">
                 <button type="button" class="btn btn-sm btn-primary si-btn-apply-filter px-3">
-                    <i class="ti ti-filter me-1"></i> Apply
+                    <x-core::icon name="ti ti-filter" class="me-1" /> {{ trans('plugins/seller-invoicing::seller-invoicing.apply') }}
                 </button>
                 <button type="button" class="btn btn-sm btn-outline-secondary si-btn-reset-filter px-3" {{ empty($currentDateFrom) && empty($currentDateTo) ? 'style=display:none;' : '' }}>
-                    <i class="ti ti-rotate-2 me-1"></i> Reset
+                    <x-core::icon name="ti ti-rotate-2" class="me-1" /> {{ trans('plugins/seller-invoicing::seller-invoicing.reset') }}
                 </button>
             </div>
         </form>
@@ -190,6 +192,22 @@
                 $(toInput).val(to);
             }
         });
+
+        // Dynamic Label Handler for Order Date vs Invoice Date
+        function updateDateLabels() {
+            const dateType = $('.si-date-type').val();
+            const isInvoice = dateType === 'issued_at';
+            const fromText = isInvoice
+                ? @json(trans('plugins/seller-invoicing::seller-invoicing.invoice_date_from'))
+                : @json(trans('plugins/seller-invoicing::seller-invoicing.order_date_from'));
+            const toText = isInvoice
+                ? @json(trans('plugins/seller-invoicing::seller-invoicing.invoice_date_to'))
+                : @json(trans('plugins/seller-invoicing::seller-invoicing.order_date_to'));
+            $('.si-label-from-text').text(fromText);
+            $('.si-label-to-text').text(toText);
+        }
+        $(document).on('change', '.si-date-type', updateDateLabels);
+        updateDateLabels();
 
         // Apply Filter
         $(document).on('click', '.si-btn-apply-filter', function (e) {

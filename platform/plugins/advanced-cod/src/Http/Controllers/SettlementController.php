@@ -19,10 +19,10 @@ class SettlementController extends BaseController
     {
         $this->authorizeOrder($order);
 
-        $this->pageTitle(trans('plugins/advanced-cod::advanced-cod.settlement_management') . ' — ' . $order->code);
+        $this->pageTitle(trans('plugins/advanced-cod::advanced-cod.settlement_management') . ' — ' . $order->code, false);
 
         $this->breadcrumb()
-            ->add(trans('plugins/ecommerce::order.menu_name'), route('orders.index'))
+            ->add(trans('plugins/ecommerce::order.menu'), route('orders.index'))
             ->add($order->code, route('orders.edit', $order->id))
             ->add(trans('plugins/advanced-cod::advanced-cod.settlement_title'));
 

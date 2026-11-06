@@ -60,6 +60,9 @@ class SellerInvoiceTable extends TableAbstract
             ->addColumn('checkbox', function ($item) {
                 return view('core/table::partials.checkbox', ['id' => $item->getKey()])->render();
             })
+            ->orderColumn('number', function ($query, $order) {
+                $query->orderBy('si_documents.number', $order);
+            })
             ->orderColumn('order_date', function ($query, $order) {
                 $query->orderBy('ec_orders.created_at', $order);
             })
@@ -68,6 +71,18 @@ class SellerInvoiceTable extends TableAbstract
             })
             ->orderColumn('issued_at', function ($query, $order) {
                 $query->orderBy('si_documents.issued_at', $order);
+            })
+            ->orderColumn('subtotal', function ($query, $order) {
+                $query->orderBy('si_documents.subtotal', $order);
+            })
+            ->orderColumn('tax_amount', function ($query, $order) {
+                $query->orderBy('si_documents.tax_amount', $order);
+            })
+            ->orderColumn('grand_total', function ($query, $order) {
+                $query->orderBy('si_documents.grand_total', $order);
+            })
+            ->orderColumn('status', function ($query, $order) {
+                $query->orderBy('si_documents.status', $order);
             })
             ->filter(function ($query) {
                 $keyword = $this->request->input('search.value');
@@ -123,9 +138,11 @@ class SellerInvoiceTable extends TableAbstract
             }
         }
 
-        $query
-            ->orderByDesc('ec_orders.created_at')
-            ->orderByDesc('si_documents.order_id');
+        if (! $this->request->has('order')) {
+            $query
+                ->orderByDesc('ec_orders.created_at')
+                ->orderByDesc('si_documents.order_id');
+        }
 
         return $this->applyScopes($query);
     }
@@ -138,6 +155,7 @@ class SellerInvoiceTable extends TableAbstract
             FormattedColumn::make('number')
                 ->title(trans('plugins/seller-invoicing::seller-invoicing.invoice_number'))
                 ->alignStart()
+                ->orderable(true)
                 ->renderUsing(function (FormattedColumn $column) {
                     $item = $column->getItem();
                     $url = route('seller-invoicing.show', $item->getKey());
@@ -200,24 +218,28 @@ class SellerInvoiceTable extends TableAbstract
             FormattedColumn::make('subtotal')
                 ->title(trans('plugins/seller-invoicing::seller-invoicing.subtotal'))
                 ->alignEnd()
+                ->orderable(true)
                 ->renderUsing(function (FormattedColumn $column) {
                     return format_price($column->getItem()->subtotal);
                 }),
             FormattedColumn::make('tax_amount')
                 ->title(trans('plugins/seller-invoicing::seller-invoicing.tax'))
                 ->alignEnd()
+                ->orderable(true)
                 ->renderUsing(function (FormattedColumn $column) {
                     return format_price($column->getItem()->tax_amount);
                 }),
             FormattedColumn::make('grand_total')
                 ->title(trans('plugins/seller-invoicing::seller-invoicing.grand_total'))
                 ->alignEnd()
+                ->orderable(true)
                 ->renderUsing(function (FormattedColumn $column) {
                     return '<strong class="text-success">' . format_price($column->getItem()->grand_total) . '</strong>';
                 }),
             FormattedColumn::make('status')
                 ->title(trans('core/base::tables.status'))
                 ->alignCenter()
+                ->orderable(true)
                 ->renderUsing(function (FormattedColumn $column) {
                     $item = $column->getItem();
                     $status = strtolower($item->status);

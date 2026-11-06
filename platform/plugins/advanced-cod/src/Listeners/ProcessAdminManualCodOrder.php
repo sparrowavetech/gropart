@@ -25,6 +25,26 @@ class ProcessAdminManualCodOrder
             return;
         }
 
+        // Automatically calculate and add Cash Collection Fee (4%) if not already added to order
+        $feeValue = (float) get_payment_setting('fee', 'cod', 4);
+        $feeType = get_payment_setting('fee_type', 'cod', 'percentage');
+        $feeFixed = (float) get_payment_setting('fee_fixed', 'cod', 0);
+
+        $baseAmount = (float) $order->amount;
+        $fee = (float) $order->payment_fee;
+        if ($fee <= 0 && $feeValue > 0) {
+            if ($feeType === 'percentage') {
+                $fee = round($baseAmount * ($feeValue / 100), 2) + $feeFixed;
+            } else {
+                $fee = $feeValue;
+            }
+            if ($fee > 0) {
+                $order->payment_fee = $fee;
+                $order->amount = round($baseAmount + $fee, 2);
+                $order->saveQuietly();
+            }
+        }
+
         $orderTotal = (float) $order->amount;
         $prepaymentPercentage = CodAmounts::getPrepaymentPercentage();
         $split = CodAmounts::split($orderTotal, $prepaymentPercentage);

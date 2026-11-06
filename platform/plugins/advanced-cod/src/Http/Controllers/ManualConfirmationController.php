@@ -19,10 +19,10 @@ class ManualConfirmationController extends BaseController
         $this->authorizeConfirmation();
         abort_unless(ManualConfirmation::available($order), 404);
 
-        $this->pageTitle(trans('plugins/advanced-cod::advanced-cod.manual_confirmation_title') . ' — ' . $order->code);
+        $this->pageTitle(trans('plugins/advanced-cod::advanced-cod.manual_confirmation_title') . ' — ' . $order->code, false);
 
         $this->breadcrumb()
-            ->add(trans('plugins/ecommerce::order.menu_name'), route('orders.index'))
+            ->add(trans('plugins/ecommerce::order.menu'), route('orders.index'))
             ->add(
                 $order->code,
                 $order->is_finished ? route('orders.edit', $order->id) : route('orders.view-incomplete-order', $order->id)

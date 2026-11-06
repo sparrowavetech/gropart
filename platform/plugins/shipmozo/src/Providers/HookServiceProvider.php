@@ -70,6 +70,23 @@ class HookServiceProvider extends ServiceProvider
             return $html . $badge;
         }, 195, 3);
 
+        add_filter('ecommerce_admin_product_view_badges', function ($html, $product) {
+            if (! \Botble\Base\Facades\AdminHelper::isInAdmin() || ! $product) {
+                return $html;
+            }
+
+            $prod = $product->original_product ?: $product;
+            $isEligible = is_callable([$prod, 'isShipmozoShippingEnabled'])
+                ? (bool) $prod->isShipmozoShippingEnabled()
+                : (bool) ($prod->enable_shipmozo_shipping ?? false);
+
+            if ($isEligible) {
+                return $html . '<span class="badge bg-blue-lt text-blue ms-1" style="display: inline-flex; vertical-align: middle; margin: 4px 4px 4px 0; font-size: 11px; padding: 4px 8px; border-radius: 4px; font-weight: 500;"><i class="ti ti-truck me-1"></i>ShipMozo</span>';
+            }
+
+            return $html;
+        }, 130, 2);
+
         // Product Form Extensions (Admin & Marketplace Vendor)
         if (class_exists(ProductForm::class)) {
             ProductForm::extend(function (ProductForm $form) {

@@ -51,6 +51,7 @@ class HookServiceProvider extends ServiceProvider
         $this->hookDashboardMenuGating();
         $this->hookAdminDataTables();
         $this->hookAdminStoreViewPage();
+        $this->hookAdminProductView();
         $this->hookVendorDashboardContent();
         $this->hookOrderEditStoreBadges();
         $this->listenToEvents();
@@ -408,6 +409,30 @@ class HookServiceProvider extends ServiceProvider
                 }, 120);
             }
         });
+    }
+
+    protected function hookAdminProductView(): void
+    {
+        add_filter('ecommerce_admin_product_view_datagrid', function ($html, $product) {
+            if (! \Botble\Base\Facades\AdminHelper::isInAdmin() || ! $product) {
+                return $html;
+            }
+
+            $store = $product->original_product?->store ?? $product->store ?? null;
+            if (! $store || ! $store->id) {
+                return $html;
+            }
+
+            $badges = VendorBadgeHelper::renderBadges($store, ['is_admin' => true]);
+            $storeLink = '<a href="' . route('marketplace.store.edit', $store->id) . '" target="_blank" class="fw-semibold text-primary">' . e($store->name) . '</a>';
+
+            $itemHtml = '<div class="datagrid-item">'
+                . '<div class="datagrid-title">' . trans('plugins/marketplace::store.forms.store_name') . '</div>'
+                . '<div class="datagrid-content d-flex align-items-center flex-wrap gap-1">' . $storeLink . ' ' . $badges . '</div>'
+                . '</div>';
+
+            return $html . $itemHtml;
+        }, 120, 2);
     }
 
     protected function hookOrderEditStoreBadges(): void

@@ -108,9 +108,9 @@ class SellerInvoicingServiceProvider extends ServiceProvider
             ];
         }, 999);
 
-        // Admin Order Detail: Seller Fee Invoice Card & Buttons
+        // Admin Order Detail: Seller Fee Invoice Card & Buttons (only for finished/fulfilled orders)
         add_filter('ecommerce_admin_order_extra_info', function (?string $html, Order $order): string {
-            if (! auth()->check() || ! auth()->user()?->hasPermission('seller-invoicing.view') || ! $order->store_id) {
+            if (! auth()->check() || ! auth()->user()?->hasPermission('seller-invoicing.view') || ! $order->store_id || ! $order->is_finished) {
                 return $html ?? '';
             }
 

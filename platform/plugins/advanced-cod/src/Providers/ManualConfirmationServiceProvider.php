@@ -12,8 +12,58 @@ class ManualConfirmationServiceProvider extends ServiceProvider
     {
         $this->app['router']->pushMiddlewareToGroup('web',\SparroWave\AdvancedCod\Http\Middleware\GuardManualCod::class);
         $this->app->booted(function(){
-            add_filter(BASE_FILTER_ENUM_ARRAY,function($values,$class){if($class===PaymentMethodEnum::class)$values['ADVANCED_COD_MANUAL']=ManualConfirmation::CHANNEL;return $values;},30,2);
-            add_filter(BASE_FILTER_ENUM_LABEL,function($value,$class){return $class===PaymentMethodEnum::class && $value===ManualConfirmation::CHANNEL?'Manual COD advance receipt':$value;},30,2);
+            add_filter(BASE_FILTER_ENUM_ARRAY, function ($values, $class) {
+                if ($class === PaymentMethodEnum::class) {
+                    $values['ADVANCED_COD_MANUAL'] = ManualConfirmation::CHANNEL;
+                    $values['ADVANCED_COD'] = 'advanced_cod';
+                }
+                return $values;
+            }, 30, 2);
+
+            add_filter(BASE_FILTER_ENUM_LABEL, function ($value, $class) {
+                if ($class === PaymentMethodEnum::class) {
+                    if ($value === ManualConfirmation::CHANNEL) {
+                        return 'Manual COD advance receipt';
+                    }
+                    if ($value === 'advanced_cod') {
+                        return 'Advanced COD (Online / Front-end)';
+                    }
+                }
+                return $value;
+            }, 30, 2);
+
+            add_filter(BASE_FILTER_TABLE_QUERY, function ($query, $table) {
+                if ($table instanceof \Botble\Ecommerce\Tables\OrderTable) {
+                    $filterValues = request()->input('filter_values', []);
+                    $filterColumns = request()->input('filter_columns', []);
+                    $hasAdvancedCod = false;
+                    foreach ($filterColumns as $idx => $col) {
+                        if ($col === 'payment_method' && ($filterValues[$idx] ?? '') === 'advanced_cod') {
+                            $hasAdvancedCod = true;
+                            break;
+                        }
+                    }
+                    if ($hasAdvancedCod) {
+                        $wheres = $query->getQuery()->wheres;
+                        foreach ($wheres as $k => $w) {
+                            if (($w['type'] ?? '') === 'Exists') {
+                                unset($wheres[$k]);
+                            }
+                        }
+                        $query->getQuery()->wheres = array_values($wheres);
+                        $query->getQuery()->bindings['where'] = array_values(array_filter(
+                            $query->getQuery()->bindings['where'],
+                            fn($b) => $b !== 'advanced_cod'
+                        ));
+                        $query->where(function ($q) {
+                            $q->whereNotNull('ec_orders.cod_prepayment_amount')
+                              ->where('ec_orders.cod_prepayment_amount', '>', 0)
+                              ->orWhereHas('payment', fn($p) => $p->whereIn('payment_channel', ['advanced_cod', ManualConfirmation::CHANNEL]));
+                        });
+                    }
+                }
+                return $query;
+            }, 50, 2);
             add_filter('ecommerce_admin_order_extra_info',function($html,$order){
                 if(!\Botble\Base\Facades\AdminHelper::isInAdmin() || !ManualConfirmation::available($order))return $html;
                 return $html.view('plugins/advanced-cod::manual.tags',['order'=>$order,'flags'=>OrderEligibility::read($order)])->render();
@@ -32,6 +82,9 @@ class ManualConfirmationServiceProvider extends ServiceProvider
                 }
                 $config = [
                     'percentage' => (float) \SparroWave\AdvancedCod\Supports\CodAmounts::getPrepaymentPercentage(),
+                    'fee_percentage' => (float) get_payment_setting('fee', 'cod', 4),
+                    'fee_type' => get_payment_setting('fee_type', 'cod', 'percentage'),
+                    'fee_fixed' => (float) get_payment_setting('fee_fixed', 'cod', 0),
                     'currency_symbol' => get_application_currency()->symbol,
                     'currency_title' => get_application_currency()->title,
                     'admin_full_cod_override' => (bool) get_payment_setting('admin_full_cod_override', 'cod', 0),

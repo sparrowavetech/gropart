@@ -12,6 +12,48 @@ class CheckoutShippingFeeService extends HandleShippingFeeService
 {
     public function execute(array $data, ?string $method = null, ?string $option = null): array
     {
+        // Enrich items missing product ID or store ID (e.g. from Botble Admin Order Create)
+        if (! empty($data['items']) && is_array($data['items'])) {
+            $firstStoreId = 0;
+            foreach ($data['items'] as $key => $item) {
+                if (empty($item['id']) && ! empty($item['name'])) {
+                    $product = \Botble\Ecommerce\Models\Product::query()->where('name', $item['name'])->first();
+                    if ($product) {
+                        $data['items'][$key]['id'] = $product->id;
+                        $data['items'][$key]['product_id'] = $product->id;
+                        $storeId = $product->original_product->store_id ?? 0;
+                        $data['items'][$key]['store_id'] = $storeId;
+                        if (! $firstStoreId && $storeId) {
+                            $firstStoreId = $storeId;
+                        }
+                    }
+                } elseif (! empty($item['id'])) {
+                    $productId = $item['id'];
+                    $product = \Botble\Ecommerce\Models\Product::query()->find($productId);
+                    if ($product) {
+                        $storeId = $product->original_product->store_id ?? 0;
+                        $data['items'][$key]['product_id'] = $productId;
+                        $data['items'][$key]['store_id'] = $storeId;
+                        if (! $firstStoreId && $storeId) {
+                            $firstStoreId = $storeId;
+                        }
+                    }
+                }
+            }
+
+            if ($firstStoreId) {
+                if (empty($data['extra'])) {
+                    $data['extra'] = [];
+                }
+                if (empty($data['extra']['store_id'])) {
+                    $data['extra']['store_id'] = $firstStoreId;
+                }
+                if (empty($data['store_id'])) {
+                    $data['store_id'] = $firstStoreId;
+                }
+            }
+        }
+
         $result = [];
 
         $cacheKey = $this->getCacheKey($data);

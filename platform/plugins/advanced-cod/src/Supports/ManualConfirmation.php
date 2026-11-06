@@ -16,7 +16,8 @@ class ManualConfirmation
     {
         if ($order->is_finished || (string) $order->status === 'canceled') return false;
         return (bool) AdvancePayment::intent($order)
-            || Payment::where('order_id', $order->id)->where('payment_channel', 'cod')->exists();
+            || Payment::where('order_id', $order->id)->where('payment_channel', 'cod')->exists()
+            || (OrderEligibility::read($order)['cod'] && (function_exists('get_payment_setting') ? get_payment_setting('status', 'cod') == 1 : true));
     }
 
     public static function preview(Order $order): array
@@ -104,6 +105,10 @@ class ManualConfirmation
             $order->histories()->create(['user_id'=>$actor->id,'action'=>'advanced_cod_admin_confirmation',
                 'description'=>'Advanced COD '.$mode.'; received '.($mode==='full_cod'?'0':$payment->amount).' '.$payment->currency.'; method '.($data['method']??$payment->payment_channel).'; reference '.($data['reference']??$payment->charge_id).'; occurred '.($data['occurred_at']??now()).'; note '.$data['note']]);
             Settlement::sync($order);
+            \Botble\Ecommerce\Models\Shipment::query()->where('order_id', $order->id)->update([
+                'cod_amount' => $mode === 'full_cod' ? $p['total'] : $p['remaining'],
+                'cod_status' => \Botble\Ecommerce\Enums\ShippingCodStatusEnum::PENDING,
+            ]);
             return $order;
         },3); } finally {DB::select('SELECT RELEASE_LOCK(?)',[$lock]);}
     }

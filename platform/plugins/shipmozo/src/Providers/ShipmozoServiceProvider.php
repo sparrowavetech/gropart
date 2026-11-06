@@ -41,6 +41,18 @@ class ShipmozoServiceProvider extends ServiceProvider
             ->loadMigrations()
             ->publishAssets();
 
+        $this->app['router']->pushMiddlewareToGroup('web', \SparroWave\Shipmozo\Http\Middleware\EnrichShipmozoProductSearchMiddleware::class);
+
+        add_filter('core_layout_end_body', function (?string $html): ?string {
+            if (! \Botble\Base\Facades\AdminHelper::isInAdmin()) {
+                return $html;
+            }
+
+            $jsUrl = asset('vendor/core/plugins/shipmozo/js/admin-shipmozo.js');
+
+            return ($html ?? '') . "\n" . '<script src="' . $jsUrl . '?v=' . get_cms_version() . '"></script>';
+        }, 130);
+
         if (setting('shipping_shipmozo_status') == 1) {
             $this->app->bind(
                 \Botble\Ecommerce\Http\Controllers\Fronts\PublicUpdateCheckoutController::class,
