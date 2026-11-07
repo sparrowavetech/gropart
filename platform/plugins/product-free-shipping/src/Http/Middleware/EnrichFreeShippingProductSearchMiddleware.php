@@ -15,32 +15,59 @@ class EnrichFreeShippingProductSearchMiddleware
     {
         $response = $next($request);
 
-        if ($request->isMethod('GET') && $request->routeIs('products.get-all-products-and-variations') && $response instanceof JsonResponse) {
+        $isTargetRoute = $request->routeIs('products.get-all-products-and-variations')
+            || (method_exists($request, 'is') && $request->is('*products/get-all-products-and-variations*'));
+
+        if ($request->isMethod('GET') && $isTargetRoute && $response instanceof JsonResponse) {
             $data = $response->getData(true);
-            $items = $data['data'] ?? [];
+            $isWrapped = isset($data['data']['data']) && is_array($data['data']['data']);
+            $items = $isWrapped ? $data['data']['data'] : (isset($data['data']) && is_array($data['data']) ? $data['data'] : []);
 
-            if (! empty($items) && is_array($items) && ProductFreeShippingHelper::isEnabled()) {
-                $productIds = array_column($items, 'id');
-                $products = Product::query()
-                    ->whereIn('id', $productIds)
-                    ->get()
-                    ->keyBy('id');
+            if (! empty($items) && ProductFreeShippingHelper::isEnabled()) {
+                $productIds = array_filter(array_column($items, 'id'));
+                if (! empty($productIds)) {
+                    $products = Product::query()
+                        ->whereIn('id', $productIds)
+                        ->get()
+                        ->keyBy('id');
 
-                foreach ($items as &$item) {
-                    $pid = $item['id'] ?? 0;
-                    $p = $products->get($pid);
-                    $isFree = $p ? ProductFreeShippingHelper::isProductFreeShipping($p) : false;
-                    $item['free_shipping'] = $isFree;
-                    // Also support nested flags object for backward compatibility
-                    if (! isset($item['flags'])) {
-                        $item['flags'] = [];
+                    foreach ($items as &$item) {
+                        if (! is_array($item)) {
+                            continue;
+                        }
+                        $pid = $item['id'] ?? 0;
+                        $p = $products->get($pid);
+                        $isFree = $p ? (ProductFreeShippingHelper::isProductFreeShipping($p) || ($p->original_product && ProductFreeShippingHelper::isProductFreeShipping($p->original_product))) : false;
+                        $item['free_shipping'] = $isFree;
+
+                        if (! isset($item['flags'])) {
+                            $item['flags'] = [];
+                        }
+                        $item['flags']['free_shipping'] = $isFree;
+
+                        if (! empty($item['variations']) && is_array($item['variations'])) {
+                            foreach ($item['variations'] as &$v) {
+                                if (is_array($v)) {
+                                    $v['free_shipping'] = $isFree;
+                                    if (! isset($v['flags'])) {
+                                        $v['flags'] = [];
+                                    }
+                                    $v['flags']['free_shipping'] = $isFree;
+                                }
+                            }
+                            unset($v);
+                        }
                     }
-                    $item['flags']['free_shipping'] = $isFree;
-                }
-                unset($item);
+                    unset($item);
 
-                $data['data'] = $items;
-                $response->setData($data);
+                    if ($isWrapped) {
+                        $data['data']['data'] = array_values($items);
+                    } else {
+                        $data['data'] = array_values($items);
+                    }
+
+                    $response->setData($data);
+                }
             }
         }
 

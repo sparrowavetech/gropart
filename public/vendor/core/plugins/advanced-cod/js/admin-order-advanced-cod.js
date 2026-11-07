@@ -349,42 +349,129 @@
         }
     }
 
+    let searchDebounceTimer = null;
+
+    // Cache helper for products & variations
+    function cacheProducts(items) {
+        if (!Array.isArray(items)) return;
+        items.forEach(item => {
+            if (item && item.id) {
+                window.__adminProductSearchCache[item.id] = Object.assign(window.__adminProductSearchCache[item.id] || {}, item);
+            }
+            if (item && Array.isArray(item.variations)) {
+                item.variations.forEach(v => {
+                    if (v && v.id) {
+                        window.__adminProductSearchCache[v.id] = Object.assign(window.__adminProductSearchCache[v.id] || {}, v, {
+                            cod: item.cod ?? item.flags?.cod,
+                            is_smart_cod_eligible: item.is_smart_cod_eligible ?? item.flags?.is_smart_cod_eligible,
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    function findProductData(name, id) {
+        if (!window.__adminProductSearchCache) return null;
+        if (id && window.__adminProductSearchCache[id]) {
+            return window.__adminProductSearchCache[id];
+        }
+        if (!name) return null;
+        const cleanName = name.toLowerCase().replace(/\s*\([^)]*\)\s*$/, '').trim();
+        for (const key of Object.keys(window.__adminProductSearchCache)) {
+            const p = window.__adminProductSearchCache[key];
+            if (p && p.name) {
+                const pName = p.name.toLowerCase().replace(/\s*\([^)]*\)\s*$/, '').trim();
+                if (cleanName === pName || cleanName.includes(pName) || pName.includes(cleanName)) {
+                    return p;
+                }
+            }
+        }
+        return null;
+    }
+
     // Decorate search results with clean badges
     function decorateProductSearchResults() {
-        const searchItems = document.querySelectorAll('.box-search-advance.product .list-group-item');
+        const searchContainer = document.querySelector('.box-search-advance.product');
+        if (!searchContainer) return;
+
+        const searchItems = searchContainer.querySelectorAll('.list-group-item:not([data-cod-badge-done])');
         if (!searchItems.length) return;
 
         searchItems.forEach(itemEl => {
-            if (itemEl.querySelector('.adv-product-meta-row')) return;
+            if (itemEl.hasAttribute('v-ec-modal.add-product-item') || itemEl.querySelector('img[src*="next-create-custom-line-item"]')) {
+                return;
+            }
 
-            // Find product name or image to match
-            const titleEl = itemEl.querySelector('.col.text-truncate');
+            // Find product title element
+            const titleEl = itemEl.querySelector('.col.text-truncate') || itemEl.querySelector('.item-name') || itemEl;
             if (!titleEl) return;
 
             const nameSpan = titleEl.querySelector('span:not(.text-info):not(.text-danger):not(.text-warning)');
-            const productName = nameSpan ? nameSpan.textContent.trim() : '';
+            const productName = nameSpan ? nameSpan.textContent.trim() : titleEl.textContent.trim();
 
-            // Match from cached search responses
-            let matchedProduct = null;
-            Object.values(window.__adminProductSearchCache).forEach(p => {
-                if (p.name && (productName.includes(p.name) || p.name.includes(productName))) {
-                    matchedProduct = p;
-                }
-            });
+            const matchedProduct = findProductData(productName);
 
             if (matchedProduct) {
+                itemEl.setAttribute('data-cod-badge-done', '1');
                 const isCod = matchedProduct.cod ?? matchedProduct.flags?.cod;
                 if (typeof isCod !== 'undefined') {
-                    let metaRow = el.querySelector('.item-search-badges-row');
+                    let metaRow = itemEl.querySelector('.item-search-badges-row');
                     if (!metaRow) {
                         metaRow = document.createElement('div');
                         metaRow.className = 'item-search-badges-row d-flex align-items-center flex-wrap gap-1 mt-1';
-                        titleEl.appendChild(metaRow);
+                        const firstActionRow = titleEl.querySelector('.row.align-items-center');
+                        if (firstActionRow && firstActionRow.parentNode === titleEl) {
+                            firstActionRow.after(metaRow);
+                        } else {
+                            titleEl.appendChild(metaRow);
+                        }
                     }
 
                     if (!metaRow.querySelector('.cod-search-badge')) {
                         const badge = document.createElement('span');
                         badge.className = isCod ? 'badge bg-success-lt text-success cod-search-badge' : 'badge bg-danger-lt text-danger cod-search-badge';
+                        badge.style.cssText = 'font-size: 10px; padding: 2px 5px;';
+                        badge.innerHTML = isCod ? '<i class="ti ti-truck me-1"></i>COD Available' : '<i class="ti ti-ban me-1"></i>COD Not Eligible';
+                        metaRow.appendChild(badge);
+                    }
+                }
+            }
+        });
+    }
+
+    function decorateAddedProductsTable() {
+        const table = document.querySelector('table.card-table') || document.querySelector('.table-responsive table');
+        if (!table) return;
+
+        const rows = table.querySelectorAll('tbody tr:not([data-cod-table-decorated])');
+        rows.forEach(tr => {
+            const link = tr.querySelector('td:nth-child(2) a');
+            if (!link) return;
+
+            const name = link.textContent.trim();
+            const href = link.getAttribute('href') || '';
+            const idMatch = href.match(/\/(?:edit|products)\/(\d+)/);
+            const prodId = idMatch ? parseInt(idMatch[1], 10) : null;
+
+            const productData = findProductData(name, prodId);
+            if (productData) {
+                tr.setAttribute('data-cod-table-decorated', '1');
+                const isCod = productData.cod ?? productData.flags?.cod;
+                if (typeof isCod !== 'undefined') {
+                    const col = tr.querySelector('td:nth-child(2)');
+                    if (!col) return;
+
+                    let metaRow = col.querySelector('.item-table-badges-row');
+                    if (!metaRow) {
+                        metaRow = document.createElement('div');
+                        metaRow.className = 'item-table-badges-row d-flex align-items-center flex-wrap gap-1 mt-1';
+                        col.appendChild(metaRow);
+                    }
+
+                    if (!metaRow.querySelector('.cod-table-badge')) {
+                        const badge = document.createElement('span');
+                        badge.className = isCod ? 'badge bg-success-lt text-success cod-table-badge' : 'badge bg-danger-lt text-danger cod-table-badge';
                         badge.style.cssText = 'font-size: 10px; padding: 2px 5px;';
                         badge.innerHTML = isCod ? '<i class="ti ti-truck me-1"></i>COD Available' : '<i class="ti ti-ban me-1"></i>COD Not Eligible';
                         metaRow.appendChild(badge);
@@ -404,13 +491,39 @@
     function init() {
         loadSettings();
 
-        // Observe search panel to decorate items
+        // Observe search panel to decorate items with debounce and mutation filter
         const searchContainer = document.querySelector('.box-search-advance.product');
         if (searchContainer) {
-            const searchObserver = new MutationObserver(() => {
-                decorateProductSearchResults();
+            const searchObserver = new MutationObserver((mutations) => {
+                const isOnlyOurBadges = mutations.every(m => {
+                    return m.target && (m.target.closest?.('.item-search-badges-row, .item-table-badges-row') || m.target.classList?.contains('item-search-badges-row') || m.target.classList?.contains('item-table-badges-row'));
+                });
+                if (isOnlyOurBadges) return;
+
+                if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+                searchDebounceTimer = setTimeout(() => {
+                    decorateProductSearchResults();
+                    decorateAddedProductsTable();
+                }, 100);
             });
             searchObserver.observe(searchContainer, { childList: true, subtree: true });
+        }
+
+        const orderContainer = document.querySelector('.card-table') || document.querySelector('.table-responsive') || document.querySelector('.main-card');
+        if (orderContainer) {
+            const tableObserver = new MutationObserver((mutations) => {
+                const isOnlyOurBadges = mutations.every(m => {
+                    return m.target && (m.target.closest?.('.item-search-badges-row, .item-table-badges-row') || m.target.classList?.contains('item-search-badges-row') || m.target.classList?.contains('item-table-badges-row'));
+                });
+                if (isOnlyOurBadges) return;
+
+                if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+                searchDebounceTimer = setTimeout(() => {
+                    decorateProductSearchResults();
+                    decorateAddedProductsTable();
+                }, 100);
+            });
+            tableObserver.observe(orderContainer, { childList: true, subtree: true });
         }
 
         const checkReady = setInterval(() => {
@@ -509,16 +622,13 @@
         window.axios.interceptors.response.use(function (response) {
             try {
                 const url = response.config?.url || '';
-                if (url.includes('products/get-all-products-and-variations')) {
-                    const items = response.data?.data?.data || response.data?.data || [];
-                    if (Array.isArray(items)) {
-                        items.forEach(item => {
-                            if (item.id) {
-                                window.__adminProductSearchCache[item.id] = item;
-                            }
-                        });
-                        setTimeout(decorateProductSearchResults, 50);
-                    }
+                if (url.includes('products/get-all-products-and-variations') || url.includes('check-data-before-create-order')) {
+                    const items = response.data?.data?.data || response.data?.data?.products || response.data?.data || [];
+                    cacheProducts(items);
+                    setTimeout(() => {
+                        decorateProductSearchResults();
+                        decorateAddedProductsTable();
+                    }, 50);
                 }
             } catch (e) {
                 console.error('[AdvancedCOD] Response interceptor error', e);

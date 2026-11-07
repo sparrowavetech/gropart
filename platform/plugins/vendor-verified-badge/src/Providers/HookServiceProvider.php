@@ -404,7 +404,7 @@ class HookServiceProvider extends ServiceProvider
             $store = $view->getData()['store'] ?? null;
             if ($store) {
                 $badgesHtml = (string) VendorBadgeHelper::renderBadges($store);
-                add_filter('core_layout_end_body', function ($footerHtml) use ($badgesHtml) {
+                add_filter(BASE_FILTER_FOOTER_LAYOUT_TEMPLATE, function ($footerHtml) use ($badgesHtml) {
                     return $footerHtml . '<script>window.adminStoreBadgesHtml = ' . json_encode($badgesHtml) . ';</script>';
                 }, 120);
             }
@@ -427,7 +427,7 @@ class HookServiceProvider extends ServiceProvider
             $storeLink = '<a href="' . route('marketplace.store.edit', $store->id) . '" target="_blank" class="fw-semibold text-primary">' . e($store->name) . '</a>';
 
             $itemHtml = '<div class="datagrid-item">'
-                . '<div class="datagrid-title">' . trans('plugins/marketplace::store.forms.store_name') . '</div>'
+                . '<div class="datagrid-title">' . trans('plugins/marketplace::store.store_name') . '</div>'
                 . '<div class="datagrid-content d-flex align-items-center flex-wrap gap-1">' . $storeLink . ' ' . $badges . '</div>'
                 . '</div>';
 

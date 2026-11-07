@@ -37,7 +37,14 @@ class EnquiryProductsServiceProvider extends ServiceProvider
         $this->app['router']->pushMiddlewareToGroup('api', \SparroWave\EnquiryProducts\Http\Middleware\ProtectCheckout::class);
         Product::addGlobalScope(Catalog::SCOPE, function (Builder $query): void {
             $catalog = app(Catalog::class);
-            if ($catalog->isStorefront()) { $catalog->constrain($query, false); }
+            $req = request();
+            $isOrderCreateSearch = $req && (
+                $req->routeIs('products.get-all-products-and-variations')
+                || (method_exists($req, 'is') && $req->is('*products/get-all-products-and-variations*'))
+            );
+            if ($catalog->isStorefront() || $isOrderCreateSearch) {
+                $catalog->constrain($query, false);
+            }
         });
         ProductCategory::addGlobalScope(Catalog::SCOPE, function (Builder $query): void {
             if (app(Catalog::class)->isStorefront()) {

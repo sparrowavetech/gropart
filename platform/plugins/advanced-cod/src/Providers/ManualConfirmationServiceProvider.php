@@ -15,7 +15,6 @@ class ManualConfirmationServiceProvider extends ServiceProvider
             add_filter(BASE_FILTER_ENUM_ARRAY, function ($values, $class) {
                 if ($class === PaymentMethodEnum::class) {
                     $values['ADVANCED_COD_MANUAL'] = ManualConfirmation::CHANNEL;
-                    $values['ADVANCED_COD'] = 'advanced_cod';
                 }
                 return $values;
             }, 30, 2);
@@ -23,13 +22,17 @@ class ManualConfirmationServiceProvider extends ServiceProvider
             add_filter(BASE_FILTER_ENUM_LABEL, function ($value, $class) {
                 if ($class === PaymentMethodEnum::class) {
                     if ($value === ManualConfirmation::CHANNEL) {
-                        return 'Manual COD advance receipt';
-                    }
-                    if ($value === 'advanced_cod') {
-                        return 'Advanced COD (Online / Front-end)';
+                        return trans('plugins/advanced-cod::advanced-cod.manual_receipt_channel');
                     }
                 }
                 return $value;
+            }, 30, 2);
+
+            add_filter('ecommerce_order_table_filters', function (array $filters, $table) {
+                if (isset($filters['payment_method']['choices'])) {
+                    $filters['payment_method']['choices']['advanced_cod'] = trans('plugins/advanced-cod::advanced-cod.advanced_cod_online');
+                }
+                return $filters;
             }, 30, 2);
 
             add_filter(BASE_FILTER_TABLE_QUERY, function ($query, $table) {

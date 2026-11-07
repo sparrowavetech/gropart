@@ -54,6 +54,7 @@ return [
     'confirm_and_place' => 'Confirm & Place Order',
     'review_and_place_order' => 'Review Advanced COD & Place Order',
     'manual_receipt_channel' => 'Manual COD advance receipt',
+    'advanced_cod_online' => 'Advanced COD (Online / Front-end)',
     'balance_pending' => 'Balance pending',
     'fully_paid' => 'Fully paid',
     'back_to_order' => 'Back to Order',

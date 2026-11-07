@@ -7,6 +7,15 @@
         : (Route::has('seller-invoicing.bulk-download') ? route('seller-invoicing.bulk-download') : '');
 @endphp
 
+<style>
+    #sparro-wave-seller-invoicing-tables-seller-invoice-table_wrapper table.dataTable>tbody>tr.selected .text-primary,
+    #sparro-wave-seller-invoicing-tables-seller-invoice-table_wrapper table.dataTable>tbody>tr.selected .text-success,
+    #sparro-wave-seller-invoicing-tables-vendor-seller-invoice-table_wrapper table.dataTable>tbody>tr.selected .text-primary,
+    #sparro-wave-seller-invoicing-tables-vendor-seller-invoice-table_wrapper table.dataTable>tbody>tr.selected .text-success { color: #fff !important; }
+    #sparro-wave-seller-invoicing-tables-seller-invoice-table_wrapper table.dataTable>tbody>tr.selected .border-success,
+    #sparro-wave-seller-invoicing-tables-vendor-seller-invoice-table_wrapper table.dataTable>tbody>tr.selected .border-success { border-color: #fff !important; }
+</style>
+
 <div class="card mb-3 si-date-range-filter-card">
     <div class="card-header py-2 px-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div class="d-flex align-items-center gap-2">

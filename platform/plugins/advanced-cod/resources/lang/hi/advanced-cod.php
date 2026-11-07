@@ -54,6 +54,7 @@ return [
     'confirm_and_place' => 'पुष्टि करें और ऑर्डर दें',
     'review_and_place_order' => 'उन्नत सीओडी की समीक्षा करें और ऑर्डर दें',
     'manual_receipt_channel' => 'मैन्युअल सीओडी अग्रिम रसीद',
+    'advanced_cod_online' => 'उन्नत सीओडी (ऑनलाइन / फ्रंट-एंड)',
     'balance_pending' => 'शेष राशि लंबित',
     'fully_paid' => 'पूर्ण भुगतान प्राप्त',
     'back_to_order' => 'ऑर्डर पर वापस जाएं',

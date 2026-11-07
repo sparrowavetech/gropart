@@ -14,36 +14,71 @@ class EnrichShipmozoProductSearchMiddleware
     {
         $response = $next($request);
 
-        if ($request->isMethod('GET') && $request->routeIs('products.get-all-products-and-variations') && $response instanceof JsonResponse) {
+        $isTargetRoute = $request->routeIs('products.get-all-products-and-variations')
+            || (method_exists($request, 'is') && $request->is('*products/get-all-products-and-variations*'));
+
+        if ($request->isMethod('GET') && $isTargetRoute && $response instanceof JsonResponse) {
             $data = $response->getData(true);
-            $items = $data['data'] ?? [];
+            $isWrapped = isset($data['data']['data']) && is_array($data['data']['data']);
+            $items = $isWrapped ? $data['data']['data'] : (isset($data['data']) && is_array($data['data']) ? $data['data'] : []);
 
-            if (! empty($items) && is_array($items)) {
-                $productIds = array_column($items, 'id');
-                $products = Product::query()
-                    ->whereIn('id', $productIds)
-                    ->get()
-                    ->keyBy('id');
+            if (! empty($items)) {
+                $productIds = array_filter(array_column($items, 'id'));
+                if (! empty($productIds)) {
+                    $products = Product::query()
+                        ->whereIn('id', $productIds)
+                        ->get()
+                        ->keyBy('id');
 
-                foreach ($items as &$item) {
-                    $pid = $item['id'] ?? 0;
-                    $p = $products->get($pid);
-                    $isShipmozo = false;
-                    if ($p) {
-                        $isShipmozo = is_callable([$p, 'isShipmozoShippingEnabled'])
-                            ? (bool) $p->isShipmozoShippingEnabled()
-                            : (bool) ($p->enable_shipmozo_shipping ?? false);
+                    foreach ($items as &$item) {
+                        if (! is_array($item)) {
+                            continue;
+                        }
+                        $pid = $item['id'] ?? 0;
+                        $p = $products->get($pid);
+                        $isShipmozo = false;
+                        if ($p) {
+                            try {
+                                if (method_exists($p, 'hasMacro') && $p::hasMacro('isShipmozoShippingEnabled')) {
+                                    $isShipmozo = (bool) $p->isShipmozoShippingEnabled();
+                                } elseif (\Botble\Base\Supports\MacroableModels::modelHasMacro(Product::class, 'isShipmozoShippingEnabled')) {
+                                    $isShipmozo = (bool) $p->isShipmozoShippingEnabled();
+                                } else {
+                                    $isShipmozo = (bool) ($p->enable_shipmozo_shipping ?? false);
+                                }
+                            } catch (\Throwable $e) {
+                                $isShipmozo = (bool) ($p->enable_shipmozo_shipping ?? false);
+                            }
+                        }
+                        $item['shipmozo'] = $isShipmozo;
+                        if (! isset($item['flags'])) {
+                            $item['flags'] = [];
+                        }
+                        $item['flags']['shipmozo'] = $isShipmozo;
+
+                        if (! empty($item['variations']) && is_array($item['variations'])) {
+                            foreach ($item['variations'] as &$v) {
+                                if (is_array($v)) {
+                                    $v['shipmozo'] = $isShipmozo;
+                                    if (! isset($v['flags'])) {
+                                        $v['flags'] = [];
+                                    }
+                                    $v['flags']['shipmozo'] = $isShipmozo;
+                                }
+                            }
+                            unset($v);
+                        }
                     }
-                    $item['shipmozo'] = $isShipmozo;
-                    if (! isset($item['flags'])) {
-                        $item['flags'] = [];
+                    unset($item);
+
+                    if ($isWrapped) {
+                        $data['data']['data'] = array_values($items);
+                    } else {
+                        $data['data'] = array_values($items);
                     }
-                    $item['flags']['shipmozo'] = $isShipmozo;
+
+                    $response->setData($data);
                 }
-                unset($item);
-
-                $data['data'] = $items;
-                $response->setData($data);
             }
         }
 

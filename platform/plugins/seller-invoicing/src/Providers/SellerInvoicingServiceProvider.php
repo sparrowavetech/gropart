@@ -212,5 +212,22 @@ class SellerInvoicingServiceProvider extends ServiceProvider
 
             return $filters;
         }, 120, 2);
+
+        add_filter(BASE_FILTER_FOOTER_LAYOUT_TEMPLATE, function (?string $html): ?string {
+            if (! \Botble\Base\Facades\AdminHelper::isInAdmin() && ! request()->is('vendor/*')) {
+                return $html;
+            }
+
+            $style = '<style>
+#sparro-wave-seller-invoicing-tables-seller-invoice-table_wrapper table.dataTable>tbody>tr.selected .text-primary,
+#sparro-wave-seller-invoicing-tables-seller-invoice-table_wrapper table.dataTable>tbody>tr.selected .text-success,
+#sparro-wave-seller-invoicing-tables-vendor-seller-invoice-table_wrapper table.dataTable>tbody>tr.selected .text-primary,
+#sparro-wave-seller-invoicing-tables-vendor-seller-invoice-table_wrapper table.dataTable>tbody>tr.selected .text-success { color: #fff !important; }
+#sparro-wave-seller-invoicing-tables-seller-invoice-table_wrapper table.dataTable>tbody>tr.selected .border-success,
+#sparro-wave-seller-invoicing-tables-vendor-seller-invoice-table_wrapper table.dataTable>tbody>tr.selected .border-success { border-color: #fff !important; }
+</style>';
+
+            return ($html ?? '') . $style;
+        }, 130);
     }
 }

@@ -428,8 +428,9 @@
                     : ['cod' => true];
                 $isCodEligible = $orderEligibility['cod'] && (function_exists('get_payment_setting') ? get_payment_setting('status', 'cod') == 1 : true);
                 $availableMethods = \Botble\Payment\Enums\PaymentMethodEnum::labels();
+                unset($availableMethods['advanced_cod'], $availableMethods['advanced_cod_manual']);
                 if (! $isCodEligible) {
-                    unset($availableMethods['cod'], $availableMethods['advanced_cod_manual']);
+                    unset($availableMethods['cod']);
                 }
                 $baseOrderAmount = round((float) $order->amount - (float) $order->payment_fee, 2);
                 $codFeeEstimate = round(\Botble\Payment\Supports\PaymentFeeHelper::calculateFee('cod', $baseOrderAmount), 2);

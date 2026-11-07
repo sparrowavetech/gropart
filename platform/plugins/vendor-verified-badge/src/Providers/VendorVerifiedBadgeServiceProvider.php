@@ -45,14 +45,16 @@ class VendorVerifiedBadgeServiceProvider extends ServiceProvider
 
         $this->app['router']->pushMiddlewareToGroup('web', \SparroWave\VendorVerifiedBadge\Http\Middleware\EnrichVendorBadgeProductSearchMiddleware::class);
 
-        add_filter('core_layout_end_body', function (?string $html): ?string {
+        add_filter(BASE_FILTER_FOOTER_LAYOUT_TEMPLATE, function (?string $html): ?string {
             if (! \Botble\Base\Facades\AdminHelper::isInAdmin()) {
                 return $html;
             }
 
+            $assetPath = public_path('vendor/core/plugins/vendor-verified-badge/js/admin-vendor-badge.js');
+            $v = file_exists($assetPath) ? filemtime($assetPath) : get_cms_version();
             $jsUrl = asset('vendor/core/plugins/vendor-verified-badge/js/admin-vendor-badge.js');
 
-            return ($html ?? '') . "\n" . '<script src="' . $jsUrl . '?v=' . get_cms_version() . '"></script>';
+            return ($html ?? '') . "\n" . '<script src="' . $jsUrl . '?v=' . $v . '"></script>';
         }, 130);
 
         $this->registerBladeDirectives();

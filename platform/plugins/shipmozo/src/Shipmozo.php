@@ -10,6 +10,7 @@ use Botble\Ecommerce\Models\Shipment;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
@@ -245,15 +246,35 @@ class Shipmozo
             'order_id' => '',
         ];
 
-        $this->log('Rate calculator request', $payload);
+        $cacheKey = 'shipmozo_rate_calc_' . md5(json_encode([
+            'pickup' => (int) $pickupPincode,
+            'delivery' => (int) $deliveryPincode,
+            'weight' => (int) $weight,
+            'length' => (string) max($length, 1),
+            'width' => (string) max($wide, 1),
+            'height' => (string) max($height, 1),
+            'payment_type' => $paymentType,
+            'order_amount' => $amount,
+            'cod_amount' => $codAmount,
+        ]));
 
-        $response = $this->httpClient(true)
-            ->post($this->baseUrl.'/rate-calculator', $payload);
+        $responseData = Cache::remember($cacheKey, 600, function () use ($payload) {
+            $this->log('Rate calculator request', $payload);
 
-        $apiResult = $response->json();
-        $this->log('Rate calculator response', (array) $apiResult);
+            try {
+                $response = $this->httpClient(true)
+                    ->post($this->baseUrl.'/rate-calculator', $payload);
 
-        $responseData = is_array($apiResult) ? $apiResult : [];
+                $apiResult = $response->json();
+                $this->log('Rate calculator response', (array) $apiResult);
+
+                return is_array($apiResult) ? $apiResult : [];
+            } catch (\Throwable $e) {
+                $this->log('Rate calculator exception: ' . $e->getMessage());
+
+                return [];
+            }
+        });
 
         $formattedRates = [];
         if (Arr::get($responseData, 'result') == 1 && ! empty(Arr::get($responseData, 'data'))) {
