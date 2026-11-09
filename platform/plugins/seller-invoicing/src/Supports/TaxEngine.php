@@ -8,6 +8,30 @@ use Botble\Marketplace\Models\Store;
 
 class TaxEngine
 {
+    public static function isIndianBillingMode(): bool
+    {
+        $taxMode = (string) setting('seller_invoicing_tax_mode', 'auto');
+        if ($taxMode === 'dual_gst') {
+            return true;
+        }
+        if ($taxMode === 'flat_tax' || $taxMode === 'exempt') {
+            return false;
+        }
+
+        $rawIssuerCountry = (string) (get_ecommerce_setting('company_country_for_invoicing') ?: get_ecommerce_setting('store_country', 'IN'));
+        $issuerCountry = LocationResolver::resolveCountry($rawIssuerCountry);
+
+        return in_array(strtoupper(trim($rawIssuerCountry)), ['IN', 'IND', 'INDIA'])
+            || in_array(strtoupper(trim($issuerCountry)), ['INDIA', 'IN']);
+    }
+
+    public static function isGstReportEnabled(): bool
+    {
+        return function_exists('is_plugin_active')
+            && is_plugin_active('marketplace')
+            && static::isIndianBillingMode();
+    }
+
     public function resolve(Order $order, Revenue $revenue, ?Store $store = null): array
     {
         if (! $store || (int) $store->customer_id !== (int) $revenue->customer_id) {

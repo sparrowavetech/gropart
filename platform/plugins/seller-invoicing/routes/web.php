@@ -33,6 +33,15 @@ AdminHelper::registerRoutes(function (): void {
             Route::get('settings', [SellerInvoicingSettingController::class, 'edit'])->name('settings');
             Route::put('settings', [SellerInvoicingSettingController::class, 'update'])->name('settings.update');
             Route::post('settings/regenerate', [SellerInvoicingSettingController::class, 'regenerate'])->name('settings.regenerate');
+            Route::post('settings/regenerate-batch', [SellerInvoicingSettingController::class, 'regenerateBatch'])->name('settings.regenerate-batch');
+        });
+
+        Route::group(['prefix' => 'gst-reports', 'as' => 'gst-reports.', 'permission' => 'seller-invoicing.gst-reports'], function (): void {
+            Route::get('/', [\SparroWave\SellerInvoicing\Http\Controllers\AdminGstReportController::class, 'index'])->name('index');
+            Route::get('export-excel', [\SparroWave\SellerInvoicing\Http\Controllers\AdminGstReportController::class, 'exportExcel'])->name('export-excel');
+            Route::get('export-json', [\SparroWave\SellerInvoicing\Http\Controllers\AdminGstReportController::class, 'exportJson'])->name('export-json');
+            Route::get('export-csv-zip', [\SparroWave\SellerInvoicing\Http\Controllers\AdminGstReportController::class, 'exportCsvZip'])->name('export-csv-zip');
+            Route::post('send-notifications', [\SparroWave\SellerInvoicing\Http\Controllers\AdminGstReportController::class, 'sendNotifications'])->name('send-notifications');
         });
     });
 });
@@ -49,6 +58,13 @@ Route::group([
     Route::post('bulk-download', [VendorController::class, 'bulkDownload'])->name('bulk-download');
     Route::get('filter-input', [VendorController::class, 'filterInput'])->name('filter-input');
     Route::get('orders/{order}', [VendorController::class, 'showByOrder'])->name('orders.show');
+
+    Route::group(['prefix' => 'gst-reports', 'as' => 'gst-reports.'], function (): void {
+        Route::get('/', [\SparroWave\SellerInvoicing\Http\Controllers\VendorGstReportController::class, 'index'])->name('index');
+        Route::get('export-excel', [\SparroWave\SellerInvoicing\Http\Controllers\VendorGstReportController::class, 'exportExcel'])->name('export-excel');
+        Route::get('export-json', [\SparroWave\SellerInvoicing\Http\Controllers\VendorGstReportController::class, 'exportJson'])->name('export-json');
+        Route::get('export-csv-zip', [\SparroWave\SellerInvoicing\Http\Controllers\VendorGstReportController::class, 'exportCsvZip'])->name('export-csv-zip');
+    });
 
     // Legacy backward-compatibility routes
     Route::get('documents/{document}', fn ($document) => redirect()->route('marketplace.vendor.seller-invoicing.show', $document));

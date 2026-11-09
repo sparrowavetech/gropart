@@ -47,11 +47,32 @@ class SellerInvoicingServiceProvider extends ServiceProvider
 
         $this
             ->setNamespace('plugins/seller-invoicing')
-            ->loadAndPublishConfigurations(['permissions'])
+            ->loadAndPublishConfigurations(['permissions', 'email'])
             ->loadMigrations()
             ->loadAndPublishTranslations()
             ->loadAndPublishViews()
             ->loadRoutes(['web']);
+
+        $this->app->booted(function (): void {
+            \Botble\Base\Facades\EmailHandler::addTemplateSettings(
+                'seller-invoicing',
+                config('plugins.seller-invoicing.email', [])
+            );
+        });
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                \SparroWave\SellerInvoicing\Commands\CompileMonthlyGstCommand::class,
+                \SparroWave\SellerInvoicing\Commands\SendMonthlyGstReportNotificationCommand::class,
+            ]);
+
+            $this->app->booted(function (): void {
+                $schedule = $this->app->make(\Illuminate\Console\Scheduling\Schedule::class);
+                $schedule->command('seller-invoicing:compile-monthly-gst --notify')
+                    ->monthlyOn(1, '02:00')
+                    ->withoutOverlapping();
+            });
+        }
 
         DashboardMenu::beforeRetrieving(function (): void {
             DashboardMenu::make()->registerItem([
@@ -63,6 +84,18 @@ class SellerInvoicingServiceProvider extends ServiceProvider
                 'url' => fn () => route('seller-invoicing.index'),
                 'permissions' => ['seller-invoicing.index', 'seller-invoicing.view'],
             ]);
+
+            if (\SparroWave\SellerInvoicing\Supports\TaxEngine::isGstReportEnabled()) {
+                DashboardMenu::make()->registerItem([
+                    'id' => 'sparrowave-seller-invoicing-gst-reports',
+                    'priority' => 16,
+                    'parent_id' => 'cms-plugins-marketplace',
+                    'name' => 'plugins/seller-invoicing::seller-invoicing.gst_reports.menu_title',
+                    'icon' => 'ti ti-file-analytics',
+                    'url' => fn () => route('seller-invoicing.gst-reports.index'),
+                    'permissions' => ['seller-invoicing.gst-reports', 'seller-invoicing.index'],
+                ]);
+            }
         });
 
         DashboardMenu::for('vendor')->beforeRetrieving(function (): void {
@@ -73,6 +106,16 @@ class SellerInvoicingServiceProvider extends ServiceProvider
                 'url' => fn () => route('marketplace.vendor.seller-invoicing.index'),
                 'icon' => 'ti ti-file-invoice',
             ]);
+
+            if (\SparroWave\SellerInvoicing\Supports\TaxEngine::isGstReportEnabled()) {
+                DashboardMenu::make()->registerItem([
+                    'id' => 'marketplace.vendor.seller-invoicing-gst-reports',
+                    'priority' => 8,
+                    'name' => trans('plugins/seller-invoicing::seller-invoicing.gst_reports.menu_title'),
+                    'url' => fn () => route('marketplace.vendor.seller-invoicing.gst-reports.index'),
+                    'icon' => 'ti ti-file-analytics',
+                ]);
+            }
         });
 
         // Extend Marketplace Settings Form with Seller Invoicing fields

@@ -22,7 +22,11 @@ final class SnapshotBuilder
 
             $revenue = Revenue::query()
                 ->where('order_id', $order->getKey())
-                ->where('type', RevenueTypeEnum::ADD_AMOUNT)
+                ->where(function ($q) {
+                    $q->where('type', RevenueTypeEnum::ADD_AMOUNT)
+                        ->orWhereNull('type')
+                        ->orWhere('type', '');
+                })
                 ->first();
             if (! $revenue) {
                 throw new SnapshotPreparationException(trans('plugins/seller-invoicing::seller-invoicing.errors.no_revenue'));

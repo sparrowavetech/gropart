@@ -41,7 +41,7 @@ class SellerInvoicingSettingForm extends SettingForm
                 TextFieldOption::make()
                     ->label(trans('plugins/seller-invoicing::seller-invoicing.settings.prefix'))
                     ->helperText(trans('plugins/seller-invoicing::seller-invoicing.settings.prefix_helper'))
-                    ->value(setting('seller_invoicing_prefix', setting('seller_invoice_code_prefix', 'GPINV-')))
+                    ->value(in_array(setting('seller_invoicing_prefix'), ['GPINV-', 'GPINV']) ? 'GP' : setting('seller_invoicing_prefix', setting('seller_invoice_code_prefix', 'GP')))
                     ->toArray()
             )
             ->add(

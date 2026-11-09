@@ -21,4 +21,9 @@ return [
         'flag' => 'seller-invoicing.settings',
         'parent_flag' => 'seller-invoicing.index',
     ],
+    [
+        'name' => 'Seller GST Reports',
+        'flag' => 'seller-invoicing.gst-reports',
+        'parent_flag' => 'seller-invoicing.index',
+    ],
 ];

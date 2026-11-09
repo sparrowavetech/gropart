@@ -99,10 +99,14 @@
                             </div>
                         </div>
                         <div class="col-md-5 text-md-end mt-3 mt-md-0">
+                            @php
+                                $fallbackSiteTitle = get_ecommerce_setting('store_name', 'Marketplace');
+                                $siteTitle = theme_option('site_title') ?: $fallbackSiteTitle;
+                            @endphp
                             @if ($logo)
-                                <img src="{{ RvMedia::getImageUrl($logo) }}" alt="{{ theme_option('site_title', 'Gropart') }}" style="max-height: 55px; max-width: 250px; width: auto !important; height: auto !important; object-fit: contain; display: inline-block;" />
+                                <img src="{{ RvMedia::getImageUrl($logo) }}" alt="{{ $siteTitle }}" style="max-height: 55px; max-width: 250px; width: auto !important; height: auto !important; object-fit: contain; display: inline-block;" />
                             @else
-                                <h3 class="mb-0 text-primary">{{ theme_option('site_title', 'Gropart') }}</h3>
+                                <h3 class="mb-0 text-primary">{{ $siteTitle }}</h3>
                             @endif
                         </div>
                     </div>

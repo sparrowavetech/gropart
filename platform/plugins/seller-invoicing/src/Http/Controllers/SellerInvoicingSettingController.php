@@ -5,6 +5,7 @@ namespace SparroWave\SellerInvoicing\Http\Controllers;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Supports\Breadcrumb;
 use Botble\Setting\Http\Controllers\SettingController;
+use Illuminate\Http\Request;
 use SparroWave\SellerInvoicing\Forms\Settings\SellerInvoicingSettingForm;
 use SparroWave\SellerInvoicing\Http\Requests\SellerInvoicingSettingRequest;
 use SparroWave\SellerInvoicing\Services\InvoiceGeneratorService;
@@ -65,5 +66,17 @@ class SellerInvoicingSettingController extends SettingController
         return $response->setMessage(
             trans('plugins/seller-invoicing::seller-invoicing.settings.regenerated_success', ['count' => $count])
         );
+    }
+
+    public function regenerateBatch(
+        Request $request,
+        InvoiceGeneratorService $generator,
+        BaseHttpResponse $response
+    ) {
+        $offset = (int) $request->input('offset', 0);
+        $limit = (int) $request->input('limit', 25);
+        $result = $generator->regenerateBatch($offset, $limit);
+
+        return $response->setData($result);
     }
 }

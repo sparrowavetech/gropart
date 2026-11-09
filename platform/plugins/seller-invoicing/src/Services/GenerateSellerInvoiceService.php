@@ -125,7 +125,7 @@ class GenerateSellerInvoiceService
         $orderCode = ltrim($order?->code ?: ($this->document?->order_id ?: ''), '#');
 
         return [
-            'site_title' => theme_option('site_title', 'Gropart'),
+            'site_title' => theme_option('site_title') ?: get_ecommerce_setting('store_name', 'Marketplace'),
             'company' => [
                 'logo' => $logoRealPath ?: ($logo ? RvMedia::getImageUrl($logo) : null),
                 'name' => $company['name'] ?? get_ecommerce_setting('company_name_for_invoicing', get_ecommerce_setting('store_name')),

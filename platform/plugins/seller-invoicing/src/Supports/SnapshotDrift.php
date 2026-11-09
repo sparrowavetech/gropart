@@ -15,7 +15,11 @@ final class SnapshotDrift
             ->whereKey($snapshot->revenue_id)
             ->where('order_id', $snapshot->order_id)
             ->where('customer_id', $snapshot->seller_id)
-            ->where('type', RevenueTypeEnum::ADD_AMOUNT)
+            ->where(function ($q) {
+                $q->where('type', RevenueTypeEnum::ADD_AMOUNT)
+                    ->orWhereNull('type')
+                    ->orWhere('type', '');
+            })
             ->first();
 
         if (! $revenue) {
