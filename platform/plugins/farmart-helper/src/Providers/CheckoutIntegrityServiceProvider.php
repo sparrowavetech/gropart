@@ -43,6 +43,11 @@ class CheckoutIntegrityServiceProvider extends ServiceProvider
         // Action callbacks cannot stop propagation by returning false in this CMS.
         $this->app->extend('core.action', fn (BaseAction $actions) => new PaymentActionGuard($actions));
         Action::clearResolvedInstance('core.action');
+
+        // Decorate filter dispatcher to guard order notification emails with idempotency
+        // and payment confirmation requirements.
+        $this->app->extend('core.filter', fn (\Botble\Base\Supports\Filter $filters) => new \SparroWave\FarmartHelper\Supports\OrderFilterGuard($filters));
+        \Botble\Base\Facades\Filter::clearResolvedInstance('core.filter');
     }
 
     public function boot(): void
