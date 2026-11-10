@@ -157,15 +157,21 @@ class Gstr3bEngine
             $docSgst = 0.0;
 
             if (is_array($doc->taxes)) {
-                foreach ($doc->taxes as $t) {
-                    $tName = strtoupper($t['name'] ?? '');
-                    $tAmt = (float) ($t['amount'] ?? 0);
-                    if (str_contains($tName, 'IGST')) {
-                        $docIgst += $tAmt;
-                    } elseif (str_contains($tName, 'CGST')) {
-                        $docCgst += $tAmt;
-                    } elseif (str_contains($tName, 'SGST') || str_contains($tName, 'UTGST')) {
-                        $docSgst += $tAmt;
+                if (isset($doc->taxes['cgst_amount']) || isset($doc->taxes['sgst_amount']) || isset($doc->taxes['igst_amount'])) {
+                    $docIgst = (float) ($doc->taxes['igst_amount'] ?? 0);
+                    $docCgst = (float) ($doc->taxes['cgst_amount'] ?? 0);
+                    $docSgst = (float) ($doc->taxes['sgst_amount'] ?? 0);
+                } else {
+                    foreach ($doc->taxes as $t) {
+                        $tName = strtoupper($t['name'] ?? '');
+                        $tAmt = (float) ($t['amount'] ?? 0);
+                        if (str_contains($tName, 'IGST')) {
+                            $docIgst += $tAmt;
+                        } elseif (str_contains($tName, 'CGST')) {
+                            $docCgst += $tAmt;
+                        } elseif (str_contains($tName, 'SGST') || str_contains($tName, 'UTGST')) {
+                            $docSgst += $tAmt;
+                        }
                     }
                 }
             }
