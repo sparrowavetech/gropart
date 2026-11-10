@@ -27,6 +27,14 @@ class InvoiceGeneratorService
 
     public function generateForOrder(Order $order, bool $force = false): ?Document
     {
+        if (in_array($order->status, [OrderStatusEnum::CANCELED, 'canceled'])) {
+            Document::query()
+                ->where('order_id', $order->getKey())
+                ->update(['status' => 'canceled']);
+
+            return null;
+        }
+
         return DB::transaction(function () use ($order, $force): ?Document {
             $revenue = Revenue::query()
                 ->where('order_id', $order->getKey())
@@ -459,6 +467,20 @@ class InvoiceGeneratorService
         $order = $document->order;
         if (! $order) {
             return false;
+        }
+
+        if (in_array($order->status, [OrderStatusEnum::CANCELED, 'canceled'])) {
+            $document->update([
+                'status' => 'canceled',
+            ]);
+
+            if ($document->snapshot) {
+                $document->snapshot->update([
+                    'status' => 'canceled',
+                ]);
+            }
+
+            return true;
         }
 
         $revenue = Revenue::query()

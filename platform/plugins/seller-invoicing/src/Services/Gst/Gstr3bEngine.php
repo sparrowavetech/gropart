@@ -2,6 +2,7 @@
 
 namespace SparroWave\SellerInvoicing\Services\Gst;
 
+use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Marketplace\Models\Store;
 use Carbon\Carbon;
 use SparroWave\SellerInvoicing\Models\Document;
@@ -125,6 +126,10 @@ class Gstr3bEngine
                     ->orWhere(function ($sub) use ($startDate, $endDate) {
                         $sub->whereNull('issued_at')->whereBetween('created_at', [$startDate, $endDate]);
                     });
+            })
+            ->where('status', '!=', 'canceled')
+            ->whereDoesntHave('order', function ($oq) {
+                $oq->whereIn('status', [OrderStatusEnum::CANCELED, 'canceled']);
             });
 
         if ($storeId) {

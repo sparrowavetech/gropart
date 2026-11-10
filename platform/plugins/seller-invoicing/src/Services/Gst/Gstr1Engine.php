@@ -2,6 +2,7 @@
 
 namespace SparroWave\SellerInvoicing\Services\Gst;
 
+use Botble\Ecommerce\Enums\OrderStatusEnum;
 use Botble\Ecommerce\Models\Order;
 use Botble\Marketplace\Models\Store;
 use Carbon\Carbon;
@@ -24,6 +25,7 @@ class Gstr1Engine
             ->where(function ($q) {
                 $q->where('is_finished', 1)->orWhere('status', 'completed');
             })
+            ->whereNotIn('status', [OrderStatusEnum::CANCELED, 'canceled'])
             ->whereBetween('created_at', [$startDate, $endDate]);
 
         if ($storeId) {

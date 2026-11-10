@@ -195,6 +195,32 @@ class SellerInvoicingServiceProvider extends ServiceProvider
             }
         }, 35);
 
+        // Auto-cancel seller invoice when order status is CANCELED
+        if (class_exists(\Botble\Ecommerce\Events\OrderCancelledEvent::class)) {
+            \Illuminate\Support\Facades\Event::listen(\Botble\Ecommerce\Events\OrderCancelledEvent::class, function (\Botble\Ecommerce\Events\OrderCancelledEvent $event): void {
+                try {
+                    if ($event->order) {
+                        \SparroWave\SellerInvoicing\Models\Document::query()
+                            ->where('order_id', $event->order->getKey())
+                            ->update(['status' => 'canceled']);
+                    }
+                } catch (\Throwable $e) {
+                    report($e);
+                }
+            });
+        }
+
+        if (class_exists(Order::class)) {
+            Order::saved(function (Order $order): void {
+                if (in_array($order->status, [\Botble\Ecommerce\Enums\OrderStatusEnum::CANCELED, 'canceled'])) {
+                    \SparroWave\SellerInvoicing\Models\Document::query()
+                        ->where('order_id', $order->getKey())
+                        ->where('status', '!=', 'canceled')
+                        ->update(['status' => 'canceled']);
+                }
+            });
+        }
+
         // Inject Date Range Filter Bar before SellerInvoiceTable, VendorSellerInvoiceTable, and OrderTable
         add_filter(BASE_FILTER_TABLE_BEFORE_RENDER, function (?string $html, $table): ?string {
             $isSellerInvoiceTable = $table instanceof \SparroWave\SellerInvoicing\Tables\SellerInvoiceTable;
