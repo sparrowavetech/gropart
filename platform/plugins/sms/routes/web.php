@@ -48,10 +48,11 @@ Route::group(['namespace' => 'Botble\Sms\Http\Controllers', 'middleware' => ['we
                 'permission' => 'sms.logs.show',
             ]);
 
-            Route::get('', ['as' => 'index', 'uses' => 'SmsController@index', 'permission' => 'sms.index']);
+            Route::match(['GET', 'POST'], '', ['as' => 'index', 'uses' => 'SmsController@index', 'permission' => 'sms.index']);
             Route::get('create', ['as' => 'create', 'uses' => 'SmsController@create', 'permission' => 'sms.create']);
-            Route::post('', ['as' => 'store', 'uses' => 'SmsController@store', 'permission' => 'sms.create']);
+            Route::post('create', ['as' => 'store', 'uses' => 'SmsController@store', 'permission' => 'sms.create']);
             Route::get('{sms}/edit', ['as' => 'edit', 'uses' => 'SmsController@edit', 'permission' => 'sms.edit']);
+            Route::match(['POST', 'PUT', 'PATCH'], '{sms}/edit', ['as' => 'edit.post', 'uses' => 'SmsController@update', 'permission' => 'sms.edit']);
             Route::match(['PUT', 'PATCH'], '{sms}', ['as' => 'update', 'uses' => 'SmsController@update', 'permission' => 'sms.edit']);
             Route::delete('{sms}', ['as' => 'destroy', 'uses' => 'SmsController@destroy', 'permission' => 'sms.destroy']);
             Route::delete('items/destroy', [

@@ -41,9 +41,16 @@ class SmsController extends BaseController
      * @param SmsTable $table
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function index(SmsTable $table)
+    public function index(SmsTable $table, ?Request $request = null, ?BaseHttpResponse $response = null)
     {
         page_title()->setTitle(trans('plugins/sms::sms.name'));
+
+        $request = $request ?: request();
+        $response = $response ?: app(BaseHttpResponse::class);
+
+        if ($request->isMethod('POST') && ! $request->ajax()) {
+            return $this->store(app(SmsRequest::class), $response);
+        }
 
         return $table->renderTable();
     }
