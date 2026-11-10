@@ -102,7 +102,7 @@ class Settlement
                 'currency'=>$s['currency'],'reference'=>$data['reference'],'idempotency_key'=>$data['idempotency_key'],
                 'reversal_of'=>$reversal,'user_id'=>$actor,'note'=>$data['note'],'occurred_at'=>$data['occurred_at'],
             ]);
-            OrderHistory::create(['order_id'=>$order->id,'user_id'=>$actor,'action'=>'advanced_cod_settlement',
+            OrderHistory::create(['order_id'=>$order->id,'user_id'=>$actor,'action'=>'update_cod_status',
                 'description'=>'Advanced COD '.$kind.': '.number_format($amount/100,2,'.','').' '.$s['currency'].'; reference '.$data['reference'].'; entry #'.$entry->id]);
             self::sync($order);
             return $entry;
