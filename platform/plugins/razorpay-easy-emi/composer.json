@@ -1,0 +1,18 @@
+{
+    "name": "sparrowave/razorpay-easy-emi",
+    "description": "Enterprise-grade Razorpay Affordability & EMI Widget with Live Offer Sync, Standard / No Cost / Low Cost EMI, and Vendor Approval Workflow.",
+    "type": "botble-plugin",
+    "autoload": {
+        "psr-4": {
+            "SparroWave\\RazorpayEasyEmi\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "SparroWave\\RazorpayEasyEmi\\Providers\\RazorpayEasyEmiServiceProvider"
+            ]
+        }
+    }
+}
+

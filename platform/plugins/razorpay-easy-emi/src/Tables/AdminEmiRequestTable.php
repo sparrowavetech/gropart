@@ -1,0 +1,120 @@
+<?php
+
+namespace SparroWave\RazorpayEasyEmi\Tables;
+
+use Botble\Base\Facades\BaseHelper;
+use Botble\Base\Facades\Html;
+use Botble\Table\Abstracts\TableAbstract;
+use Botble\Table\Actions\Action;
+use Botble\Table\Actions\DeleteAction;
+use Botble\Table\BulkActions\DeleteBulkAction;
+use Botble\Table\Columns\Column;
+use Botble\Table\Columns\CreatedAtColumn;
+use Botble\Table\Columns\IdColumn;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\JsonResponse;
+use SparroWave\RazorpayEasyEmi\Enums\EmiRequestStatusEnum;
+use SparroWave\RazorpayEasyEmi\Models\RazorpayEmiVendorRequest;
+
+class AdminEmiRequestTable extends TableAbstract
+{
+    public function setup(): void
+    {
+        $this
+            ->model(RazorpayEmiVendorRequest::class)
+            ->addColumns([
+                IdColumn::make(),
+                Column::make('product_id')
+                    ->title(trans('plugins/razorpay-easy-emi::razorpay-easy-emi.tables.product'))
+                    ->alignStart(),
+                Column::make('store_id')
+                    ->title(trans('plugins/razorpay-easy-emi::razorpay-easy-emi.tables.store'))
+                    ->alignStart(),
+                Column::make('requested_scheme')
+                    ->title(trans('plugins/razorpay-easy-emi::razorpay-easy-emi.tables.scheme'))
+                    ->alignCenter(),
+                Column::make('subvention_willingness')
+                    ->title(trans('plugins/razorpay-easy-emi::razorpay-easy-emi.tables.subvention'))
+                    ->alignCenter(),
+                Column::make('status')
+                    ->title(trans('core/base::tables.status'))
+                    ->alignCenter()
+                    ->width(120),
+                Column::make('notes')
+                    ->title(trans('plugins/razorpay-easy-emi::razorpay-easy-emi.tables.notes'))
+                    ->alignStart(),
+                CreatedAtColumn::make(),
+            ])
+            ->addActions([
+                Action::make('review')
+                    ->route('razorpay-easy-emi.requests.review')
+                    ->label(trans('plugins/razorpay-easy-emi::razorpay-easy-emi.actions.review'))
+                    ->icon('ti ti-eye')
+                    ->permission('razorpay-easy-emi.requests.action'),
+                DeleteAction::make()->permission('razorpay-easy-emi.requests.action'),
+            ])
+            ->addBulkActions([
+                DeleteBulkAction::make()->permission('razorpay-easy-emi.requests.action'),
+            ])
+            ->queryUsing(function (Builder $query) {
+                return $query
+                    ->select([
+                        'id',
+                        'product_id',
+                        'store_id',
+                        'requested_scheme',
+                        'subvention_willingness',
+                        'notes',
+                        'status',
+                        'admin_remarks',
+                        'approved_offer_id',
+                        'created_at',
+                    ])
+                    ->with(['product', 'store'])
+                    ->latest();
+            });
+    }
+
+    public function ajax(): JsonResponse
+    {
+        $data = $this->table
+            ->eloquent($this->query())
+            ->editColumn('product_id', function (RazorpayEmiVendorRequest $item) {
+                if (! $item->product) {
+                    return '&mdash;';
+                }
+
+                $name = BaseHelper::clean($item->product->name);
+                $url = route('products.edit', $item->product->id);
+
+                return Html::link($url, $name, ['target' => '_blank']);
+            })
+            ->editColumn('store_id', function (RazorpayEmiVendorRequest $item) {
+                return $item->store ? BaseHelper::clean($item->store->name) : '&mdash;';
+            })
+            ->editColumn('requested_scheme', function (RazorpayEmiVendorRequest $item) {
+                return $item->requested_scheme ? $item->requested_scheme->toHtml() : '&mdash;';
+            })
+            ->editColumn('subvention_willingness', function (RazorpayEmiVendorRequest $item) {
+                return $item->subvention_willingness ? $item->subvention_willingness->toHtml() : '&mdash;';
+            })
+            ->editColumn('status', function (RazorpayEmiVendorRequest $item) {
+                return $item->status ? $item->status->toHtml() : '&mdash;';
+            })
+            ->editColumn('notes', function (RazorpayEmiVendorRequest $item) {
+                $notes = BaseHelper::clean($item->notes);
+                if ($item->admin_remarks) {
+                    $notes .= '<br><small class="text-muted"><strong>' . trans('plugins/razorpay-easy-emi::razorpay-easy-emi.tables.admin_remarks') . ':</strong> ' . BaseHelper::clean($item->admin_remarks) . '</small>';
+                }
+                if ($item->approved_offer_id) {
+                    $notes .= '<br><small class="text-success"><strong>' . trans('plugins/razorpay-easy-emi::razorpay-easy-emi.tables.offer_id') . ':</strong> ' . e($item->approved_offer_id) . '</small>';
+                }
+
+                return $notes;
+            });
+
+        return $this->toJson($data);
+    }
+}

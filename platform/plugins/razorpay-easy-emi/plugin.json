@@ -1,0 +1,15 @@
+{
+    "id": "sparrowave/razorpay-easy-emi",
+    "name": "RazorPay Easy EMI Widget",
+    "namespace": "SparroWave\\RazorpayEasyEmi\\",
+    "provider": "SparroWave\\RazorpayEasyEmi\\Providers\\RazorpayEasyEmiServiceProvider",
+    "author": "SparroWave Technologies",
+    "url": "https://www.sparrowave.com",
+    "version": "1.0.0",
+    "description": "Enterprise-grade Razorpay Affordability & EMI Widget with Live Offer Sync, Standard / No Cost / Low Cost EMI, and Vendor Approval Workflow.",
+    "minimum_core_version": "7.0.0",
+    "require": [
+        "ecommerce"
+    ]
+}
+
