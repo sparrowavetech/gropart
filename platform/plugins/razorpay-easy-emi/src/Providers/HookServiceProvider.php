@@ -339,24 +339,57 @@ class HookServiceProvider extends ServiceProvider
         $cart = class_exists(\Botble\Ecommerce\Facades\Cart::class) ? \Botble\Ecommerce\Facades\Cart::instance('cart') : null;
         $cartTotal = (float) ($cart ? ($cart->rawTotal() ?: $cart->rawSubTotal()) : 0);
 
-        $cachedOffers = \SparroWave\RazorpayEasyEmi\Models\RazorpayEmiCachedOffer::query()
-            ->where('is_active', true)
-            ->get()
-            ->filter(fn ($o) => $o->isEmiApplicable());
-
-        $hasNoCostEmi = $cachedOffers->contains(fn ($o) => $o->isNoCostEmi());
+        $hasNoCostEmi = false;
+        $hasLowCostEmi = false;
+        $applicableOfferIds = [];
 
         if ($cart) {
             $cartProductIds = $cart->products()->pluck('id')->toArray();
             if (! empty($cartProductIds)) {
-                $configs = \SparroWave\RazorpayEasyEmi\Models\RazorpayEmiProductConfig::query()->whereIn('product_id', $cartProductIds)->get();
-                if ($configs->contains(fn ($c) => $c->emi_type?->getValue() === 'no_cost')) {
-                    $hasNoCostEmi = true;
+                $products = Product::query()->whereIn('id', $cartProductIds)->get();
+                $parentIds = $products->map(fn ($p) => $p->is_variation ? ($p->original_product->id ?? $p->id) : $p->id)->unique()->toArray();
+
+                $configs = RazorpayEmiProductConfig::query()
+                    ->whereIn('product_id', $parentIds)
+                    ->get();
+
+                foreach ($configs as $config) {
+                    if ($config->status === 'disabled') {
+                        continue;
+                    }
+
+                    $scheme = $config->emi_type ? $config->emi_type->getValue() : setting('razorpay_easy_emi_default_scheme', 'standard');
+
+                    if ($scheme === 'no_cost') {
+                        $hasNoCostEmi = true;
+                    } elseif ($scheme === 'low_cost') {
+                        $hasLowCostEmi = true;
+                    }
+
+                    if ($config->offer_mode === 'custom' && ! empty($config->offer_ids)) {
+                        $applicableOfferIds = array_merge($applicableOfferIds, $config->offer_ids);
+                    }
                 }
             }
         }
 
-        $activeOfferIds = $cachedOffers->pluck('id')->values()->toArray();
+        // If no custom offer IDs were specifically curated on products, fetch active offers matching cart schemes
+        if (empty($applicableOfferIds)) {
+            $cachedOffers = \SparroWave\RazorpayEasyEmi\Models\RazorpayEmiCachedOffer::query()
+                ->where('is_active', true)
+                ->get();
+
+            if ($hasNoCostEmi) {
+                $noCostOffers = $cachedOffers->filter(fn ($o) => $o->isNoCostEmi())->pluck('id')->toArray();
+                $applicableOfferIds = array_merge($applicableOfferIds, $noCostOffers);
+            }
+            if ($hasLowCostEmi) {
+                $lowCostOffers = $cachedOffers->filter(fn ($o) => $o->isLowCostEmi())->pluck('id')->toArray();
+                $applicableOfferIds = array_merge($applicableOfferIds, $lowCostOffers);
+            }
+        }
+
+        $activeOfferIds = array_values(array_unique(array_filter($applicableOfferIds)));
         $isEligible = $cartTotal >= $minThreshold || $cartTotal == 0;
 
         $bridgeHtml = view('plugins/razorpay-easy-emi::front.checkout-bridge', compact(

@@ -22,14 +22,17 @@ class RazorpayOfferSyncService
             ];
         }
 
-        $key = get_payment_setting('key', 'razorpay');
-        $secret = get_payment_setting('secret', 'razorpay');
+        $autoDetect = (bool) setting('razorpay_easy_emi_auto_detect_key', true);
+        if ($autoDetect) {
+            $key = get_payment_setting('key', 'razorpay');
+            $secret = get_payment_setting('secret', 'razorpay');
 
-        if (! empty($key) && ! empty($secret)) {
-            return [
-                'key' => trim($key),
-                'secret' => trim($secret),
-            ];
+            if (! empty($key) && ! empty($secret)) {
+                return [
+                    'key' => trim($key),
+                    'secret' => trim($secret),
+                ];
+            }
         }
 
         return null;
@@ -51,7 +54,9 @@ class RazorpayOfferSyncService
         try {
             $response = Http::withBasicAuth($creds['key'], $creds['secret'])
                 ->timeout(12)
-                ->get('https://api.razorpay.com/v1/offers');
+                ->get('https://api.razorpay.com/v1/offers', [
+                    'count' => 100,
+                ]);
 
             if (! $response->successful()) {
                 $errorMsg = $response->json('error.description') ?: $response->body();

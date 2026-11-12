@@ -53,7 +53,9 @@ class AdminEmiRequestTable extends TableAbstract
                     ->label(trans('plugins/razorpay-easy-emi::razorpay-easy-emi.actions.review'))
                     ->icon('ti ti-eye')
                     ->permission('razorpay-easy-emi.requests.action'),
-                DeleteAction::make()->permission('razorpay-easy-emi.requests.action'),
+                DeleteAction::make()
+                    ->route('razorpay-easy-emi.requests.destroy')
+                    ->permission('razorpay-easy-emi.requests.action'),
             ])
             ->addBulkActions([
                 DeleteBulkAction::make()->permission('razorpay-easy-emi.requests.action'),
@@ -113,6 +115,26 @@ class AdminEmiRequestTable extends TableAbstract
                 }
 
                 return $notes;
+            })
+            ->filter(function ($query) {
+                $keyword = $this->request->input('search.value');
+                if ($keyword) {
+                    return $query->where(function ($q) use ($keyword) {
+                        $q->whereHas('product', function ($subQuery) use ($keyword) {
+                            $subQuery->where('ec_products.name', 'LIKE', '%' . $keyword . '%');
+                        })
+                        ->orWhereHas('store', function ($subQuery) use ($keyword) {
+                            $subQuery->where('mp_stores.name', 'LIKE', '%' . $keyword . '%');
+                        })
+                        ->orWhere('notes', 'LIKE', '%' . $keyword . '%')
+                        ->orWhere('admin_remarks', 'LIKE', '%' . $keyword . '%')
+                        ->orWhere('approved_offer_id', 'LIKE', '%' . $keyword . '%')
+                        ->orWhere('requested_scheme', 'LIKE', '%' . $keyword . '%')
+                        ->orWhere('status', 'LIKE', '%' . $keyword . '%');
+                    });
+                }
+
+                return $query;
             });
 
         return $this->toJson($data);

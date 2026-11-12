@@ -51,6 +51,14 @@
     function updateWidgetForPrice(wrapper, newPrice) {
         if (!wrapper || isNaN(newPrice) || newPrice <= 0) return;
 
+        var minThreshold = parseFloat(wrapper.getAttribute('data-min-amount')) || 2500;
+        if (newPrice < minThreshold) {
+            wrapper.style.display = 'none';
+            return;
+        } else {
+            wrapper.style.display = '';
+        }
+
         var scheme = wrapper.getAttribute('data-scheme') || 'standard';
         var startingEmi;
         if (scheme === 'no_cost') {

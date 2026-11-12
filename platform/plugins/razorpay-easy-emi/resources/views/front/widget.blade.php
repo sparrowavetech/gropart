@@ -13,6 +13,7 @@
          data-scheme="{{ $resolution['scheme'] ?? 'standard' }}"
          data-offer-mode="{{ $resolution['offer_mode'] ?? 'auto' }}"
          data-offer-ids='@json($resolution['offer_ids'] ?? [])'
+         data-min-amount="{{ $resolution['min_amount'] ?? 2500 }}"
     >
         {{-- Optional Custom Promotional Badge above Widget (if explicitly configured) --}}
         @if (! empty($resolution['custom_badge']))

@@ -19,6 +19,21 @@ class EmiRequestStatusEnum extends Enum
 
     public static $langPath = 'plugins/razorpay-easy-emi::razorpay-easy-emi.request_statuses';
 
+    public function isPending(): bool
+    {
+        return (string) $this->value === self::PENDING;
+    }
+
+    public function isApproved(): bool
+    {
+        return (string) $this->value === self::APPROVED;
+    }
+
+    public function isRejected(): bool
+    {
+        return (string) $this->value === self::REJECTED;
+    }
+
     public function toHtml(): string|HtmlString
     {
         return match ($this->value) {

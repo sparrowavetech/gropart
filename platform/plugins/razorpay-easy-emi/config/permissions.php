@@ -21,5 +21,10 @@ return [
         'flag' => 'marketplace.vendor.razorpay-easy-emi.request',
         'parent_flag' => 'marketplace.vendor.dashboard',
     ],
+    [
+        'name' => 'View EMI Program Requests',
+        'flag' => 'marketplace.vendor.razorpay-easy-emi.requests.index',
+        'parent_flag' => 'marketplace.vendor.dashboard',
+    ],
 ];
 

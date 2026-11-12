@@ -35,5 +35,6 @@ Route::group([
     Route::group(['prefix' => 'requests', 'as' => 'requests.'], function (): void {
         Route::match(['GET', 'POST'], '/', [VendorEmiRequestController::class, 'index'])->name('index');
         Route::post('store', [VendorEmiRequestController::class, 'store'])->name('store');
+        Route::post('{id}/cancel', [VendorEmiRequestController::class, 'cancel'])->name('cancel');
     });
 });

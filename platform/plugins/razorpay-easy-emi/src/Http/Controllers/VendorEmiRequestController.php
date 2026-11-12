@@ -8,6 +8,7 @@ use Botble\Ecommerce\Models\Product;
 use SparroWave\RazorpayEasyEmi\Enums\EmiRequestStatusEnum;
 use SparroWave\RazorpayEasyEmi\Http\Requests\VendorEmiRequestSubmissionRequest;
 use SparroWave\RazorpayEasyEmi\Models\RazorpayEmiVendorRequest;
+use SparroWave\RazorpayEasyEmi\Services\EmiNotificationService;
 use SparroWave\RazorpayEasyEmi\Tables\VendorEmiRequestTable;
 
 class VendorEmiRequestController extends BaseController
@@ -15,12 +16,13 @@ class VendorEmiRequestController extends BaseController
     public function __construct()
     {
         $this->breadcrumb()
-            ->add(trans('plugins/razorpay-easy-emi::razorpay-easy-emi.admin_menu.emi_requests'), route('marketplace.vendor.razorpay-easy-emi.requests.index'));
+            ->add(trans('plugins/marketplace::marketplace.dashboard'), route('marketplace.vendor.dashboard'))
+            ->add(trans('plugins/razorpay-easy-emi::razorpay-easy-emi.vendor_menu.emi_requests'), route('marketplace.vendor.razorpay-easy-emi.requests.index'));
     }
 
     public function index(VendorEmiRequestTable $table)
     {
-        $this->pageTitle(trans('plugins/razorpay-easy-emi::razorpay-easy-emi.admin_menu.emi_requests'));
+        $this->pageTitle(trans('plugins/razorpay-easy-emi::razorpay-easy-emi.vendor_menu.emi_requests'));
 
         return $table->renderTable();
     }
@@ -61,7 +63,7 @@ class VendorEmiRequestController extends BaseController
                 ->setMessage(trans('plugins/razorpay-easy-emi::razorpay-easy-emi.messages.request_already_pending'));
         }
 
-        RazorpayEmiVendorRequest::query()->create([
+        $vendorRequest = RazorpayEmiVendorRequest::query()->create([
             'product_id' => $productId,
             'store_id' => $store->id,
             'requested_scheme' => $request->input('requested_scheme'),
@@ -70,8 +72,43 @@ class VendorEmiRequestController extends BaseController
             'status' => EmiRequestStatusEnum::PENDING,
         ]);
 
+        app(EmiNotificationService::class)->sendNewRequestNotificationToAdmin($vendorRequest);
+
         return $response
             ->setMessage(trans('plugins/razorpay-easy-emi::razorpay-easy-emi.messages.request_submitted_success'));
+    }
+
+    public function cancel(int|string $id, BaseHttpResponse $response): BaseHttpResponse
+    {
+        $store = auth('customer')->user()?->store;
+
+        if (! $store) {
+            return $response
+                ->setError()
+                ->setMessage(trans('plugins/razorpay-easy-emi::razorpay-easy-emi.messages.unauthorized_store'));
+        }
+
+        $vendorRequest = RazorpayEmiVendorRequest::query()
+            ->where('id', $id)
+            ->where('store_id', $store->id)
+            ->first();
+
+        if (! $vendorRequest) {
+            return $response
+                ->setError()
+                ->setMessage(trans('plugins/razorpay-easy-emi::razorpay-easy-emi.messages.request_not_found'));
+        }
+
+        if (! $vendorRequest->status->isPending()) {
+            return $response
+                ->setError()
+                ->setMessage(trans('plugins/razorpay-easy-emi::razorpay-easy-emi.messages.cannot_cancel_processed_request'));
+        }
+
+        $vendorRequest->delete();
+
+        return $response
+            ->setMessage(trans('plugins/razorpay-easy-emi::razorpay-easy-emi.messages.request_cancelled_success'));
     }
 }
 

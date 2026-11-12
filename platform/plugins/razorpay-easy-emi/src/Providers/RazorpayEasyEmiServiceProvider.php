@@ -3,6 +3,7 @@
 namespace SparroWave\RazorpayEasyEmi\Providers;
 
 use Botble\Base\Facades\DashboardMenu;
+use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Facades\PanelSectionManager;
 use Botble\Base\PanelSections\PanelSectionItem;
 use Botble\Base\Supports\ServiceProvider;
@@ -22,12 +23,19 @@ class RazorpayEasyEmiServiceProvider extends ServiceProvider
     {
         $this
             ->setNamespace('plugins/razorpay-easy-emi')
-            ->loadAndPublishConfigurations(['permissions'])
+            ->loadAndPublishConfigurations(['permissions', 'email'])
             ->loadMigrations()
             ->loadAndPublishTranslations()
             ->loadAndPublishViews()
             ->loadRoutes(['web'])
             ->publishAssets();
+
+        $this->app->booted(function (): void {
+            EmailHandler::addTemplateSettings(
+                'razorpay-easy-emi',
+                config('plugins.razorpay-easy-emi.email', [])
+            );
+        });
 
         // 1. Register in Admin Ecommerce Settings Panel
         PanelSectionManager::default()->beforeRendering(function () {
@@ -49,12 +57,25 @@ class RazorpayEasyEmiServiceProvider extends ServiceProvider
                 'id' => 'sparrowave-razorpay-emi-requests',
                 'priority' => 17,
                 'parent_id' => 'cms-plugins-marketplace',
-                'name' => 'plugins/razorpay-easy-emi::razorpay-easy-emi.admin_menu.emi_requests',
+                'name' => trans('plugins/razorpay-easy-emi::razorpay-easy-emi.admin_menu.emi_requests'),
                 'icon' => 'ti ti-credit-card',
                 'url' => fn () => route('razorpay-easy-emi.requests.index'),
                 'permissions' => ['razorpay-easy-emi.requests.index'],
             ]);
         });
+
+        // 3. Register EMI Requests under Vendor Dashboard Menu
+        if (is_plugin_active('marketplace')) {
+            DashboardMenu::for('vendor')->beforeRetrieving(function (): void {
+                DashboardMenu::make()->registerItem([
+                    'id' => 'sparrowave-vendor-razorpay-emi-requests',
+                    'priority' => 125,
+                    'name' => trans('plugins/razorpay-easy-emi::razorpay-easy-emi.vendor_menu.emi_requests'),
+                    'icon' => 'ti ti-credit-card',
+                    'url' => fn () => route('marketplace.vendor.razorpay-easy-emi.requests.index'),
+                ]);
+            });
+        }
     }
 }
 

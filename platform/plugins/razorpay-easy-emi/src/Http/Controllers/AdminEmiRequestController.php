@@ -11,6 +11,7 @@ use SparroWave\RazorpayEasyEmi\Enums\EmiRequestStatusEnum;
 use SparroWave\RazorpayEasyEmi\Models\RazorpayEmiCachedOffer;
 use SparroWave\RazorpayEasyEmi\Models\RazorpayEmiProductConfig;
 use SparroWave\RazorpayEasyEmi\Models\RazorpayEmiVendorRequest;
+use SparroWave\RazorpayEasyEmi\Services\EmiNotificationService;
 use SparroWave\RazorpayEasyEmi\Tables\AdminEmiRequestTable;
 
 class AdminEmiRequestController extends BaseController
@@ -79,6 +80,8 @@ class AdminEmiRequestController extends BaseController
             ]
         );
 
+        app(EmiNotificationService::class)->sendStatusUpdateNotificationToVendor($vendorRequest);
+
         return $response
             ->setNextUrl(route('razorpay-easy-emi.requests.index'))
             ->setMessage(trans('plugins/razorpay-easy-emi::razorpay-easy-emi.messages.request_approved_success'));
@@ -101,6 +104,8 @@ class AdminEmiRequestController extends BaseController
         $vendorRequest->reviewed_by = auth()->id();
         $vendorRequest->reviewed_at = Carbon::now();
         $vendorRequest->save();
+
+        app(EmiNotificationService::class)->sendStatusUpdateNotificationToVendor($vendorRequest);
 
         return $response
             ->setNextUrl(route('razorpay-easy-emi.requests.index'))

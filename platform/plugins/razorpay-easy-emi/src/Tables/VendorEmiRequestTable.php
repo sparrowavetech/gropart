@@ -4,6 +4,7 @@ namespace SparroWave\RazorpayEasyEmi\Tables;
 
 use Botble\Base\Facades\BaseHelper;
 use Botble\Base\Facades\Html;
+use Botble\Marketplace\Tables\Traits\ForVendor;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
@@ -14,10 +15,15 @@ use SparroWave\RazorpayEasyEmi\Models\RazorpayEmiVendorRequest;
 
 class VendorEmiRequestTable extends TableAbstract
 {
+    use ForVendor;
+
+    protected $hasOperations = false;
+
     public function setup(): void
     {
         $this
             ->model(RazorpayEmiVendorRequest::class)
+            ->addActions([])
             ->addColumns([
                 IdColumn::make(),
                 Column::make('product_id')
@@ -72,7 +78,7 @@ class VendorEmiRequestTable extends TableAbstract
                 $name = BaseHelper::clean($item->product->name);
                 $url = route('marketplace.vendor.products.edit', $item->product->id);
 
-                return Html::link($url, $name);
+                return Html::link($url, $name, ['class' => 'fw-semibold text-primary text-decoration-none']);
             })
             ->editColumn('requested_scheme', function (RazorpayEmiVendorRequest $item) {
                 return $item->requested_scheme ? $item->requested_scheme->toHtml() : '&mdash;';
@@ -93,6 +99,23 @@ class VendorEmiRequestTable extends TableAbstract
                 }
 
                 return $notes;
+            })
+            ->filter(function ($query) {
+                $keyword = $this->request->input('search.value');
+                if ($keyword) {
+                    return $query->where(function ($q) use ($keyword) {
+                        $q->whereHas('product', function ($subQuery) use ($keyword) {
+                            $subQuery->where('ec_products.name', 'LIKE', '%' . $keyword . '%');
+                        })
+                        ->orWhere('notes', 'LIKE', '%' . $keyword . '%')
+                        ->orWhere('admin_remarks', 'LIKE', '%' . $keyword . '%')
+                        ->orWhere('approved_offer_id', 'LIKE', '%' . $keyword . '%')
+                        ->orWhere('requested_scheme', 'LIKE', '%' . $keyword . '%')
+                        ->orWhere('status', 'LIKE', '%' . $keyword . '%');
+                    });
+                }
+
+                return $query;
             });
 
         return $this->toJson($data);
