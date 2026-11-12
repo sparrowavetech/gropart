@@ -267,3 +267,107 @@
         justify-content: center;
     }
 }
+
+/* ==========================================================================
+   Product Listing Card Badges — Compact Sleek Tag at Bottom-Left of Thumbnail
+   ========================================================================== */
+.razorpay-easy-emi-catalog-badge {
+    position: absolute !important;
+    bottom: 6px !important;
+    left: 6px !important;
+    top: auto !important;
+    z-index: 5 !important;
+    pointer-events: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.rzp-badge-pill {
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 3.5px !important;
+    padding: 2.5px 7px !important;
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    line-height: 1.25 !important;
+    letter-spacing: 0.35px !important;
+    text-transform: uppercase !important;
+    border-radius: 4px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    width: auto !important;
+    max-width: fit-content !important;
+    font-family: inherit !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.16) !important;
+}
+
+/* Subtle, refined light-beam gleam passing across the badge */
+.rzp-badge-pill::after {
+    content: '' !important;
+    position: absolute !important;
+    top: -60% !important;
+    left: -130% !important;
+    width: 50% !important;
+    height: 220% !important;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.45) 50%,
+        rgba(255, 255, 255, 0) 100%
+    ) !important;
+    transform: rotate(25deg) !important;
+    animation: rzpBadgeShineSweep 3s cubic-bezier(0.4, 0, 0.2, 1) infinite !important;
+    pointer-events: none !important;
+}
+
+@keyframes rzpBadgeShineSweep {
+    0% {
+        left: -130%;
+    }
+    35%, 100% {
+        left: 150%;
+    }
+}
+
+.rzp-badge-text {
+    white-space: nowrap !important;
+}
+
+.rzp-badge-icon {
+    width: 10px !important;
+    height: 10px !important;
+    flex-shrink: 0 !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+}
+
+/* 1. Low Cost EMI Badge: Warm Golden Amber (Matches Retailer/Sale themes) */
+.rzp-badge-low-cost {
+    background: #b45309 !important;
+    color: #ffffff !important;
+    border: 1px solid #f59e0b !important;
+}
+
+/* 2. No Cost EMI Badge: Clean Emerald Green */
+.rzp-badge-no-cost {
+    background: #047857 !important;
+    color: #ffffff !important;
+    border: 1px solid #10b981 !important;
+}
+
+/* 3. Standard EMI Badge: Clean Royal Blue */
+.rzp-badge-standard {
+    background: #1d4ed8 !important;
+    color: #ffffff !important;
+    border: 1px solid #3b82f6 !important;
+}
+
+/* 4. Custom Promotional Badge: Clean Indigo */
+.rzp-badge-custom {
+    background: #4338ca !important;
+    color: #ffffff !important;
+    border: 1px solid #6366f1 !important;
+}
+

@@ -104,6 +104,18 @@ class EmiResolutionService
             $applicableOtherOffers = $activeOtherOffers;
         }
 
+        // Scheme Isolation: Strictly filter subvention offers based on product scheme
+        if ($scheme === 'no_cost') {
+            // Strictly exclude Low Cost EMI offers from a No Cost EMI product
+            $applicableEmiOffers = $applicableEmiOffers->filter(fn ($o) => ! $o->isLowCostEmi());
+        } elseif ($scheme === 'low_cost') {
+            // Strictly exclude No Cost EMI offers from a Low Cost EMI product
+            $applicableEmiOffers = $applicableEmiOffers->filter(fn ($o) => ! $o->isNoCostEmi());
+        } else {
+            // Standard EMI: Strictly exclude both No Cost and Low Cost subvention offers
+            $applicableEmiOffers = $applicableEmiOffers->filter(fn ($o) => ! $o->isNoCostEmi() && ! $o->isLowCostEmi());
+        }
+
         // Calculate starting EMI
         $startingEmi = $this->calculateStartingEmi($price, $scheme);
 
@@ -160,10 +172,14 @@ class EmiResolutionService
 
     public function calculateStartingEmi(float $price, string $scheme): float
     {
-        // 24 months standard/low-cost gives the lowest starting EMI (e.g. ₹106/mo or ₹124/mo)
         if ($scheme === 'no_cost') {
             // For 3-month or 6-month zero interest
             return round($price / 6);
+        }
+
+        if ($scheme === 'low_cost') {
+            // Subsidized 6-month low cost EMI at 7% p.a.
+            return $this->calculateMonthlyEmi($price, 6, 7.0);
         }
 
         return $this->calculateMonthlyEmi($price, 24, 15.0);
@@ -177,6 +193,11 @@ class EmiResolutionService
         if ($scheme === 'no_cost') {
             $stdTotal = $this->calculateMonthlyEmi($price, 6, 15.0) * 6;
             $savings = max($savings, round($stdTotal - $price));
+        } elseif ($scheme === 'low_cost') {
+            // Subvention saving for Low Cost EMI: interest reduced from 15% to 7%
+            $stdTotal = $this->calculateMonthlyEmi($price, 6, 15.0) * 6;
+            $lowTotal = $this->calculateMonthlyEmi($price, 6, 7.0) * 6;
+            $savings = max($savings, round($stdTotal - $lowTotal));
         }
 
         foreach ($offers as $offer) {
@@ -214,62 +235,73 @@ class EmiResolutionService
 
     public function getBankEmiPlans(float $price, string $scheme): array
     {
+        $isNoCostScheme = ($scheme === 'no_cost');
+        $isLowCostScheme = ($scheme === 'low_cost');
+
         $banks = [
             [
                 'code' => 'hdfc',
                 'name' => 'HDFC Bank',
                 'type' => 'Credit Card',
                 'annual_rate' => 15.0,
-                'no_cost_tenures' => in_array($scheme, ['no_cost', 'low_cost']) ? [3, 6] : [],
+                'no_cost_tenures' => $isNoCostScheme ? [3, 6] : [],
+                'low_cost_tenures' => $isLowCostScheme ? [3, 6] : [],
             ],
             [
                 'code' => 'icici',
                 'name' => 'ICICI Bank',
                 'type' => 'Credit Card',
                 'annual_rate' => 15.0,
-                'no_cost_tenures' => in_array($scheme, ['no_cost', 'low_cost']) ? [3, 6] : [],
+                'no_cost_tenures' => $isNoCostScheme ? [3, 6] : [],
+                'low_cost_tenures' => $isLowCostScheme ? [3, 6] : [],
             ],
             [
                 'code' => 'sbi',
                 'name' => 'State Bank of India',
                 'type' => 'Credit Card',
                 'annual_rate' => 14.5,
-                'no_cost_tenures' => in_array($scheme, ['no_cost', 'low_cost']) ? [3] : [],
+                'no_cost_tenures' => $isNoCostScheme ? [3] : [],
+                'low_cost_tenures' => $isLowCostScheme ? [3] : [],
             ],
             [
                 'code' => 'axis',
                 'name' => 'Axis Bank',
                 'type' => 'Credit Card',
                 'annual_rate' => 15.0,
-                'no_cost_tenures' => in_array($scheme, ['no_cost', 'low_cost']) ? [3, 6] : [],
+                'no_cost_tenures' => $isNoCostScheme ? [3, 6] : [],
+                'low_cost_tenures' => $isLowCostScheme ? [3, 6] : [],
             ],
             [
                 'code' => 'kotak',
                 'name' => 'Kotak Mahindra Bank',
                 'type' => 'Credit Card',
                 'annual_rate' => 15.0,
-                'no_cost_tenures' => in_array($scheme, ['no_cost', 'low_cost']) ? [3] : [],
+                'no_cost_tenures' => $isNoCostScheme ? [3] : [],
+                'low_cost_tenures' => $isLowCostScheme ? [3] : [],
             ],
             [
                 'code' => 'idfc',
                 'name' => 'IDFC FIRST Bank',
                 'type' => 'Credit Card',
                 'annual_rate' => 14.0,
-                'no_cost_tenures' => in_array($scheme, ['no_cost', 'low_cost']) ? [3, 6] : [],
+                'no_cost_tenures' => $isNoCostScheme ? [3, 6] : [],
+                'low_cost_tenures' => $isLowCostScheme ? [3, 6] : [],
             ],
             [
                 'code' => 'yesbank',
                 'name' => 'Yes Bank',
                 'type' => 'Credit Card',
                 'annual_rate' => 15.0,
-                'no_cost_tenures' => in_array($scheme, ['no_cost', 'low_cost']) ? [3] : [],
+                'no_cost_tenures' => $isNoCostScheme ? [3] : [],
+                'low_cost_tenures' => $isLowCostScheme ? [3] : [],
             ],
             [
                 'code' => 'bob',
                 'name' => 'Bank of Baroda',
                 'type' => 'Credit Card',
                 'annual_rate' => 14.5,
-                'no_cost_tenures' => in_array($scheme, ['no_cost', 'low_cost']) ? [3] : [],
+                'no_cost_tenures' => $isNoCostScheme ? [3] : [],
+                'low_cost_tenures' => $isLowCostScheme ? [3] : [],
             ],
         ];
 
@@ -279,17 +311,25 @@ class EmiResolutionService
             $plans = [];
             foreach ($tenures as $months) {
                 $isNoCost = in_array($months, $bank['no_cost_tenures'], true);
-                $annualRate = $isNoCost ? 0.0 : $bank['annual_rate'];
+                $isLowCost = in_array($months, $bank['low_cost_tenures'], true);
 
                 $stdMonthlyEmi = $this->calculateMonthlyEmi($price, $months, $bank['annual_rate']);
                 $stdTotal = round($stdMonthlyEmi * $months);
                 $stdInterest = max(0, $stdTotal - $price);
 
                 if ($isNoCost) {
+                    $annualRate = 0.0;
                     $monthlyEmi = round($price / $months);
                     $total = $price;
                     $savings = $stdInterest;
+                } elseif ($isLowCost) {
+                    // Subsidized low cost interest rate (e.g. 7.0% p.a. vs 14.5%-15% standard)
+                    $annualRate = 7.0;
+                    $monthlyEmi = $this->calculateMonthlyEmi($price, $months, 7.0);
+                    $total = round($monthlyEmi * $months);
+                    $savings = max(0, $stdTotal - $total);
                 } else {
+                    $annualRate = $bank['annual_rate'];
                     $monthlyEmi = $stdMonthlyEmi;
                     $total = $stdTotal;
                     $savings = 0;
@@ -303,6 +343,7 @@ class EmiResolutionService
                     'total' => $total,
                     'savings' => $savings,
                     'is_no_cost' => $isNoCost,
+                    'is_low_cost' => $isLowCost,
                 ];
             }
             $bank['plans'] = $plans;

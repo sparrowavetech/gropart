@@ -25,16 +25,52 @@ class HookServiceProvider extends ServiceProvider
             add_action(BASE_ACTION_META_BOXES, [$this, 'addVendorProductMetaBox'], 125, 2);
         }
 
+        // Global Front Storefront Assets Registration (Universal across ANY Botble theme)
+        if (defined('THEME_FRONT_HEADER')) {
+            add_filter([THEME_FRONT_HEADER, 'ecommerce_checkout_header'], function (?string $html): ?string {
+                if (AdminHelper::isInAdmin()) {
+                    return $html;
+                }
+
+                $cssUrl = asset('vendor/core/plugins/razorpay-easy-emi/css/razorpay-easy-emi.css');
+                $v = file_exists(public_path('vendor/core/plugins/razorpay-easy-emi/css/razorpay-easy-emi.css'))
+                    ? filemtime(public_path('vendor/core/plugins/razorpay-easy-emi/css/razorpay-easy-emi.css'))
+                    : '1.0';
+
+                return ($html ?? '') . "\n" . '<link rel="stylesheet" href="' . $cssUrl . '?v=' . $v . '">';
+            }, 125);
+        }
+
+        if (defined('THEME_FRONT_FOOTER')) {
+            add_filter(THEME_FRONT_FOOTER, function (?string $html): ?string {
+                if (AdminHelper::isInAdmin()) {
+                    return $html;
+                }
+
+                $jsUrl = asset('vendor/core/plugins/razorpay-easy-emi/js/razorpay-easy-emi.js');
+                $v = file_exists(public_path('vendor/core/plugins/razorpay-easy-emi/js/razorpay-easy-emi.js'))
+                    ? filemtime(public_path('vendor/core/plugins/razorpay-easy-emi/js/razorpay-easy-emi.js'))
+                    : '1.0';
+
+                return ($html ?? '') . "\n" . '<script src="' . $jsUrl . '?v=' . $v . '"></script>';
+            }, 125);
+        }
+
         // 3. Product Detail Page (PDP) Widget Hook
-        add_filter('ecommerce_before_product_description', [$this, 'renderPdpWidget'], 115, 2);
+        // Priority 140 renders below Seller Name & Free Shipping badge (125), and directly above Short Description
+        add_filter('ecommerce_before_product_description', [$this, 'renderPdpWidget'], 140, 2);
 
         // 4. Universal Catalog / Grid Card Badge Hooks (Matches advanced-cod and product-free-shipping patterns)
         add_filter('ecommerce_after_product_price', [$this, 'renderCatalogBadge'], 130, 2);
         add_filter('ecommerce_product_item_badges', [$this, 'renderCatalogBadge'], 130, 2);
         add_filter('ecommerce_product_loop_extra_html', [$this, 'renderCatalogBadge'], 130, 2);
+        add_filter('farmart_helper_product_card_extra_html', [$this, 'renderCatalogBadge'], 130, 2);
 
         // Standard Ecommerce card forms view composer for Farmart and other themes
-        $this->app['view']->composer('theme.*::partials.ecommerce.product-cart-form', function ($view): void {
+        $this->app['view']->composer([
+            'theme.*::partials.ecommerce.product-cart-form',
+            'plugins/farmart-helper::product-cards.*',
+        ], function ($view): void {
             $data = $view->getData();
             $product = $data['product'] ?? null;
             $isCard = $product && ! array_key_exists('withVariations', $data)
@@ -47,8 +83,10 @@ class HookServiceProvider extends ServiceProvider
 
         add_filter(ECOMMERCE_PRODUCT_DETAIL_EXTRA_HTML, function (mixed $html, mixed $product = null): mixed {
             $id = is_object($product) ? (string) ($product->id ?? '') : '';
-            if ($id === '' || request()->attributes->get('razorpay_easy_emi_card_context') !== $id
-                || request()->attributes->get('razorpay_easy_emi_native_card_badge') === $id) {
+            $isCard = request()->attributes->get('farmart_helper_card_context', false)
+                || request()->attributes->get('razorpay_easy_emi_card_context') === $id;
+
+            if ($id === '' || ! $isCard || request()->attributes->get('razorpay_easy_emi_native_card_badge') === $id) {
                 return $html;
             }
 
@@ -74,7 +112,7 @@ class HookServiceProvider extends ServiceProvider
 
     public function addProductMetaBox(string $priority, mixed $model): void
     {
-        if (! $model instanceof Product || ! AdminHelper::isInAdmin()) {
+        if (! $model instanceof Product || ! AdminHelper::isInAdmin(true) || request()->is('vendor/*') || request()->is('*/vendor/*')) {
             return;
         }
 
@@ -92,12 +130,17 @@ class HookServiceProvider extends ServiceProvider
 
     public function addVendorProductMetaBox(string $priority, mixed $model): void
     {
-        if (! $model instanceof Product || AdminHelper::isInAdmin()) {
+        if (! $model instanceof Product) {
             return;
         }
 
-        // Check if inside vendor panel
-        if (! auth('customer')->check() || ! auth('customer')->user()->is_vendor) {
+        // Strictly prevent loading in CMS Admin panel
+        if (AdminHelper::isInAdmin(true)) {
+            return;
+        }
+
+        // Must strictly be on a vendor route
+        if (! request()->is('vendor/*') && ! request()->is('*/vendor/*')) {
             return;
         }
 
@@ -115,10 +158,11 @@ class HookServiceProvider extends ServiceProvider
 
     public function saveProductEmiConfig(string $screen, Request $request, mixed $model): void
     {
-        if (! $model instanceof Product || ! $request->has('razorpay_emi_status')) {
+        if (! $model instanceof Product || request()->is('vendor/*') || request()->is('*/vendor/*') || ! $request->has('razorpay_emi_status')) {
             return;
         }
 
+        $emiType = $request->input('razorpay_emi_type', 'standard');
         $offerMode = $request->input('razorpay_emi_offer_mode', 'auto');
         $rawOfferIds = $request->input('razorpay_emi_offer_ids');
         $singleOfferId = $request->input('razorpay_emi_offer_id');
@@ -130,13 +174,39 @@ class HookServiceProvider extends ServiceProvider
             } elseif (! empty($singleOfferId)) {
                 $offerIds = [(string) $singleOfferId];
             }
+
+            // Prune incompatible offers according to selected scheme
+            if (! empty($offerIds)) {
+                $cachedOffers = \SparroWave\RazorpayEasyEmi\Models\RazorpayEmiCachedOffer::query()
+                    ->whereIn('id', $offerIds)
+                    ->get()
+                    ->keyBy('id');
+
+                $offerIds = array_values(array_filter($offerIds, function ($id) use ($cachedOffers, $emiType) {
+                    $offer = $cachedOffers->get($id);
+                    if (! $offer) {
+                        return true;
+                    }
+                    if ($emiType === 'standard' && ($offer->isNoCostEmi() || $offer->isLowCostEmi())) {
+                        return false;
+                    }
+                    if ($emiType === 'no_cost' && $offer->isLowCostEmi()) {
+                        return false;
+                    }
+                    if ($emiType === 'low_cost' && $offer->isNoCostEmi()) {
+                        return false;
+                    }
+
+                    return true;
+                }));
+            }
         }
 
         RazorpayEmiProductConfig::query()->updateOrCreate(
             ['product_id' => $model->id],
             [
                 'status' => $request->input('razorpay_emi_status', 'inherit'),
-                'emi_type' => $request->input('razorpay_emi_type', 'standard'),
+                'emi_type' => $emiType,
                 'offer_mode' => $offerMode,
                 'offer_id' => ! empty($offerIds) ? json_encode($offerIds) : null,
                 'subvention_payer' => $request->input('razorpay_emi_subvention_payer', 'platform'),

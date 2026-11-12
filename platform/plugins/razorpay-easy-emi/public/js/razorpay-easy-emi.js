@@ -7,20 +7,34 @@
 (function () {
     'use strict';
 
-    function dockWidgetBelowPrice(wrapper) {
+    function dockWidget(wrapper) {
         if (!wrapper || wrapper.getAttribute('data-docked') === 'true') {
             return;
         }
 
-        // Search for primary product price element in common Botble themes (Farmart, Nest, Shofy, Martfury)
-        var priceElement = document.querySelector('.entry-product-header .product-price')
-            || document.querySelector('.product-details-content .product-price')
-            || document.querySelector('.product-info .product-price')
-            || document.querySelector('.ps-product__price')
-            || document.querySelector('.product-price');
+        // If wrapper is already rendered inside .ps-list--dot or product description container,
+        // it is already naturally positioned below the seller info & badges, and above the short description.
+        if (wrapper.closest('.ps-list--dot') || wrapper.closest('.product-description')) {
+            wrapper.setAttribute('data-docked', 'true');
+            return;
+        }
 
-        if (priceElement && priceElement.parentNode && priceElement.nextSibling !== wrapper) {
-            priceElement.parentNode.insertBefore(wrapper, priceElement.nextSibling);
+        // For other themes (e.g. Nest, Shofy, Martfury), dock before the short description or after seller/badges
+        var descTarget = document.querySelector('.product-short-description')
+            || document.querySelector('.product-description')
+            || document.querySelector('.ps-product__short-desc');
+
+        var lastBadge = document.querySelector('.product-free-shipping-detail-badge')
+            || document.querySelector('.product-cod-view-badge')
+            || document.querySelector('.product-meta-sold-by');
+
+        if (descTarget && descTarget.parentNode && descTarget !== wrapper) {
+            descTarget.parentNode.insertBefore(wrapper, descTarget);
+            wrapper.setAttribute('data-docked', 'true');
+        } else if (lastBadge && lastBadge.parentNode && lastBadge !== wrapper) {
+            lastBadge.parentNode.insertBefore(wrapper, lastBadge.nextSibling);
+            wrapper.setAttribute('data-docked', 'true');
+        } else {
             wrapper.setAttribute('data-docked', 'true');
         }
     }
@@ -38,7 +52,14 @@
         if (!wrapper || isNaN(newPrice) || newPrice <= 0) return;
 
         var scheme = wrapper.getAttribute('data-scheme') || 'standard';
-        var startingEmi = (scheme === 'no_cost') ? Math.round(newPrice / 6) : calculateMonthlyEmi(newPrice, 24, 15.0);
+        var startingEmi;
+        if (scheme === 'no_cost') {
+            startingEmi = Math.round(newPrice / 6);
+        } else if (scheme === 'low_cost') {
+            startingEmi = calculateMonthlyEmi(newPrice, 6, 7.0);
+        } else {
+            startingEmi = calculateMonthlyEmi(newPrice, 24, 15.0);
+        }
 
         var startingEmiEl = wrapper.querySelector('#rzp-starting-emi-val');
         if (startingEmiEl) {
@@ -63,14 +84,25 @@
                     if (!monthsMatch) return;
                     var months = parseInt(monthsMatch[0], 10);
                     var isNoCost = !!row.querySelector('.bg-success-subtle');
+                    var isLowCost = !!row.querySelector('.bg-warning-subtle');
 
                     var stdMonthly = calculateMonthlyEmi(newPrice, months, 15.0);
                     var stdTotal = Math.round(stdMonthly * months);
                     var stdInterest = Math.max(0, stdTotal - newPrice);
 
-                    var monthlyEmi = isNoCost ? Math.round(newPrice / months) : stdMonthly;
-                    var total = isNoCost ? newPrice : stdTotal;
-                    var savings = isNoCost ? stdInterest : 0;
+                    var monthlyEmi = stdMonthly;
+                    var total = stdTotal;
+                    var savings = 0;
+
+                    if (isNoCost) {
+                        monthlyEmi = Math.round(newPrice / months);
+                        total = newPrice;
+                        savings = stdInterest;
+                    } else if (isLowCost) {
+                        monthlyEmi = calculateMonthlyEmi(newPrice, months, 7.0);
+                        total = Math.round(monthlyEmi * months);
+                        savings = Math.max(0, stdTotal - total);
+                    }
 
                     var monthlyCell = row.querySelector('td:nth-child(2)');
                     if (monthlyCell) {
@@ -165,10 +197,24 @@
         }
     }
 
+    function dockCatalogBadges() {
+        var badges = document.querySelectorAll('.razorpay-easy-emi-catalog-badge');
+        badges.forEach(function (badge) {
+            var card = badge.closest('.product-inner, .product-item, .product-card, article');
+            if (!card) return;
+
+            var thumbnail = card.querySelector('.product-thumbnail, .product-image, .img-fluid-eq__wrap') || card;
+
+            if (thumbnail && badge.parentElement !== thumbnail) {
+                thumbnail.appendChild(badge);
+            }
+        });
+    }
+
     function init() {
         var wrapper = document.querySelector('.razorpay-easy-emi-container');
         if (wrapper) {
-            dockWidgetBelowPrice(wrapper);
+            dockWidget(wrapper);
             initVariationWatcher(wrapper);
 
             // Track user interaction with plans/offers
@@ -185,6 +231,9 @@
             if (viewOffersBtn) viewOffersBtn.addEventListener('click', recordIntent);
         }
 
+        // Auto-dock catalog badges to top-left of image across all product cards
+        dockCatalogBadges();
+
         // Auto-dock cart banner if on cart page across any Botble theme
         dockCartBanner();
     }
@@ -193,5 +242,12 @@
         document.addEventListener('DOMContentLoaded', init);
     } else {
         init();
+    }
+
+    // Re-dock when AJAX pagination or filtering occurs
+    if (window.jQuery) {
+        window.jQuery(document).ajaxComplete(function () {
+            setTimeout(dockCatalogBadges, 150);
+        });
     }
 })();

@@ -14,23 +14,11 @@
          data-offer-mode="{{ $resolution['offer_mode'] ?? 'auto' }}"
          data-offer-ids='@json($resolution['offer_ids'] ?? [])'
     >
-        {{-- Optional Promotional Badge above Widget --}}
+        {{-- Optional Custom Promotional Badge above Widget (if explicitly configured) --}}
         @if (! empty($resolution['custom_badge']))
             <div class="mb-2">
                 <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fs-7 fw-semibold">
                     <i class="ti ti-discount-2 me-1"></i> {{ $resolution['custom_badge'] }}
-                </span>
-            </div>
-        @elseif (($resolution['scheme'] ?? '') === 'no_cost')
-            <div class="mb-2">
-                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fs-7 fw-semibold">
-                    <i class="ti ti-bolt me-1"></i> {{ $resolution['badge'] ?? trans('plugins/razorpay-easy-emi::razorpay-easy-emi.badges.no_cost_emi') }}
-                </span>
-            </div>
-        @elseif (($resolution['scheme'] ?? '') === 'low_cost')
-            <div class="mb-2">
-                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1 fs-7 fw-semibold">
-                    <i class="ti ti-trending-down me-1"></i> {{ $resolution['badge'] ?? trans('plugins/razorpay-easy-emi::razorpay-easy-emi.badges.low_cost_emi') }}
                 </span>
             </div>
         @endif
@@ -131,6 +119,13 @@
                                 <strong>⭐ No Cost EMI Available:</strong> The bank interest is subsidized as an upfront instant discount on eligible tenures. You pay 0% effective interest!
                             </div>
                         </div>
+                    @elseif (($resolution['scheme'] ?? '') === 'low_cost')
+                        <div class="alert alert-warning d-flex align-items-center py-2 px-3 mb-3 border-0 bg-warning-subtle text-warning-emphasis rounded-2">
+                            <i class="ti ti-trending-down fs-3 me-2 flex-shrink-0"></i>
+                            <div class="small">
+                                <strong>📉 Low Cost EMI Available:</strong> Enjoy subsidized, reduced interest rates on select tenures with upfront merchant discounts. Pay significantly lower interest!
+                            </div>
+                        </div>
                     @else
                         <div class="alert alert-info d-flex align-items-center py-2 px-3 mb-3 border-0 bg-info-subtle text-info-emphasis rounded-2">
                             <i class="ti ti-info-circle fs-3 me-2 flex-shrink-0"></i>
@@ -183,9 +178,13 @@
                                                     <td class="fw-bold">{{ $plan['months'] }} Months</td>
                                                     <td class="fw-semibold text-primary">₹{{ number_format($plan['monthly_emi']) }}/mo</td>
                                                     <td>
-                                                        @if ($plan['is_no_cost'])
+                                                        @if (!empty($plan['is_no_cost']))
                                                             <span class="badge bg-success-subtle text-success border border-success-subtle">
                                                                 ⭐ 0% No Cost EMI
+                                                            </span>
+                                                        @elseif (!empty($plan['is_low_cost']))
+                                                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                                                                📉 Low Cost ({{ $plan['annual_rate'] }}% p.a.)
                                                             </span>
                                                         @else
                                                             <span class="text-muted">{{ $plan['annual_rate'] }}% p.a.</span>

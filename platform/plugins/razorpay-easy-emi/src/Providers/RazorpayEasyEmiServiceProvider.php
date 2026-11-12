@@ -55,17 +55,6 @@ class RazorpayEasyEmiServiceProvider extends ServiceProvider
                 'permissions' => ['razorpay-easy-emi.requests.index'],
             ]);
         });
-
-        // 3. Register EMI Requests under Vendor Dashboard Menu
-        DashboardMenu::for('vendor')->beforeRetrieving(function (): void {
-            DashboardMenu::make()->registerItem([
-                'id' => 'marketplace.vendor.razorpay-easy-emi-requests',
-                'priority' => 9,
-                'name' => trans('plugins/razorpay-easy-emi::razorpay-easy-emi.admin_menu.emi_requests'),
-                'url' => fn () => route('marketplace.vendor.razorpay-easy-emi.requests.index'),
-                'icon' => 'ti ti-credit-card',
-            ]);
-        });
     }
 }
 
