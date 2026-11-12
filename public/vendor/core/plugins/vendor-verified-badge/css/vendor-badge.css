@@ -46,3 +46,71 @@
     font-size: 12px;
     font-weight: 600;
 }
+
+/* ==========================================================================
+   Catalog Product Card Sold-By Meta — Two-Line Uniform Alignment
+   Line 1: Store Name (Clean ellipsis if long)
+   Line 2: Verified Seller Badge + Shop Type Tag
+   ========================================================================== */
+.sold-by-meta {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 2px !important;
+    margin-bottom: 5px !important;
+    min-height: 42px !important;
+}
+
+.sold-by-meta > a {
+    display: block !important;
+    max-width: 100% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-size: 13px !important;
+    line-height: 1.3 !important;
+    font-weight: 600 !important;
+    color: #2f8a33 !important;
+    text-decoration: none !important;
+}
+
+.sold-by-meta .vendor-badges-wrap {
+    display: inline-flex !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+}
+
+.sold-by-meta .vendor-verified-label {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 3px !important;
+    background: #e8f5e9 !important;
+    border: 1px solid #c8e6c9 !important;
+    padding: 1.5px 6px !important;
+    border-radius: 4px !important;
+    line-height: 1.2 !important;
+}
+
+.sold-by-meta .vendor-verified-label-text {
+    font-size: 10.5px !important;
+    color: #198754 !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+}
+
+.sold-by-meta .verified-store-badge {
+    height: 12px !important;
+    max-height: 12px !important;
+    margin: 0 !important;
+}
+
+.sold-by-meta .vendor-shop-type-badge {
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+    margin-left: 0 !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+}

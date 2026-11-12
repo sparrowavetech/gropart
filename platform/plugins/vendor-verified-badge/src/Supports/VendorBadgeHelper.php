@@ -167,7 +167,13 @@ class VendorBadgeHelper
             return '';
         }
 
-        return new HtmlString($verifiedHtml . ' ' . $typeHtml);
+        $isInAdmin = (bool) (\Illuminate\Support\Arr::get($options, 'is_admin') ?? (function_exists('is_in_admin') && is_in_admin(true)));
+
+        if ($isInAdmin) {
+            return new HtmlString($verifiedHtml . ' ' . $typeHtml);
+        }
+
+        return new HtmlString('<span class="vendor-badges-wrap">' . $verifiedHtml . ' ' . $typeHtml . '</span>');
     }
 
     public static function isVendorProfileComplete(int $customerId): array

@@ -99,11 +99,14 @@ class VendorVerifiedBadgeServiceProvider extends ServiceProvider
 
     protected function registerThemeAssets(): void
     {
+        $cssPath = public_path('vendor/core/plugins/vendor-verified-badge/css/vendor-badge.css');
+        $cssVersion = file_exists($cssPath) ? filemtime($cssPath) : '20261111';
+
         Theme::asset()
             ->usePath(false)
             ->add(
                 'vendor-badge-css',
-                asset('vendor/core/plugins/vendor-verified-badge/css/vendor-badge.css') . '?v=20261020-2'
+                asset('vendor/core/plugins/vendor-verified-badge/css/vendor-badge.css') . '?v=' . $cssVersion
             )
             ->add(
                 'vendor-badge-js',
@@ -115,6 +118,34 @@ class VendorVerifiedBadgeServiceProvider extends ServiceProvider
             \Botble\Base\Facades\Assets::addScriptsDirectly('vendor/core/plugins/vendor-verified-badge/js/vendor-badge.js');
             \Botble\Base\Facades\Assets::addStylesDirectly('vendor/core/plugins/vendor-verified-badge/css/vendor-badge.css');
         });
+
+        if (defined('THEME_FRONT_HEADER')) {
+            add_filter(THEME_FRONT_HEADER, function (?string $html): ?string {
+                if (\Botble\Base\Facades\AdminHelper::isInAdmin()) {
+                    return $html;
+                }
+
+                $cssPath = public_path('vendor/core/plugins/vendor-verified-badge/css/vendor-badge.css');
+                $v = file_exists($cssPath) ? filemtime($cssPath) : '20261111';
+                $cssUrl = asset('vendor/core/plugins/vendor-verified-badge/css/vendor-badge.css');
+
+                return ($html ?? '') . "\n" . '<link rel="stylesheet" href="' . $cssUrl . '?v=' . $v . '">';
+            }, 120);
+        }
+
+        if (defined('THEME_FRONT_FOOTER')) {
+            add_filter(THEME_FRONT_FOOTER, function (?string $html): ?string {
+                if (\Botble\Base\Facades\AdminHelper::isInAdmin()) {
+                    return $html;
+                }
+
+                $jsPath = public_path('vendor/core/plugins/vendor-verified-badge/js/vendor-badge.js');
+                $v = file_exists($jsPath) ? filemtime($jsPath) : '20261111';
+                $jsUrl = asset('vendor/core/plugins/vendor-verified-badge/js/vendor-badge.js');
+
+                return ($html ?? '') . "\n" . '<script src="' . $jsUrl . '?v=' . $v . '"></script>';
+            }, 120);
+        }
 
         add_filter('theme_front_footer', function ($html) {
             $translations = [
