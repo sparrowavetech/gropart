@@ -1,0 +1,1326 @@
+<style>
+    #razorpay_easy_emi_meta_box {
+        border: 1px solid #bfdbfe !important;
+        box-shadow: 0 10px 28px rgba(37, 99, 235, 0.08) !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+    }
+
+    #razorpay_easy_emi_meta_box .card-header {
+        background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%) !important;
+        border-bottom: 1px solid #dbeafe !important;
+        padding: 14px 20px !important;
+    }
+
+    #razorpay_easy_emi_meta_box .card-title {
+        color: #1e40af !important;
+        font-weight: 700 !important;
+        font-size: 14.5px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+    }
+
+    #razorpay_easy_emi_meta_box .card-body {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f7fe 50%, #fbfdfc 100%) !important;
+        padding: 22px !important;
+    }
+
+    /* 1. Hero Availability Bar (COD Design Language) */
+    .rzp-hero-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #e2e8f0;
+        margin-bottom: 22px;
+    }
+
+    .rzp-hero-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .rzp-hero-desc {
+        font-size: 13px;
+        color: #475569;
+        margin-bottom: 0;
+        line-height: 1.5;
+        max-width: 680px;
+    }
+
+    .rzp-status-toggle-wrap {
+        display: inline-flex;
+        background: #e2e8f0;
+        padding: 4px;
+        border-radius: 8px;
+        gap: 3px;
+        flex-shrink: 0;
+    }
+
+    .rzp-status-toggle-btn {
+        border: none;
+        background: transparent;
+        padding: 7px 15px;
+        font-size: 12.5px;
+        font-weight: 600;
+        border-radius: 6px;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .rzp-status-toggle-btn:hover {
+        color: #0f172a;
+    }
+
+    .rzp-status-toggle-btn.active {
+        background: #ffffff;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12);
+        color: #1e40af;
+    }
+
+    .rzp-status-toggle-btn.active.is-enabled {
+        color: #047857;
+    }
+
+    .rzp-status-toggle-btn.active.is-disabled {
+        color: #b91c1c;
+    }
+
+    /* 2. Scheme Selector Cards */
+    .rzp-scheme-card {
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .rzp-scheme-card:hover {
+        border-color: #93c5fd;
+        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.08);
+        transform: translateY(-1px);
+    }
+
+    .rzp-scheme-card.active {
+        border-color: #2563eb;
+        background: #f8faff;
+        box-shadow: 0 6px 18px rgba(37, 99, 235, 0.14);
+    }
+
+    .rzp-scheme-card .check-circle {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid #cbd5e1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        color: transparent;
+        transition: all 0.2s ease;
+    }
+
+    .rzp-scheme-card.active .check-circle {
+        border-color: #2563eb;
+        background: #2563eb;
+        color: #ffffff;
+    }
+
+    .rzp-scheme-badge {
+        font-size: 10.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        padding: 3px 8px;
+        border-radius: 4px;
+        display: inline-block;
+        margin-bottom: 8px;
+    }
+
+    /* 3. Offers Management Panel */
+    .rzp-offers-panel {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+        overflow: hidden;
+    }
+
+    .rzp-offers-panel-header {
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 14px 18px;
+    }
+
+    /* Nav Tabs for Category Filtering */
+    .rzp-category-tabs {
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
+        padding: 8px 16px 0 16px;
+        display: flex;
+        gap: 6px;
+    }
+
+    .rzp-tab-btn {
+        border: 1px solid transparent;
+        border-bottom: none;
+        background: transparent;
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 8px 16px;
+        border-top-left-radius: 6px;
+        border-top-right-radius: 6px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: -1px;
+    }
+
+    .rzp-tab-btn:hover {
+        color: #0f172a;
+        background: #ffffff;
+    }
+
+    .rzp-tab-btn.active {
+        color: #1e40af;
+        background: #ffffff;
+        border-color: #e2e8f0;
+        border-top: 2px solid #2563eb;
+    }
+
+    /* Spacious Offer Card */
+    .rzp-offer-box {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 12px 16px;
+        margin-bottom: 10px;
+        transition: all 0.15s ease;
+        cursor: pointer;
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .rzp-offer-box:hover {
+        border-color: #3b82f6;
+        background: #f8faff;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.06);
+    }
+
+    .rzp-offer-box.is-checked {
+        border-color: #2563eb;
+        background: #eff6ff;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+    }
+
+    .rzp-offer-title {
+        font-size: 13.5px;
+        font-weight: 600;
+        color: #0f172a;
+        line-height: 1.45;
+        white-space: normal !important;
+        word-break: break-word;
+    }
+
+    .rzp-offer-desc {
+        font-size: 12px;
+        color: #64748b;
+        line-height: 1.4;
+        margin-top: 4px;
+    }
+
+    .cursor-pointer {
+        cursor: pointer;
+    }
+
+    .ti-spin {
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        100% { transform: rotate(360deg); }
+    }
+</style>
+
+<div class="razorpay-easy-emi-metabox">
+    
+    <div class="rzp-hero-bar">
+        <div>
+            <div class="rzp-hero-title">
+                <svg width="18" height="18" viewBox="0 0 16 18" fill="none" class="flex-shrink-0">
+                    <path d="M9.5 0L1 9.5H6.5L4 18L15 7H9.5L12 0H9.5Z" fill="#2b83ea"/>
+                </svg>
+                <span>EMI Availability</span>
+                <span id="rzp_status_badge" class="badge bg-secondary-subtle text-secondary border ms-1 fs-7"></span>
+            </div>
+            <p class="rzp-hero-desc">
+                Control whether the EMI widget appears on this specific product.
+            </p>
+        </div>
+
+        
+        <select class="d-none" name="razorpay_emi_status" id="razorpay_emi_status">
+            <option value="inherit" selected>Inherit Global Default</option>
+            <option value="enabled" >Enable EMI on this Product</option>
+            <option value="disabled" >Disable EMI on this Product</option>
+        </select>
+
+        
+        <div class="rzp-status-toggle-wrap">
+            <button type="button" class="rzp-status-toggle-btn  active " data-val="inherit">
+                <i class="ti ti-settings fs-6"></i>
+                <span>Store Default</span>
+            </button>
+            <button type="button" class="rzp-status-toggle-btn is-enabled " data-val="enabled">
+                <i class="ti ti-check fs-6"></i>
+                <span>Enable</span>
+            </button>
+            <button type="button" class="rzp-status-toggle-btn is-disabled " data-val="disabled">
+                <i class="ti ti-ban fs-6"></i>
+                <span>Disable</span>
+            </button>
+        </div>
+    </div>
+
+    
+    <div id="rzp_disabled_notice" class="alert alert-warning d-flex align-items-center mb-0 py-3 px-3 border-0 bg-warning-subtle text-warning-emphasis rounded-2" style="display: none;">
+        <i class="ti ti-alert-triangle fs-3 me-2 flex-shrink-0"></i>
+        <div>
+            <strong>EMI Plans & Badges Disabled:</strong>
+            Razorpay Affordability widget and catalog badges will be completely hidden for this product.
+        </div>
+    </div>
+
+    
+    <div id="rzp_dependent_content" style="display: block;">
+        
+        <div class="mb-4">
+            <label class="form-label fw-bold text-dark d-flex align-items-center gap-1 mb-2">
+                <i class="ti ti-chart-arrows text-primary"></i>
+                <span>Offered EMI Scheme</span>
+            </label>
+
+            
+            <select class="d-none" name="razorpay_emi_type" id="razorpay_emi_type">
+                <option value="standard" selected>Standard EMI (With Bank Interest)</option>
+                <option value="no_cost" >No Cost EMI (Subvention Discount)</option>
+                <option value="low_cost" >Low Cost EMI</option>
+            </select>
+
+            <div class="row g-3">
+                
+                <div class="col-md-4">
+                    <div class="rzp-scheme-card " data-scheme="no_cost">
+                        <div class="check-circle"><i class="ti ti-check"></i></div>
+                        <div>
+                            <span class="rzp-scheme-badge bg-success-subtle text-success border border-success-subtle">
+                                <i class="ti ti-bolt me-1"></i>0% Subvention
+                            </span>
+                            <h6 class="fw-bold text-dark mb-1">No Cost EMI</h6>
+                            <p class="text-muted small mb-0" style="font-size: 12px; line-height: 1.45;">
+                                Zero interest to buyer. Subvention discount is subsidized by platform or merchant.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="col-md-4">
+                    <div class="rzp-scheme-card " data-scheme="low_cost">
+                        <div class="check-circle"><i class="ti ti-check"></i></div>
+                        <div>
+                            <span class="rzp-scheme-badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                                <i class="ti ti-trending-down me-1"></i>Subsidized
+                            </span>
+                            <h6 class="fw-bold text-dark mb-1">Low Cost EMI</h6>
+                            <p class="text-muted small mb-0" style="font-size: 12px; line-height: 1.45;">
+                                Reduced interest rate (7% p.a.). Buyer gets lower monthly installments.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="col-md-4">
+                    <div class="rzp-scheme-card  active " data-scheme="standard">
+                        <div class="check-circle"><i class="ti ti-check"></i></div>
+                        <div>
+                            <span class="rzp-scheme-badge bg-info-subtle text-info-emphasis border border-info-subtle">
+                                <i class="ti ti-credit-card me-1"></i>Bank Standard
+                            </span>
+                            <h6 class="fw-bold text-dark mb-1">Standard Bank EMI</h6>
+                            <p class="text-muted small mb-0" style="font-size: 12px; line-height: 1.45;">
+                                Buyer pays standard bank card interest (13–15% p.a.). Zero cost to merchant.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+        <div id="rzp_subvention_row" class="card border mb-4 shadow-none bg-white" style="display: none;">
+            <div class="card-body p-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div>
+                    <h6 class="fw-bold text-dark mb-1 d-flex align-items-center gap-1">
+                        <i class="ti ti-shield-dollar text-primary"></i>
+                        <span>Subvention Cost Payer</span>
+                    </h6>
+                    <small class="text-muted">Specifies whether platform or seller absorbs the merchant discount subvention cost.</small>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="form-check form-check-inline mb-0">
+                        <input class="form-check-input" type="radio" name="razorpay_emi_subvention_payer" id="subvention_platform" value="platform" checked>
+                        <label class="form-check-label fw-semibold small cursor-pointer" for="subvention_platform">
+                            <i class="ti ti-building text-primary me-1"></i>Platform / Store Owner
+                        </label>
+                    </div>
+                    <div class="form-check form-check-inline mb-0">
+                        <input class="form-check-input" type="radio" name="razorpay_emi_subvention_payer" id="subvention_seller" value="seller" >
+                        <label class="form-check-label fw-semibold small cursor-pointer" for="subvention_seller">
+                            <i class="ti ti-user-check text-success me-1"></i>Product Seller / Vendor
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="row g-3 mb-4">
+            
+            <div class="col-md-6">
+                <div class="form-group mb-0">
+                    <label for="razorpay_emi_custom_badge" class="form-label fw-bold d-flex justify-content-between align-items-center">
+                        <span>Custom Promotional Badge</span>
+                        <span id="rzp_badge_live_preview" class="badge bg-primary-subtle text-primary border" style="font-size: 11px;">
+                            Badge Preview
+                        </span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="ti ti-tag text-muted"></i></span>
+                        <input type="text" class="form-control" name="razorpay_emi_custom_badge" id="razorpay_emi_custom_badge" value="" placeholder="e.g. No Cost EMI Available">
+                    </div>
+                    <div class="form-text text-muted small mt-1">Optional badge text shown above the widget and on catalog cards.</div>
+                </div>
+            </div>
+
+            
+            <div class="col-md-6">
+                <div class="form-group mb-0">
+                    <label for="razorpay_emi_min_amount" class="form-label fw-bold">
+                        <span>Custom Minimum Threshold (₹)</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white fw-bold">₹</span>
+                        <input type="number" step="0.01" class="form-control" name="razorpay_emi_min_amount" id="razorpay_emi_min_amount" value="" placeholder="2500">
+                    </div>
+                    <div class="form-text text-muted small mt-1">Leave blank to use the global minimum price.</div>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="rzp-offers-panel">
+            
+            <div class="rzp-offers-panel-header d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="ti ti-discount-2 text-primary fs-3"></i>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">Razorpay Offers & Bank Promotions</h6>
+                        <small class="text-muted">Manage active cashback, subvention and payment offers for this product</small>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    
+                    <select class="d-none" name="razorpay_emi_offer_mode" id="razorpay_emi_offer_mode">
+                        <option value="auto" selected>auto</option>
+                        <option value="custom" >custom</option>
+                    </select>
+
+                    
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-primary  active " id="btn_mode_auto">
+                            <i class="ti ti-sparkles me-1"></i>Automatic Mode
+                        </button>
+                        <button type="button" class="btn btn-outline-primary " id="btn_mode_custom">
+                            <i class="ti ti-list-check me-1"></i>Custom Selection
+                        </button>
+                    </div>
+
+                    
+                    <button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1" id="btn-sync-offers-product" data-url="http://127.0.0.1:8000/admin/razorpay-easy-emi/sync-offers">
+                        <i class="ti ti-refresh" id="product-sync-icon"></i>
+                        <span id="product-sync-text">Sync from Razorpay</span>
+                    </button>
+                </div>
+            </div>
+
+            
+            <div id="rzp_auto_mode_banner" class="alert alert-light border-0 border-bottom mb-0 py-2 px-3 small d-flex align-items-center justify-content-between" style="display: flex; background: #f0fdf4;">
+                <div class="d-flex align-items-center gap-2 text-success-emphasis">
+                    <i class="ti ti-circle-check fs-5 text-success"></i>
+                    <span><strong>Auto Mode Active:</strong> Razorpay natively evaluates and shows all eligible account offers for customer order total.</span>
+                </div>
+                <button type="button" class="btn btn-sm btn-link text-primary text-decoration-none py-0" id="btn_switch_to_custom">
+                    Switch to Curated Offers &rarr;
+                </button>
+            </div>
+
+            
+            <div class="p-3 bg-light border-bottom d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="form-check form-check-inline mb-0">
+                        <input class="form-check-input cursor-pointer" type="checkbox" id="master_checkbox_all">
+                        <label class="form-check-label fw-bold small text-dark cursor-pointer ms-1" for="master_checkbox_all">
+                            Select All Available Offers
+                        </label>
+                    </div>
+                    <span class="badge bg-secondary-subtle text-secondary border px-2 py-1" id="global_selected_pill">0 Selected</span>
+                    <span class="badge bg-white text-secondary border" id="scheme_filter_indicator">Showing All Active</span>
+                </div>
+
+                <div>
+                    <button type="button" class="btn btn-sm btn-link text-danger text-decoration-none py-0 small" id="btn_clear_all_offers">
+                        <i class="ti ti-trash me-1"></i>Clear All
+                    </button>
+                </div>
+            </div>
+
+            
+            <div class="rzp-category-tabs">
+                <button type="button" class="rzp-tab-btn active" data-target="tab_pane_bank_emi">
+                    <i class="ti ti-credit-card text-primary"></i>
+                    <span>Bank EMI Offers (<span id="emi_tab_count">4</span>)</span>
+                </button>
+                <button type="button" class="rzp-tab-btn" data-target="tab_pane_other_offers">
+                    <i class="ti ti-gift text-success"></i>
+                    <span>Other Payment Offers (<span id="other_tab_count">6</span>)</span>
+                </button>
+                <button type="button" class="rzp-tab-btn" data-target="tab_pane_all_offers">
+                    <i class="ti ti-list text-secondary"></i>
+                    <span>All Offers (<span id="all_tab_count">10</span>)</span>
+                </button>
+            </div>
+
+            
+            <div class="p-3">
+                                    
+                    <div class="rzp-tab-pane" id="tab_pane_bank_emi" style="display: block;">
+                        <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                            <div class="form-check mb-0">
+                                <input class="form-check-input cursor-pointer master-category-checkbox" type="checkbox" id="master_checkbox_emi">
+                                <label class="form-check-label fw-bold small text-dark cursor-pointer ms-1" for="master_checkbox_emi">
+                                    Select All Bank EMI Offers
+                                </label>
+                            </div>
+                            <span class="badge bg-light text-primary border" id="emi_count_pill">
+                                <span id="emi_selected_count">0</span> of <span id="emi_total_count">4</span> selected
+                            </span>
+                        </div>
+
+                        <div class="rzp-offers-list" style="max-height: 420px; overflow-y: auto;">
+                                                                                            <div class="rzp-offer-box emi-offer-item " data-offer-scheme="cashback" data-offer-id="offer_TvcI1XY2HqDPdW">
+                                    <input class="form-check-input flex-shrink-0 mt-1 emi-offer-checkbox emi-type-checkbox cursor-pointer" type="checkbox" name="razorpay_emi_offer_ids[]" value="offer_TvcI1XY2HqDPdW" data-offer-scheme="cashback" >
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                            <span class="badge bg-light text-dark border fw-bold">YESB</span>
+                                                                                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">💳 Bank Cashback</span>
+                                                                                                                                        <span class="badge bg-light text-secondary border">Min Order: ₹5,000</span>
+                                                                                    </div>
+                                        <div class="rzp-offer-title">5% Cashback upto Rs 1500 on Yes Bank Credit Card EMI Transactions</div>
+                                                                            </div>
+                                </div>
+                                                                                            <div class="rzp-offer-box emi-offer-item " data-offer-scheme="cashback" data-offer-id="offer_TvgbsKrHmniFkt">
+                                    <input class="form-check-input flex-shrink-0 mt-1 emi-offer-checkbox emi-type-checkbox cursor-pointer" type="checkbox" name="razorpay_emi_offer_ids[]" value="offer_TvgbsKrHmniFkt" data-offer-scheme="cashback" >
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                            <span class="badge bg-light text-dark border fw-bold">IDFB</span>
+                                                                                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">💳 Bank Cashback</span>
+                                                                                                                                        <span class="badge bg-light text-secondary border">Min Order: ₹5,000</span>
+                                                                                    </div>
+                                        <div class="rzp-offer-title">3.5% Cashback up to Rs 3000 using IDFC FIRST Bank Credit Card EMI Transactions</div>
+                                                                                    <div class="rzp-offer-desc">3.5% Cashback up to Rs 3000 on Min Cart Value of Rs 5000 using IDFC FIRST Bank Credit Card EMI Transactions</div>
+                                                                            </div>
+                                </div>
+                                                                                            <div class="rzp-offer-box emi-offer-item " data-offer-scheme="no_cost" data-offer-id="offer_TyayZvMA2WwkBH">
+                                    <input class="form-check-input flex-shrink-0 mt-1 emi-offer-checkbox emi-type-checkbox cursor-pointer" type="checkbox" name="razorpay_emi_offer_ids[]" value="offer_TyayZvMA2WwkBH" data-offer-scheme="no_cost" >
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                            <span class="badge bg-light text-dark border fw-bold">HDFC</span>
+                                                                                            <span class="badge bg-success-subtle text-success border border-success-subtle">⭐ No Cost EMI</span>
+                                                                                                                                        <span class="badge bg-light text-secondary border">Min Order: ₹2,500</span>
+                                                                                    </div>
+                                        <div class="rzp-offer-title">Demo Offer for NO Cost EMI on HDFC Bank</div>
+                                                                                    <div class="rzp-offer-desc">No Cost EMI</div>
+                                                                            </div>
+                                </div>
+                                                                                            <div class="rzp-offer-box emi-offer-item " data-offer-scheme="low_cost" data-offer-id="offer_Tyb088r6KaN7hm">
+                                    <input class="form-check-input flex-shrink-0 mt-1 emi-offer-checkbox emi-type-checkbox cursor-pointer" type="checkbox" name="razorpay_emi_offer_ids[]" value="offer_Tyb088r6KaN7hm" data-offer-scheme="low_cost" >
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                            <span class="badge bg-light text-dark border fw-bold">HDFC</span>
+                                                                                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">📉 Low Cost EMI</span>
+                                                                                                                                        <span class="badge bg-light text-secondary border">Min Order: ₹2,500</span>
+                                                                                    </div>
+                                        <div class="rzp-offer-title">Low Cost EMI Demo</div>
+                                                                                    <div class="rzp-offer-desc">Low Cost EMI on HDFC Bank</div>
+                                                                            </div>
+                                </div>
+                                                    </div>
+                    </div>
+
+                    
+                    <div class="rzp-tab-pane" id="tab_pane_other_offers" style="display: none;">
+                        <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                            <div class="form-check mb-0">
+                                <input class="form-check-input cursor-pointer master-category-checkbox" type="checkbox" id="master_checkbox_other">
+                                <label class="form-check-label fw-bold small text-dark cursor-pointer ms-1" for="master_checkbox_other">
+                                    Select All Other Offers (Cards & UPI)
+                                </label>
+                            </div>
+                            <span class="badge bg-light text-success border" id="other_count_pill">
+                                <span id="other_selected_count">0</span> of <span id="other_total_count">6</span> selected
+                            </span>
+                        </div>
+
+                        <div class="rzp-offers-list" style="max-height: 420px; overflow-y: auto;">
+                                                                                            <div class="rzp-offer-box non-emi-offer-item " data-offer-scheme="other" data-offer-id="offer_TdTu83cs0qyloI">
+                                    <input class="form-check-input flex-shrink-0 mt-1 emi-offer-checkbox non-emi-checkbox cursor-pointer" type="checkbox" name="razorpay_emi_offer_ids[]" value="offer_TdTu83cs0qyloI" data-offer-scheme="other" >
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                            <span class="badge bg-light text-dark border fw-bold">Bank Offer</span>
+                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">🎁 Special Offer</span>
+                                                                                            <span class="badge bg-light text-secondary border">Min Order: ₹1</span>
+                                                                                    </div>
+                                        <div class="rzp-offer-title">POP UPI Logo Visibility</div>
+                                                                            </div>
+                                </div>
+                                                                                            <div class="rzp-offer-box non-emi-offer-item " data-offer-scheme="other" data-offer-id="offer_Tf1gKQy96f1YyB">
+                                    <input class="form-check-input flex-shrink-0 mt-1 emi-offer-checkbox non-emi-checkbox cursor-pointer" type="checkbox" name="razorpay_emi_offer_ids[]" value="offer_Tf1gKQy96f1YyB" data-offer-scheme="other" >
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                            <span class="badge bg-light text-dark border fw-bold">Bank Offer</span>
+                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">🎁 Special Offer</span>
+                                                                                            <span class="badge bg-light text-secondary border">Min Order: ₹299</span>
+                                                                                    </div>
+                                        <div class="rzp-offer-title">Upto 5% savings as NeuCoins on every Tata Neu UPI Payment</div>
+                                                                            </div>
+                                </div>
+                                                                                            <div class="rzp-offer-box non-emi-offer-item " data-offer-scheme="other" data-offer-id="offer_ThNxrwoFygHcHR">
+                                    <input class="form-check-input flex-shrink-0 mt-1 emi-offer-checkbox non-emi-checkbox cursor-pointer" type="checkbox" name="razorpay_emi_offer_ids[]" value="offer_ThNxrwoFygHcHR" data-offer-scheme="other" >
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                            <span class="badge bg-light text-dark border fw-bold">ICIC</span>
+                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">🎁 Special Offer</span>
+                                                                                            <span class="badge bg-light text-secondary border">Min Order: ₹1,000</span>
+                                                                                    </div>
+                                        <div class="rzp-offer-title">Get ₹ 50 Amazon Pay Gift Card by using &amp; saving your Amazon Pay ICICI Bank Credit Card</div>
+                                                                            </div>
+                                </div>
+                                                                                            <div class="rzp-offer-box non-emi-offer-item " data-offer-scheme="other" data-offer-id="offer_Tk7vFcFHlDZxZI">
+                                    <input class="form-check-input flex-shrink-0 mt-1 emi-offer-checkbox non-emi-checkbox cursor-pointer" type="checkbox" name="razorpay_emi_offer_ids[]" value="offer_Tk7vFcFHlDZxZI" data-offer-scheme="other" >
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                            <span class="badge bg-light text-dark border fw-bold">UTIB</span>
+                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">🎁 Special Offer</span>
+                                                                                            <span class="badge bg-light text-secondary border">Min Order: ₹100</span>
+                                                                                    </div>
+                                        <div class="rzp-offer-title">Earn 1% cashback on your Flipkart Axis Bank Credit Card</div>
+                                                                            </div>
+                                </div>
+                                                                                            <div class="rzp-offer-box non-emi-offer-item " data-offer-scheme="other" data-offer-id="offer_TtjDkzgvtPhxEY">
+                                    <input class="form-check-input flex-shrink-0 mt-1 emi-offer-checkbox non-emi-checkbox cursor-pointer" type="checkbox" name="razorpay_emi_offer_ids[]" value="offer_TtjDkzgvtPhxEY" data-offer-scheme="other" >
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                            <span class="badge bg-light text-dark border fw-bold">Bank Offer</span>
+                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">🎁 Special Offer</span>
+                                                                                            <span class="badge bg-light text-secondary border">Min Order: ₹1</span>
+                                                                                    </div>
+                                        <div class="rzp-offer-title">Tata Neu UPI logo visibility offer</div>
+                                                                            </div>
+                                </div>
+                                                                                            <div class="rzp-offer-box non-emi-offer-item " data-offer-scheme="other" data-offer-id="offer_TyauIIzNwasryd">
+                                    <input class="form-check-input flex-shrink-0 mt-1 emi-offer-checkbox non-emi-checkbox cursor-pointer" type="checkbox" name="razorpay_emi_offer_ids[]" value="offer_TyauIIzNwasryd" data-offer-scheme="other" >
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                            <span class="badge bg-light text-dark border fw-bold">Bank Offer</span>
+                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">🎁 Special Offer</span>
+                                                                                            <span class="badge bg-light text-secondary border">Min Order: ₹2,500</span>
+                                                                                    </div>
+                                        <div class="rzp-offer-title">Instant Discount on 100% Prepayment</div>
+                                                                                    <div class="rzp-offer-desc">10% Off on Selecting EMI Offers</div>
+                                                                            </div>
+                                </div>
+                                                    </div>
+                    </div>
+
+                    
+                    <div class="rzp-tab-pane" id="tab_pane_all_offers" style="display: none;">
+                        <div class="alert alert-light border py-2 px-3 small mb-3 text-muted">
+                            <i class="ti ti-info-circle me-1"></i>Showing all active Razorpay offers across all categories.
+                        </div>
+                        <div class="rzp-offers-list" id="all_offers_mirror_container" style="max-height: 450px; overflow-y: auto;">
+                            
+                                                                                            <div class="rzp-offer-box all-pane-offer-item " data-offer-scheme="other" data-offer-id="offer_TdTu83cs0qyloI">
+                                    <input class="form-check-input flex-shrink-0 mt-1 emi-offer-checkbox all-type-checkbox cursor-pointer" type="checkbox" data-target-id="offer_TdTu83cs0qyloI" >
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                            <span class="badge bg-light text-dark border fw-bold">Bank Offer</span>
+                                                                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">🎁 Special Offer</span>
+                                                                                                                                        <span class="badge bg-light text-secondary border">Min Order: ₹1</span>
+                                                                                    </div>
+                                        <div class="rzp-offer-title">POP UPI Logo Visibility</div>
+                                                                            </div>
+                                </div>
+                                                                                            <div class="rzp-offer-box all-pane-offer-item " data-offer-scheme="other" data-offer-id="offer_Tf1gKQy96f1YyB">
+                                    <input class="form-check-input flex-shrink-0 mt-1 emi-offer-checkbox all-type-checkbox cursor-pointer" type="checkbox" data-target-id="offer_Tf1gKQy96f1YyB" >
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                            <span class="badge bg-light text-dark border fw-bold">Bank Offer</span>
+                                                                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">🎁 Special Offer</span>
+                                                                                                                                        <span class="badge bg-light text-secondary border">Min Order: ₹299</span>
+                                                                                    </div>
+                                        <div class="rzp-offer-title">Upto 5% savings as NeuCoins on every Tata Neu UPI Payment</div>
+                                                                            </div>
+                                </div>
+                                                                                            <div class="rzp-offer-box all-pane-offer-item " data-offer-scheme="other" data-offer-id="offer_ThNxrwoFygHcHR">
+                                    <input class="form-check-input flex-shrink-0 mt-1 emi-offer-checkbox all-type-checkbox cursor-pointer" type="checkbox" data-target-id="offer_ThNxrwoFygHcHR" >
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                            <span class="badge bg-light text-dark border fw-bold">ICIC</span>
+                                                                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">🎁 Special Offer</span>
+                                                                                                                                        <span class="badge bg-light text-secondary border">Min Order: ₹1,000</span>
+                                                                                    </div>
+                                        <div class="rzp-offer-title">Get ₹ 50 Amazon Pay Gift Card by using &amp; saving your Amazon Pay ICICI Bank Credit Card</div>
+                                                                            </div>
+                                </div>
+                                                                                            <div class="rzp-offer-box all-pane-offer-item " data-offer-scheme="other" data-offer-id="offer_Tk7vFcFHlDZxZI">
+                                    <input class="form-check-input flex-shrink-0 mt-1 emi-offer-checkbox all-type-checkbox cursor-pointer" type="checkbox" data-target-id="offer_Tk7vFcFHlDZxZI" >
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                            <span class="badge bg-light text-dark border fw-bold">UTIB</span>
+                                                                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">🎁 Special Offer</span>
+                                                                                                                                        <span class="badge bg-light text-secondary border">Min Order: ₹100</span>
+                                                                                    </div>
+                                        <div class="rzp-offer-title">Earn 1% cashback on your Flipkart Axis Bank Credit Card</div>
+                                                                            </div>
+                                </div>
+                                                                                            <div class="rzp-offer-box all-pane-offer-item " data-offer-scheme="other" data-offer-id="offer_TtjDkzgvtPhxEY">
+                                    <input class="form-check-input flex-shrink-0 mt-1 emi-offer-checkbox all-type-checkbox cursor-pointer" type="checkbox" data-target-id="offer_TtjDkzgvtPhxEY" >
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                            <span class="badge bg-light text-dark border fw-bold">Bank Offer</span>
+                                                                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">🎁 Special Offer</span>
+                                                                                                                                        <span class="badge bg-light text-secondary border">Min Order: ₹1</span>
+                                                                                    </div>
+                                        <div class="rzp-offer-title">Tata Neu UPI logo visibility offer</div>
+                                                                            </div>
+                                </div>
+                                                                                            <div class="rzp-offer-box all-pane-offer-item " data-offer-scheme="cashback" data-offer-id="offer_TvcI1XY2HqDPdW">
+                                    <input class="form-check-input flex-shrink-0 mt-1 emi-offer-checkbox all-type-checkbox cursor-pointer" type="checkbox" data-target-id="offer_TvcI1XY2HqDPdW" >
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                            <span class="badge bg-light text-dark border fw-bold">YESB</span>
+                                                                                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">💳 Bank Cashback</span>
+                                                                                                                                        <span class="badge bg-light text-secondary border">Min Order: ₹5,000</span>
+                                                                                    </div>
+                                        <div class="rzp-offer-title">5% Cashback upto Rs 1500 on Yes Bank Credit Card EMI Transactions</div>
+                                                                            </div>
+                                </div>
+                                                                                            <div class="rzp-offer-box all-pane-offer-item " data-offer-scheme="cashback" data-offer-id="offer_TvgbsKrHmniFkt">
+                                    <input class="form-check-input flex-shrink-0 mt-1 emi-offer-checkbox all-type-checkbox cursor-pointer" type="checkbox" data-target-id="offer_TvgbsKrHmniFkt" >
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                            <span class="badge bg-light text-dark border fw-bold">IDFB</span>
+                                                                                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">💳 Bank Cashback</span>
+                                                                                                                                        <span class="badge bg-light text-secondary border">Min Order: ₹5,000</span>
+                                                                                    </div>
+                                        <div class="rzp-offer-title">3.5% Cashback up to Rs 3000 using IDFC FIRST Bank Credit Card EMI Transactions</div>
+                                                                                    <div class="rzp-offer-desc">3.5% Cashback up to Rs 3000 on Min Cart Value of Rs 5000 using IDFC FIRST Bank Credit Card EMI Transactions</div>
+                                                                            </div>
+                                </div>
+                                                                                            <div class="rzp-offer-box all-pane-offer-item " data-offer-scheme="other" data-offer-id="offer_TyauIIzNwasryd">
+                                    <input class="form-check-input flex-shrink-0 mt-1 emi-offer-checkbox all-type-checkbox cursor-pointer" type="checkbox" data-target-id="offer_TyauIIzNwasryd" >
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                            <span class="badge bg-light text-dark border fw-bold">Bank Offer</span>
+                                                                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">🎁 Special Offer</span>
+                                                                                                                                        <span class="badge bg-light text-secondary border">Min Order: ₹2,500</span>
+                                                                                    </div>
+                                        <div class="rzp-offer-title">Instant Discount on 100% Prepayment</div>
+                                                                                    <div class="rzp-offer-desc">10% Off on Selecting EMI Offers</div>
+                                                                            </div>
+                                </div>
+                                                                                            <div class="rzp-offer-box all-pane-offer-item " data-offer-scheme="no_cost" data-offer-id="offer_TyayZvMA2WwkBH">
+                                    <input class="form-check-input flex-shrink-0 mt-1 emi-offer-checkbox all-type-checkbox cursor-pointer" type="checkbox" data-target-id="offer_TyayZvMA2WwkBH" >
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                            <span class="badge bg-light text-dark border fw-bold">HDFC</span>
+                                                                                            <span class="badge bg-success-subtle text-success border border-success-subtle">⭐ No Cost EMI</span>
+                                                                                                                                        <span class="badge bg-light text-secondary border">Min Order: ₹2,500</span>
+                                                                                    </div>
+                                        <div class="rzp-offer-title">Demo Offer for NO Cost EMI on HDFC Bank</div>
+                                                                                    <div class="rzp-offer-desc">No Cost EMI</div>
+                                                                            </div>
+                                </div>
+                                                                                            <div class="rzp-offer-box all-pane-offer-item " data-offer-scheme="low_cost" data-offer-id="offer_Tyb088r6KaN7hm">
+                                    <input class="form-check-input flex-shrink-0 mt-1 emi-offer-checkbox all-type-checkbox cursor-pointer" type="checkbox" data-target-id="offer_Tyb088r6KaN7hm" >
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                            <span class="badge bg-light text-dark border fw-bold">HDFC</span>
+                                                                                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">📉 Low Cost EMI</span>
+                                                                                                                                        <span class="badge bg-light text-secondary border">Min Order: ₹2,500</span>
+                                                                                    </div>
+                                        <div class="rzp-offer-title">Low Cost EMI Demo</div>
+                                                                                    <div class="rzp-offer-desc">Low Cost EMI on HDFC Bank</div>
+                                                                            </div>
+                                </div>
+                                                    </div>
+                    </div>
+                
+                <div id="product-sync-feedback" class="mt-2 small fw-semibold text-success d-none"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        // Elements
+        var statusSelect = document.getElementById('razorpay_emi_status');
+        var statusToggleBtns = document.querySelectorAll('.rzp-status-toggle-btn');
+        var statusBadge = document.getElementById('rzp_status_badge');
+        var disabledNotice = document.getElementById('rzp_disabled_notice');
+        var dependentContent = document.getElementById('rzp_dependent_content');
+
+        var schemeSelect = document.getElementById('razorpay_emi_type');
+        var schemeCards = document.querySelectorAll('.rzp-scheme-card');
+        var subventionRow = document.getElementById('rzp_subvention_row');
+
+        var customBadgeInput = document.getElementById('razorpay_emi_custom_badge');
+        var customBadgePreview = document.getElementById('rzp_badge_live_preview');
+
+        var offerModeSelect = document.getElementById('razorpay_emi_offer_mode');
+        var btnModeAuto = document.getElementById('btn_mode_auto');
+        var btnModeCustom = document.getElementById('btn_mode_custom');
+        var btnSwitchCustom = document.getElementById('btn_switch_to_custom');
+        var autoModeBanner = document.getElementById('rzp_auto_mode_banner');
+
+        var masterCheckAll = document.getElementById('master_checkbox_all');
+        var masterCheckEmi = document.getElementById('master_checkbox_emi');
+        var masterCheckOther = document.getElementById('master_checkbox_other');
+        var btnClearAll = document.getElementById('btn_clear_all_offers');
+        var schemeFilterIndicator = document.getElementById('scheme_filter_indicator');
+        var syncBtn = document.getElementById('btn-sync-offers-product');
+
+        // Tab Navigation
+        var tabButtons = document.querySelectorAll('.rzp-tab-btn');
+        var tabPanes = document.querySelectorAll('.rzp-tab-pane');
+
+        tabButtons.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var targetId = this.getAttribute('data-target');
+                tabButtons.forEach(function (b) { b.classList.remove('active'); });
+                tabPanes.forEach(function (p) {
+                    p.classList.remove('active', 'show');
+                    p.style.display = 'none';
+                });
+
+                this.classList.add('active');
+                var targetPane = document.getElementById(targetId);
+                if (targetPane) {
+                    targetPane.classList.add('active', 'show');
+                    targetPane.style.display = 'block';
+                }
+            });
+        });
+
+        // 1. Status Switching (Store Default / Enable / Disable)
+        function setStatus(val) {
+            if (statusSelect) statusSelect.value = val;
+            statusToggleBtns.forEach(function (btn) {
+                if (btn.getAttribute('data-val') === val) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            if (val === 'disabled') {
+                if (disabledNotice) disabledNotice.style.setProperty('display', 'flex', 'important');
+                if (dependentContent) dependentContent.style.setProperty('display', 'none', 'important');
+                if (statusBadge) {
+                    statusBadge.className = 'badge bg-danger-subtle text-danger border ms-1 fs-7';
+                    statusBadge.textContent = 'Disabled For Product';
+                }
+            } else if (val === 'enabled') {
+                if (disabledNotice) disabledNotice.style.setProperty('display', 'none', 'important');
+                if (dependentContent) dependentContent.style.setProperty('display', 'block', 'important');
+                if (statusBadge) {
+                    statusBadge.className = 'badge bg-success-subtle text-success border ms-1 fs-7';
+                    statusBadge.textContent = 'Explicitly Enabled';
+                }
+            } else {
+                if (disabledNotice) disabledNotice.style.setProperty('display', 'none', 'important');
+                if (dependentContent) dependentContent.style.setProperty('display', 'block', 'important');
+                if (statusBadge) {
+                    statusBadge.className = 'badge bg-secondary-subtle text-secondary border ms-1 fs-7';
+                    statusBadge.textContent = 'Inheriting Default';
+                }
+            }
+        }
+
+        statusToggleBtns.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                setStatus(this.getAttribute('data-val'));
+            });
+        });
+
+        // 2. Scheme Selection (No Cost / Low Cost / Standard)
+        function setScheme(schemeVal) {
+            if (schemeSelect) schemeSelect.value = schemeVal;
+            schemeCards.forEach(function (card) {
+                if (card.getAttribute('data-scheme') === schemeVal) {
+                    card.classList.add('active');
+                } else {
+                    card.classList.remove('active');
+                }
+            });
+
+            // Subvention row visibility
+            if (subventionRow) {
+                if (schemeVal === 'no_cost' || schemeVal === 'low_cost') {
+                    subventionRow.style.setProperty('display', 'block', 'important');
+                } else {
+                    subventionRow.style.setProperty('display', 'none', 'important');
+                }
+            }
+
+            applySchemeFilter();
+        }
+
+        schemeCards.forEach(function (card) {
+            card.addEventListener('click', function () {
+                setScheme(this.getAttribute('data-scheme'));
+            });
+        });
+
+        // 3. Custom Badge Live Preview
+        if (customBadgeInput && customBadgePreview) {
+            customBadgeInput.addEventListener('input', function () {
+                var text = this.value.trim();
+                customBadgePreview.textContent = text || 'Badge Preview';
+            });
+        }
+
+        // 4. Offer Mode Switching (Auto vs Custom)
+        function setOfferMode(mode) {
+            if (offerModeSelect) offerModeSelect.value = mode;
+
+            if (mode === 'auto') {
+                if (btnModeAuto) btnModeAuto.classList.add('active');
+                if (btnModeCustom) btnModeCustom.classList.remove('active');
+                if (autoModeBanner) autoModeBanner.style.setProperty('display', 'flex', 'important');
+            } else {
+                if (btnModeAuto) btnModeAuto.classList.remove('active');
+                if (btnModeCustom) btnModeCustom.classList.add('active');
+                if (autoModeBanner) autoModeBanner.style.setProperty('display', 'none', 'important');
+            }
+        }
+
+        if (btnModeAuto) {
+            btnModeAuto.addEventListener('click', function () {
+                setOfferMode('auto');
+            });
+        }
+        if (btnModeCustom) {
+            btnModeCustom.addEventListener('click', function () {
+                setOfferMode('custom');
+            });
+        }
+        if (btnSwitchCustom) {
+            btnSwitchCustom.addEventListener('click', function () {
+                setOfferMode('custom');
+            });
+        }
+
+        // 5. Offer Item Visual State Helper
+        function updateOfferBoxState(box, isChecked) {
+            if (isChecked) {
+                box.classList.add('is-checked');
+            } else {
+                box.classList.remove('is-checked');
+            }
+        }
+
+        // Synchronize mirroring checkbox in Pane 3 (All Offers)
+        function syncMirrorCheckbox(offerId, isChecked) {
+            var mirrorCb = document.querySelector('.all-type-checkbox[data-target-id="' + offerId + '"]');
+            if (mirrorCb) {
+                mirrorCb.checked = isChecked;
+                var mirrorBox = mirrorCb.closest('.rzp-offer-box');
+                if (mirrorBox) updateOfferBoxState(mirrorBox, isChecked);
+            }
+        }
+
+        // 6. Master Checkbox States & Counter Calculation
+        function updateMasterStates() {
+            // Category 1: EMI
+            var emiVisibleBoxes = Array.from(document.querySelectorAll('#tab_pane_bank_emi .emi-offer-item')).filter(function (b) {
+                return b.style.display !== 'none';
+            });
+            var emiCheckedBoxes = emiVisibleBoxes.filter(function (b) {
+                var cb = b.querySelector('.emi-type-checkbox');
+                return cb && cb.checked;
+            });
+
+            if (masterCheckEmi) {
+                if (emiVisibleBoxes.length > 0) {
+                    if (emiCheckedBoxes.length === emiVisibleBoxes.length) {
+                        masterCheckEmi.checked = true;
+                        masterCheckEmi.indeterminate = false;
+                    } else if (emiCheckedBoxes.length > 0) {
+                        masterCheckEmi.checked = false;
+                        masterCheckEmi.indeterminate = true;
+                    } else {
+                        masterCheckEmi.checked = false;
+                        masterCheckEmi.indeterminate = false;
+                    }
+                } else {
+                    masterCheckEmi.checked = false;
+                    masterCheckEmi.indeterminate = false;
+                }
+            }
+
+            var emiSelectedEl = document.getElementById('emi_selected_count');
+            var emiTotalEl = document.getElementById('emi_total_count');
+            var emiTabCountEl = document.getElementById('emi_tab_count');
+            if (emiSelectedEl) emiSelectedEl.textContent = emiCheckedBoxes.length;
+            if (emiTotalEl) emiTotalEl.textContent = emiVisibleBoxes.length;
+            if (emiTabCountEl) emiTabCountEl.textContent = emiVisibleBoxes.length;
+
+            // Category 2: Other
+            var otherVisibleBoxes = Array.from(document.querySelectorAll('#tab_pane_other_offers .non-emi-offer-item')).filter(function (b) {
+                return b.style.display !== 'none';
+            });
+            var otherCheckedBoxes = otherVisibleBoxes.filter(function (b) {
+                var cb = b.querySelector('.non-emi-checkbox');
+                return cb && cb.checked;
+            });
+
+            if (masterCheckOther) {
+                if (otherVisibleBoxes.length > 0) {
+                    if (otherCheckedBoxes.length === otherVisibleBoxes.length) {
+                        masterCheckOther.checked = true;
+                        masterCheckOther.indeterminate = false;
+                    } else if (otherCheckedBoxes.length > 0) {
+                        masterCheckOther.checked = false;
+                        masterCheckOther.indeterminate = true;
+                    } else {
+                        masterCheckOther.checked = false;
+                        masterCheckOther.indeterminate = false;
+                    }
+                } else {
+                    masterCheckOther.checked = false;
+                    masterCheckOther.indeterminate = false;
+                }
+            }
+
+            var otherSelectedEl = document.getElementById('other_selected_count');
+            var otherTotalEl = document.getElementById('other_total_count');
+            var otherTabCountEl = document.getElementById('other_tab_count');
+            if (otherSelectedEl) otherSelectedEl.textContent = otherCheckedBoxes.length;
+            if (otherTotalEl) otherTotalEl.textContent = otherVisibleBoxes.length;
+            if (otherTabCountEl) otherTabCountEl.textContent = otherVisibleBoxes.length;
+
+            // Global Master Checkbox
+            var totalVisible = emiVisibleBoxes.length + otherVisibleBoxes.length;
+            var totalChecked = emiCheckedBoxes.length + otherCheckedBoxes.length;
+
+            var allTabCountEl = document.getElementById('all_tab_count');
+            if (allTabCountEl) allTabCountEl.textContent = totalVisible;
+
+            if (masterCheckAll) {
+                if (totalVisible > 0) {
+                    if (totalChecked === totalVisible) {
+                        masterCheckAll.checked = true;
+                        masterCheckAll.indeterminate = false;
+                    } else if (totalChecked > 0) {
+                        masterCheckAll.checked = false;
+                        masterCheckAll.indeterminate = true;
+                    } else {
+                        masterCheckAll.checked = false;
+                        masterCheckAll.indeterminate = false;
+                    }
+                } else {
+                    masterCheckAll.checked = false;
+                    masterCheckAll.indeterminate = false;
+                }
+            }
+
+            var globalPill = document.getElementById('global_selected_pill');
+            if (globalPill) {
+                globalPill.textContent = totalChecked + ' Selected';
+                if (totalChecked > 0) {
+                    globalPill.className = 'badge bg-primary text-white px-2 py-1';
+                } else {
+                    globalPill.className = 'badge bg-secondary-subtle text-secondary border px-2 py-1';
+                }
+            }
+        }
+
+        // 7. Click Master Category Checkbox (EMI)
+        if (masterCheckEmi) {
+            masterCheckEmi.addEventListener('change', function () {
+                var isChecked = this.checked;
+                document.querySelectorAll('#tab_pane_bank_emi .emi-offer-item').forEach(function (box) {
+                    if (box.style.display !== 'none') {
+                        var cb = box.querySelector('.emi-type-checkbox');
+                        if (cb) {
+                            cb.checked = isChecked;
+                            updateOfferBoxState(box, isChecked);
+                            syncMirrorCheckbox(box.getAttribute('data-offer-id'), isChecked);
+                        }
+                    }
+                });
+                if (isChecked) setOfferMode('custom');
+                updateMasterStates();
+            });
+        }
+
+        // 8. Click Master Category Checkbox (Other)
+        if (masterCheckOther) {
+            masterCheckOther.addEventListener('change', function () {
+                var isChecked = this.checked;
+                document.querySelectorAll('#tab_pane_other_offers .non-emi-offer-item').forEach(function (box) {
+                    if (box.style.display !== 'none') {
+                        var cb = box.querySelector('.non-emi-checkbox');
+                        if (cb) {
+                            cb.checked = isChecked;
+                            updateOfferBoxState(box, isChecked);
+                            syncMirrorCheckbox(box.getAttribute('data-offer-id'), isChecked);
+                        }
+                    }
+                });
+                if (isChecked) setOfferMode('custom');
+                updateMasterStates();
+            });
+        }
+
+        // 9. Click Global Master Checkbox
+        if (masterCheckAll) {
+            masterCheckAll.addEventListener('change', function () {
+                var isChecked = this.checked;
+                document.querySelectorAll('.rzp-offer-box:not(.all-pane-offer-item)').forEach(function (box) {
+                    if (box.style.display !== 'none') {
+                        var cb = box.querySelector('.emi-offer-checkbox');
+                        if (cb) {
+                            cb.checked = isChecked;
+                            updateOfferBoxState(box, isChecked);
+                            syncMirrorCheckbox(box.getAttribute('data-offer-id'), isChecked);
+                        }
+                    }
+                });
+                if (isChecked) setOfferMode('custom');
+                updateMasterStates();
+            });
+        }
+
+        // 10. Clear All
+        if (btnClearAll) {
+            btnClearAll.addEventListener('click', function () {
+                document.querySelectorAll('.rzp-offer-box').forEach(function (box) {
+                    var cb = box.querySelector('.emi-offer-checkbox');
+                    if (cb) {
+                        cb.checked = false;
+                        updateOfferBoxState(box, false);
+                    }
+                });
+                updateMasterStates();
+            });
+        }
+
+        // 11. Individual Offer Card Click
+        document.querySelectorAll('.rzp-offer-box').forEach(function (box) {
+            box.addEventListener('click', function (e) {
+                var cb = box.querySelector('.emi-offer-checkbox');
+                if (!cb) return;
+
+                var isAllPane = box.classList.contains('all-pane-offer-item');
+                var offerId = box.getAttribute('data-offer-id');
+
+                var newCheckedState;
+                if (e.target.type === 'checkbox') {
+                    newCheckedState = e.target.checked;
+                } else {
+                    newCheckedState = !cb.checked;
+                    cb.checked = newCheckedState;
+                }
+
+                updateOfferBoxState(box, newCheckedState);
+
+                // If clicked inside All Pane, sync the real form checkbox in category pane
+                if (isAllPane) {
+                    var realCb = document.querySelector('.emi-type-checkbox[value="' + offerId + '"], .non-emi-checkbox[value="' + offerId + '"]');
+                    if (realCb) {
+                        realCb.checked = newCheckedState;
+                        var realBox = realCb.closest('.rzp-offer-box');
+                        if (realBox) updateOfferBoxState(realBox, newCheckedState);
+                    }
+                } else {
+                    syncMirrorCheckbox(offerId, newCheckedState);
+                }
+
+                if (newCheckedState) setOfferMode('custom');
+                updateMasterStates();
+            });
+        });
+
+        // 12. Scheme Filter Logic (No Cost vs Low Cost vs Standard)
+        function applySchemeFilter() {
+            var currentScheme = schemeSelect ? schemeSelect.value : 'standard';
+            var emiItems = document.querySelectorAll('.emi-offer-item');
+            var allPaneItems = document.querySelectorAll('.all-pane-offer-item');
+
+            emiItems.forEach(function (item) {
+                var offerScheme = item.getAttribute('data-offer-scheme');
+                var cb = item.querySelector('.emi-type-checkbox');
+                var shouldShow = true;
+
+                if (currentScheme === 'standard') {
+                    if (offerScheme === 'no_cost' || offerScheme === 'low_cost') {
+                        shouldShow = false;
+                    }
+                } else if (currentScheme === 'no_cost') {
+                    if (offerScheme === 'low_cost') {
+                        shouldShow = false;
+                    }
+                } else if (currentScheme === 'low_cost') {
+                    if (offerScheme === 'no_cost') {
+                        shouldShow = false;
+                    }
+                }
+
+                if (shouldShow) {
+                    item.style.setProperty('display', 'flex', 'important');
+                } else {
+                    item.style.setProperty('display', 'none', 'important');
+                    if (cb && cb.checked) {
+                        cb.checked = false;
+                        updateOfferBoxState(item, false);
+                        syncMirrorCheckbox(item.getAttribute('data-offer-id'), false);
+                    }
+                }
+            });
+
+            // Also filter matching items in All Offers pane
+            allPaneItems.forEach(function (item) {
+                var offerScheme = item.getAttribute('data-offer-scheme');
+                var shouldShow = true;
+                if (currentScheme === 'standard') {
+                    if (offerScheme === 'no_cost' || offerScheme === 'low_cost') shouldShow = false;
+                } else if (currentScheme === 'no_cost') {
+                    if (offerScheme === 'low_cost') shouldShow = false;
+                } else if (currentScheme === 'low_cost') {
+                    if (offerScheme === 'no_cost') shouldShow = false;
+                }
+                if (shouldShow) {
+                    item.style.setProperty('display', 'flex', 'important');
+                } else {
+                    item.style.setProperty('display', 'none', 'important');
+                }
+            });
+
+            if (schemeFilterIndicator) {
+                if (currentScheme === 'no_cost') {
+                    schemeFilterIndicator.innerHTML = '<i class="ti ti-check text-success me-1"></i>Filter: No Cost EMI Offers';
+                } else if (currentScheme === 'low_cost') {
+                    schemeFilterIndicator.innerHTML = '<i class="ti ti-check text-warning me-1"></i>Filter: Low Cost EMI Offers';
+                } else {
+                    schemeFilterIndicator.innerHTML = '<i class="ti ti-info-circle text-info me-1"></i>Standard: Subventions Excluded';
+                }
+            }
+
+            updateMasterStates();
+        }
+
+        // 13. Sync Offers AJAX
+        if (syncBtn) {
+            syncBtn.addEventListener('click', function () {
+                var url = this.getAttribute('data-url');
+                var icon = document.getElementById('product-sync-icon');
+                var text = document.getElementById('product-sync-text');
+                var feedback = document.getElementById('product-sync-feedback');
+
+                syncBtn.disabled = true;
+                if (icon) icon.classList.add('ti-spin');
+                if (text) text.textContent = 'Syncing...';
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    syncBtn.disabled = false;
+                    if (icon) icon.classList.remove('ti-spin');
+                    if (text) text.textContent = 'Sync from Razorpay';
+
+                    if (data.error) {
+                        if (feedback) {
+                            feedback.className = 'mt-2 small fw-semibold text-danger';
+                            feedback.textContent = data.message || 'Failed to sync offers.';
+                            feedback.classList.remove('d-none');
+                        }
+                    } else {
+                        window.location.reload();
+                    }
+                })
+                .catch(function () {
+                    syncBtn.disabled = false;
+                    if (icon) icon.classList.remove('ti-spin');
+                    if (text) text.textContent = 'Sync from Razorpay';
+                    if (feedback) {
+                        feedback.className = 'mt-2 small fw-semibold text-danger';
+                        feedback.textContent = 'Network error while syncing offers.';
+                        feedback.classList.remove('d-none');
+                    }
+                });
+            });
+        }
+
+        // Initialize state
+        setStatus('inherit');
+        setScheme('standard');
+        setOfferMode('auto');
+        updateMasterStates();
+    })();
+</script>
